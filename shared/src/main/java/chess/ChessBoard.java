@@ -30,6 +30,7 @@ public class ChessBoard {
      * position
      */
     public ChessPiece getPiece(ChessPosition position) {
+        System.out.println("Hello World");
         throw new RuntimeException("Not implemented");
     }
 
