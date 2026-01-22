@@ -117,32 +117,29 @@ public class PieceMovesCalculator {
     public Collection<ChessMove> RookMovesCalculator(ChessBoard board, ChessPosition myPosition, ChessGame.TeamColor pieceColor, Collection<ChessMove> possibilities){
         int curr_row = myPosition.getRow();
         int curr_col = myPosition.getColumn();
-        while((curr_row > 1)){
-            curr_row -= 1;
-            if(add_this(board, myPosition, pieceColor, curr_row, curr_col, possibilities)){
-                break;
-            }
+
+        // Check below
+        int[] close_piece = closest_piece_straight(board, curr_row, curr_col, "down");
+        for(int i = close_piece[0]; i < curr_row; i++){
+            king_add_this(board, myPosition, pieceColor, i, curr_col, possibilities);
         }
-        curr_row = myPosition.getRow();
-        while((curr_col > 1) && (curr_col < 8)){
-            curr_col -= 1;
-            if(add_this(board, myPosition, pieceColor, curr_row, curr_col, possibilities)){
-                break;
-            }
+
+        //check left
+        close_piece = closest_piece_straight(board, curr_row, curr_col, "left");
+        for(int i = close_piece[1]; i < curr_col; i++){
+            king_add_this(board, myPosition, pieceColor, curr_row, i, possibilities);
         }
-        curr_col = myPosition.getColumn();
-        while((curr_col > 1) && (curr_col < 8)){
-            curr_col += 1;
-            if(add_this(board, myPosition, pieceColor, curr_row, curr_col, possibilities)){
-                break;
-            }
+
+        //check right
+        close_piece = closest_piece_straight(board, curr_row, curr_col, "right");
+        for(int i = close_piece[1]; i > curr_col; i--){
+            king_add_this(board, myPosition, pieceColor, curr_row, i, possibilities);
         }
-        curr_col = myPosition.getColumn();
-        while((curr_row > 1) && (curr_row < 8)){
-            curr_row += 1;
-            if(add_this(board, myPosition, pieceColor, curr_row, curr_col, possibilities)){
-                break;
-            }
+
+        // Check up
+        close_piece = closest_piece_straight(board, curr_row, curr_col, "up");
+        for(int i = close_piece[0]; i > curr_row; i--){
+            king_add_this(board, myPosition, pieceColor, i, curr_col, possibilities);
         }
         return possibilities;
     }
@@ -190,53 +187,65 @@ public class PieceMovesCalculator {
         }
         return took_piece;
     }
-    public Object[] move_straight(ChessBoard board, ChessPosition myPosition, ChessGame.TeamColor pieceColor, int new_row, int new_col, Collection<ChessMove> possibilities, String direction){
-        Object[] closest_piece = new Object[3]; // will return the closest piece in a certain direction's row and column values as well as its team color
+    public int[] closest_piece_straight(ChessBoard board, int new_row, int new_col, String direction){
+        int[] closest_piece = new int[2];
+        boolean is_piece = false;
+        // check down
         if(direction.equals("down")){
-            for(int i = new_row; i >= 1; i--){
+            for(int i = new_row - 1; i >= 1; i--){
                 ChessPosition testing = new ChessPosition(i, new_col);
                 if(board.getPiece(testing) != null){
                     closest_piece[0] = i;
-                    closest_piece[1] = new_col;
-                    closest_piece[2] = board.getPiece(testing).getTeamColor();
+                    is_piece = true;
                 }
             }
+            if(!is_piece){
+                closest_piece[0] = 1;
+                return closest_piece;
+            }
         }
+        // check above
         if(direction.equals("up")){
-            for(int i = new_row; i <= 8; i++){
+            for(int i = new_row + 1; i <= 8; i++){
                 ChessPosition testing = new ChessPosition(i, new_col);
                 if(board.getPiece(testing) != null){
                     closest_piece[0] = i;
-                    closest_piece[1] = new_col;
-                    closest_piece[2] = board.getPiece(testing).getTeamColor();
+                    is_piece = true;
                 }
             }
+            if(!is_piece){
+                closest_piece[0] = 8;
+                return closest_piece;
+            }
         }
+        //check left
         if(direction.equals("left")){
-            for(int i = new_col; i >= 1; i--){
+            for(int i = new_col - 1; i >= 1; i--){
                 ChessPosition testing = new ChessPosition(new_row, i);
                 if(board.getPiece(testing) != null){
-                    closest_piece[0] = new_row;
                     closest_piece[1] = i;
-                    closest_piece[2] = board.getPiece(testing).getTeamColor();
+                    is_piece = true;
                 }
             }
+            if(!is_piece){
+                closest_piece[1] = 1;
+                return closest_piece;
+            }
         }
+        //check right
         if(direction.equals("right")){
-            for(int i = new_col; i <= 8; i++){
+            for(int i = new_col + 1; i <= 8; i++){
                 ChessPosition testing = new ChessPosition(new_row, i);
                 if(board.getPiece(testing) != null){
-                    closest_piece[0] = new_row;
                     closest_piece[1] = i;
-                    closest_piece[2] = board.getPiece(testing).getTeamColor();
+                    is_piece = true;
                 }
+            }
+            if(!is_piece){
+                closest_piece[1] = 8;
+                return closest_piece;
             }
         }
         return closest_piece;
     }
-
-//    public int[] find_closest_piece(ChessBoard board, ChessPosition myPosition, int curr_row, int curr_col){
-//        int[] row_col = {};
-//        return row_col;
-//    }
 }
