@@ -27,32 +27,32 @@ public class PieceMovesCalculator {
         // Add possibilities below piece
         if(curr_row - 1 >= 0){
             if(curr_col - 1 >= 0){
-                king_add_this(board, myPosition, pieceColor, curr_row - 1, curr_col - 1, possibilities);
+                add_this(board, myPosition, pieceColor, curr_row - 1, curr_col - 1, possibilities);
             } else{
                 col_minus_1_worked = false;
             }
-            king_add_this(board, myPosition, pieceColor, curr_row - 1, curr_col, possibilities);
+            add_this(board, myPosition, pieceColor, curr_row - 1, curr_col, possibilities);
             if(curr_col + 1 <= 7){
-                king_add_this(board, myPosition, pieceColor, curr_row - 1, curr_col + 1, possibilities);
+                add_this(board, myPosition, pieceColor, curr_row - 1, curr_col + 1, possibilities);
             } else {
                 col_plus_1_worked = false;
             }
         }
         // Add possibilities next to piece
         if(col_minus_1_worked){
-            king_add_this(board, myPosition, pieceColor, curr_row, curr_col - 1, possibilities);
+            add_this(board, myPosition, pieceColor, curr_row, curr_col - 1, possibilities);
         }
         if(col_plus_1_worked){
-            king_add_this(board, myPosition, pieceColor, curr_row, curr_col + 1, possibilities);
+            add_this(board, myPosition, pieceColor, curr_row, curr_col + 1, possibilities);
         }
         // Add possibilities above piece
         if(curr_row + 1 <= 7){
             if(col_minus_1_worked){
-                king_add_this(board, myPosition, pieceColor, curr_row + 1, curr_col - 1, possibilities);
+                add_this(board, myPosition, pieceColor, curr_row + 1, curr_col - 1, possibilities);
             }
-            king_add_this(board, myPosition, pieceColor, curr_row + 1, curr_col, possibilities);
+            add_this(board, myPosition, pieceColor, curr_row + 1, curr_col, possibilities);
             if(col_plus_1_worked){
-                king_add_this(board, myPosition, pieceColor, curr_row + 1, curr_col + 1, possibilities);
+                add_this(board, myPosition, pieceColor, curr_row + 1, curr_col + 1, possibilities);
             }
         }
         return possibilities;
@@ -75,7 +75,7 @@ public class PieceMovesCalculator {
         while((curr_row < 8) && (curr_row > 1) && (curr_col > 1) && (curr_col < 8)){
             curr_row += 1;
             curr_col -= 1;
-            if(add_this(board, myPosition, pieceColor, curr_row, curr_col, possibilities)){
+            if(add_this_boolean(board, myPosition, pieceColor, curr_row, curr_col, possibilities)){
                 break;
             }
         }
@@ -85,7 +85,7 @@ public class PieceMovesCalculator {
         while((curr_row < 8) && (curr_row > 1) && (curr_col > 1) && (curr_col < 8)){
             curr_row -= 1;
             curr_col += 1;
-            if(add_this(board, myPosition, pieceColor, curr_row, curr_col, possibilities)){
+            if(add_this_boolean(board, myPosition, pieceColor, curr_row, curr_col, possibilities)){
                 break;
             }
         }
@@ -95,7 +95,7 @@ public class PieceMovesCalculator {
         while((curr_row < 8) && (curr_row > 1) && (curr_col > 1) && (curr_col < 8)){
             curr_row -= 1;
             curr_col -= 1;
-            if(add_this(board, myPosition, pieceColor, curr_row, curr_col, possibilities)){
+            if(add_this_boolean(board, myPosition, pieceColor, curr_row, curr_col, possibilities)){
                 break;
             }
         }
@@ -105,7 +105,7 @@ public class PieceMovesCalculator {
         while((curr_row < 8) && (curr_row > 1) && (curr_col > 1) && (curr_col < 8)){
             curr_row += 1;
             curr_col += 1;
-            if(add_this(board, myPosition, pieceColor, curr_row, curr_col, possibilities)){
+            if(add_this_boolean(board, myPosition, pieceColor, curr_row, curr_col, possibilities)){
                 break;
             }
         }
@@ -114,6 +114,15 @@ public class PieceMovesCalculator {
         return possibilities;
     }
 
+    /**
+     * checks below, then left, then right, then above current piece to find index of closest piece in referred directions
+     * uses closest piece to determine
+     * @param board
+     * @param myPosition
+     * @param pieceColor
+     * @param possibilities
+     * @return
+     */
     public Collection<ChessMove> RookMovesCalculator(ChessBoard board, ChessPosition myPosition, ChessGame.TeamColor pieceColor, Collection<ChessMove> possibilities){
         int curr_row = myPosition.getRow();
         int curr_col = myPosition.getColumn();
@@ -121,36 +130,49 @@ public class PieceMovesCalculator {
         // Check below
         int[] close_piece = closest_piece_straight(board, curr_row, curr_col, "down");
         for(int i = close_piece[0]; i < curr_row; i++){
-            king_add_this(board, myPosition, pieceColor, i, curr_col, possibilities);
+            add_this(board, myPosition, pieceColor, i, curr_col, possibilities);
         }
 
         //check left
         close_piece = closest_piece_straight(board, curr_row, curr_col, "left");
         for(int i = close_piece[1]; i < curr_col; i++){
-            king_add_this(board, myPosition, pieceColor, curr_row, i, possibilities);
+            add_this(board, myPosition, pieceColor, curr_row, i, possibilities);
         }
 
         //check right
         close_piece = closest_piece_straight(board, curr_row, curr_col, "right");
         for(int i = close_piece[1]; i > curr_col; i--){
-            king_add_this(board, myPosition, pieceColor, curr_row, i, possibilities);
+            add_this(board, myPosition, pieceColor, curr_row, i, possibilities);
         }
 
         // Check up
         close_piece = closest_piece_straight(board, curr_row, curr_col, "up");
         for(int i = close_piece[0]; i > curr_row; i--){
-            king_add_this(board, myPosition, pieceColor, i, curr_col, possibilities);
+            add_this(board, myPosition, pieceColor, i, curr_col, possibilities);
         }
         return possibilities;
     }
+
+    public Collection<ChessMove> PawnMovesCalculator(ChessBoard board, ChessPosition myPosition, ChessGame.TeamColor pieceColor, Collection<ChessMove> possibilities){
+
+        return possibilities;
+    }
+
+
 
     /**
      * Checks to see if there is a piece at new_row, new_col
      * If yes, checks to see if piece is opposing team color
      * If all cases passed, adds piece to array of ChessMoves called possibilities
      * Only used for the KingMovesCalculator method
+     * @param board current chess board
+     * @param myPosition current position
+     * @param pieceColor current team color
+     * @param new_row what row you want to check
+     * @param new_col what column you want to check
+     * @param possibilities collection of possibilities
      */
-    public void king_add_this(ChessBoard board, ChessPosition myPosition, ChessGame.TeamColor pieceColor, int new_row, int new_col, Collection<ChessMove> possibilities){
+    public void add_this(ChessBoard board, ChessPosition myPosition, ChessGame.TeamColor pieceColor, int new_row, int new_col, Collection<ChessMove> possibilities){
         ChessPosition testing = new ChessPosition(new_row, new_col);
         if(board.getPiece(testing) == null){
             possibilities.add(new ChessMove(new ChessPosition(myPosition.getRow(), myPosition.getColumn()), testing, null));
@@ -174,7 +196,7 @@ public class PieceMovesCalculator {
      * @param possibilities array of piece move possibilities
      * @return took_piece boolean
      */
-    public boolean add_this(ChessBoard board, ChessPosition myPosition, ChessGame.TeamColor pieceColor, int new_row, int new_col, Collection<ChessMove> possibilities){
+    public boolean add_this_boolean(ChessBoard board, ChessPosition myPosition, ChessGame.TeamColor pieceColor, int new_row, int new_col, Collection<ChessMove> possibilities){
         ChessPosition testing = new ChessPosition(new_row, new_col);
         boolean took_piece = false;
         if(board.getPiece(testing) == null){
@@ -187,6 +209,15 @@ public class PieceMovesCalculator {
         }
         return took_piece;
     }
+
+    /**
+     * returns the row and col values of the closest piece that is either down, up , left, or right of current piece
+     * @param board current chess board
+     * @param new_row current piece's row position
+     * @param new_col current piece's column position
+     * @param direction which direction you want to check (down, up, left, right)
+     * @return int[] closest_piece, where first index is row position, second index is column position
+     */
     public int[] closest_piece_straight(ChessBoard board, int new_row, int new_col, String direction){
         int[] closest_piece = new int[2];
         boolean is_piece = false;
