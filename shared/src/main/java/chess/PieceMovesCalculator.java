@@ -171,7 +171,7 @@ public class PieceMovesCalculator {
      *
      * @param board current chess board
      * @param myPosition current piece position
-     * @param pieceColor current pieve color
+     * @param pieceColor current piece color
      * @param new_row row we want to check
      * @param new_col column we want to check
      * @param possibilities array of piece move possibilities
@@ -189,6 +189,50 @@ public class PieceMovesCalculator {
             }
         }
         return took_piece;
+    }
+    public Object[] move_straight(ChessBoard board, ChessPosition myPosition, ChessGame.TeamColor pieceColor, int new_row, int new_col, Collection<ChessMove> possibilities, String direction){
+        Object[] closest_piece = new Object[3]; // will return the closest piece in a certain direction's row and column values as well as its team color
+        if(direction.equals("down")){
+            for(int i = new_row; i >= 1; i--){
+                ChessPosition testing = new ChessPosition(i, new_col);
+                if(board.getPiece(testing) != null){
+                    closest_piece[0] = i;
+                    closest_piece[1] = new_col;
+                    closest_piece[2] = board.getPiece(testing).getTeamColor();
+                }
+            }
+        }
+        if(direction.equals("up")){
+            for(int i = new_row; i <= 8; i++){
+                ChessPosition testing = new ChessPosition(i, new_col);
+                if(board.getPiece(testing) != null){
+                    closest_piece[0] = i;
+                    closest_piece[1] = new_col;
+                    closest_piece[2] = board.getPiece(testing).getTeamColor();
+                }
+            }
+        }
+        if(direction.equals("left")){
+            for(int i = new_col; i >= 1; i--){
+                ChessPosition testing = new ChessPosition(new_row, i);
+                if(board.getPiece(testing) != null){
+                    closest_piece[0] = new_row;
+                    closest_piece[1] = i;
+                    closest_piece[2] = board.getPiece(testing).getTeamColor();
+                }
+            }
+        }
+        if(direction.equals("right")){
+            for(int i = new_col; i <= 8; i++){
+                ChessPosition testing = new ChessPosition(new_row, i);
+                if(board.getPiece(testing) != null){
+                    closest_piece[0] = new_row;
+                    closest_piece[1] = i;
+                    closest_piece[2] = board.getPiece(testing).getTeamColor();
+                }
+            }
+        }
+        return closest_piece;
     }
 
 //    public int[] find_closest_piece(ChessBoard board, ChessPosition myPosition, int curr_row, int curr_col){
