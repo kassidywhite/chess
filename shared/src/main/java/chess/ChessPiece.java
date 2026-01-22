@@ -64,6 +64,9 @@ public class ChessPiece {
         if(piece.getPieceType() == PieceType.BISHOP){
             possibilities = calculator.BishopMovesCalculator(board, myPosition, piece.getTeamColor(), possibilities);
         }
+        if(piece.getPieceType() == PieceType.ROOK){
+            possibilities = calculator.RookMovesCalculator(board, myPosition, piece.getTeamColor(), possibilities);
+        }
         return possibilities;
     }
 
