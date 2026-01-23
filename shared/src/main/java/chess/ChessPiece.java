@@ -70,6 +70,9 @@ public class ChessPiece {
         if(piece.getPieceType() == PieceType.QUEEN){
             possibilities = calculator.QueenMovesCalculator(board, myPosition, piece.getTeamColor(), possibilities);
         }
+        if(piece.getPieceType() == PieceType.KNIGHT){
+            possibilities = calculator.KnightMovesCalculator(board, myPosition, piece.getTeamColor(), possibilities);
+        }
         return possibilities;
     }
 

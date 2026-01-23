@@ -234,6 +234,37 @@ public class PieceMovesCalculator {
     }
 
     public Collection<ChessMove> KnightMovesCalculator(ChessBoard board, ChessPosition myPosition, ChessGame.TeamColor pieceColor, Collection<ChessMove> possibilities){
+        int curr_row = myPosition.getRow();;
+        int curr_col = myPosition.getColumn();
+
+        //checks bottom
+        int r = curr_row - 2;
+        for(int c = curr_col - 1; c <= curr_col + 1; c += 2){
+            if(c <= 8 && c >= 1 && r <= 8 && r >= 1){
+                add_this(board, myPosition, pieceColor, r, c, possibilities);
+            }
+        }
+        // checks above
+        r = curr_row + 2;
+        for(int c = curr_col - 1; c <= curr_col + 1; c += 2){
+            if(c <= 8 && c >= 1 && r <= 8 && r >= 1){
+                add_this(board, myPosition, pieceColor, r, c, possibilities);
+            }
+        }
+        //checks left
+        int c = curr_col - 2;
+        for(r = curr_row - 1; r <= curr_row + 1; r += 2){
+            if(r <= 8 && r >= 1 && c <= 8 && c>=1){
+                add_this(board, myPosition, pieceColor, r, c, possibilities);
+            }
+        }
+
+        c = curr_col + 2;
+        for(r = curr_row - 1; r <= curr_row + 1; r += 2){
+            if(r <= 8 && r >= 1 && c <= 8 && c>=1){
+                add_this(board, myPosition, pieceColor, r, c, possibilities);
+            }
+        }
         return possibilities;
     }
 
