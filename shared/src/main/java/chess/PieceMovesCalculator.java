@@ -23,20 +23,18 @@ public class PieceMovesCalculator {
     public Collection<ChessMove> KingMovesCalculator(ChessBoard board, ChessPosition myPosition, ChessGame.TeamColor pieceColor, Collection<ChessMove> possibilities){
         int curr_row = myPosition.getRow();
         int curr_col = myPosition.getColumn();
-        boolean col_minus_1_worked = true;
-        boolean col_plus_1_worked = true;
+        boolean col_minus_1_worked = false;
+        boolean col_plus_1_worked = false;
         // Add possibilities below piece
-        if(curr_row - 1 >= 0){
-            if(curr_col - 1 >= 0){
+        if(curr_row - 1 > 1){
+            if(curr_col - 1 > 1){
                 add_this(board, myPosition, pieceColor, curr_row - 1, curr_col - 1, possibilities, null);
-            } else{
-                col_minus_1_worked = false;
+                col_minus_1_worked = true;
             }
             add_this(board, myPosition, pieceColor, curr_row - 1, curr_col, possibilities, null);
             if(curr_col + 1 <= 7){
                 add_this(board, myPosition, pieceColor, curr_row - 1, curr_col + 1, possibilities, null);
-            } else {
-                col_plus_1_worked = false;
+                col_plus_1_worked = true;
             }
         }
         // Add possibilities next to piece
@@ -289,7 +287,9 @@ public class PieceMovesCalculator {
                 if(curr_col + 1 < 8 && curr_col - 1 > 1){
                     pawn_attack(board, myPosition, pieceColor, curr_row + 1, curr_col + 1, possibilities, null);
                 }
-                pawn_attack(board, myPosition, pieceColor, curr_row + 1, curr_col - 1, possibilities, null);
+                if(curr_col - 1 > 0){
+                    pawn_attack(board, myPosition, pieceColor, curr_row + 1, curr_col - 1, possibilities, null);
+                }
             }
 
             // checking if can move forward
@@ -299,7 +299,7 @@ public class PieceMovesCalculator {
             }
 
             // is it a promotion piece?
-            if(curr_row + 1 == 8){
+            if(curr_row + 1 == 8 && curr_col - 1 > 0 && curr_col + 1 <= 8){
                 for(int i = 0; i < 4; i++){
                     ChessPiece.PieceType promotionPiece = pieceTypes.get(i);
                     add_this(board, myPosition, pieceColor, curr_row + 1, curr_col, possibilities, promotionPiece);
@@ -322,7 +322,9 @@ public class PieceMovesCalculator {
                 if(curr_col - 1 > 1 && curr_col + 1 < 8){
                     pawn_attack(board, myPosition, pieceColor, curr_row - 1, curr_col + 1, possibilities, null);
                 }
-                pawn_attack(board, myPosition, pieceColor, curr_row - 1, curr_col - 1, possibilities, null);
+                if(curr_col - 1 > 0){
+                    pawn_attack(board, myPosition, pieceColor, curr_row - 1, curr_col - 1, possibilities, null);
+                }
             }
 
             // checking if can move forward
@@ -332,7 +334,7 @@ public class PieceMovesCalculator {
             }
 
             // is it a promotion piece?
-            if(curr_row - 1 == 1){
+            if(curr_row - 1 == 1 && curr_col - 1 > 0 && curr_col + 1 <= 8){
                 for(int i = 0; i < 4; i++){
                     ChessPiece.PieceType promotionPiece = pieceTypes.get(i);
                     add_this(board, myPosition, pieceColor, 1, curr_col, possibilities, promotionPiece);
