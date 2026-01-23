@@ -153,8 +153,87 @@ public class PieceMovesCalculator {
         return possibilities;
     }
 
-    public Collection<ChessMove> PawnMovesCalculator(ChessBoard board, ChessPosition myPosition, ChessGame.TeamColor pieceColor, Collection<ChessMove> possibilities){
+    /**
+     * checks below, left, above, right, lower left, lower right, upper left, upper right if queen can move there
+     *
+     * @param board current chess board
+     * @param myPosition current piece position
+     * @param pieceColor current team color
+     * @param possibilities collection of chess move possibilities
+     * @return possibilities
+     */
+    public Collection<ChessMove> QueenMovesCalculator(ChessBoard board, ChessPosition myPosition, ChessGame.TeamColor pieceColor, Collection<ChessMove> possibilities){
+        int curr_row = myPosition.getRow();
+        int curr_col = myPosition.getColumn();
 
+        // Check below
+        int[] close_piece_straight = closest_piece_straight(board, curr_row, curr_col, "down");
+        for(int i = close_piece_straight[0]; i < curr_row; i++){
+            add_this(board, myPosition, pieceColor, i, curr_col, possibilities);
+        }
+
+        //check left
+        close_piece_straight = closest_piece_straight(board, curr_row, curr_col, "left");
+        for(int i = close_piece_straight[1]; i < curr_col; i++){
+            add_this(board, myPosition, pieceColor, curr_row, i, possibilities);
+        }
+
+        //check right
+        close_piece_straight = closest_piece_straight(board, curr_row, curr_col, "right");
+        for(int i = close_piece_straight[1]; i > curr_col; i--){
+            add_this(board, myPosition, pieceColor, curr_row, i, possibilities);
+        }
+
+        // Check up
+        close_piece_straight = closest_piece_straight(board, curr_row, curr_col, "up");
+        for(int i = close_piece_straight[0]; i > curr_row; i--){
+            add_this(board, myPosition, pieceColor, i, curr_col, possibilities);
+        }
+
+        // Checks the lower left side of the bishop
+        curr_row = myPosition.getRow();
+        curr_col = myPosition.getColumn();
+        while((curr_row < 8) && (curr_row > 1) && (curr_col > 1) && (curr_col < 8)){
+            curr_row -= 1;
+            curr_col -= 1;
+            if(add_this_boolean(board, myPosition, pieceColor, curr_row, curr_col, possibilities)){
+                break;
+            }
+        }
+        // Checks the lower right side of the bishop
+        curr_row = myPosition.getRow();
+        curr_col = myPosition.getColumn();
+        while((curr_row < 8) && (curr_row > 1) && (curr_col < 8)){
+            curr_row -= 1;
+            curr_col += 1;
+            if(add_this_boolean(board, myPosition, pieceColor, curr_row, curr_col, possibilities)){
+                break;
+            }
+        }
+        // Checks the upper left side of the bishop
+        curr_row = myPosition.getRow();
+        curr_col = myPosition.getColumn();
+        while((curr_row < 8) && (curr_row > 1) && (curr_col > 1) && (curr_col < 8)){
+            curr_row += 1;
+            curr_col -= 1;
+            if(add_this_boolean(board, myPosition, pieceColor, curr_row, curr_col, possibilities)){
+                break;
+            }
+        }
+        // Checks the upper right side of the bishop
+        curr_row = myPosition.getRow();
+        curr_col = myPosition.getColumn();
+        while((curr_row < 8) && (curr_row > 1) && (curr_col < 8)){
+            curr_row += 1;
+            curr_col += 1;
+            if(add_this_boolean(board, myPosition, pieceColor, curr_row, curr_col, possibilities)){
+                break;
+            }
+        }
+        return possibilities;
+    }
+
+    public Collection<ChessMove> KnightMovesCalculator(ChessBoard board, ChessPosition myPosition, ChessGame.TeamColor pieceColor, Collection<ChessMove> possibilities){
         return possibilities;
     }
 
@@ -198,16 +277,16 @@ public class PieceMovesCalculator {
      */
     public boolean add_this_boolean(ChessBoard board, ChessPosition myPosition, ChessGame.TeamColor pieceColor, int new_row, int new_col, Collection<ChessMove> possibilities){
         ChessPosition testing = new ChessPosition(new_row, new_col);
-        boolean took_piece = false;
+        boolean is_piece = false;
         if(board.getPiece(testing) == null){
             possibilities.add(new ChessMove(new ChessPosition(myPosition.getRow(), myPosition.getColumn()), testing, null));
         } else {
             if(board.getPiece(testing).getTeamColor() != pieceColor){
-                took_piece = true;
                 possibilities.add(new ChessMove(new ChessPosition(myPosition.getRow(), myPosition.getColumn()), new ChessPosition(new_row, new_col), null));
             }
+            is_piece = true;
         }
-        return took_piece;
+        return is_piece;
     }
 
     /**
@@ -280,3 +359,4 @@ public class PieceMovesCalculator {
         return closest_piece;
     }
 }
+

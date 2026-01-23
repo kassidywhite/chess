@@ -67,8 +67,8 @@ public class ChessPiece {
         if(piece.getPieceType() == PieceType.ROOK){
             possibilities = calculator.RookMovesCalculator(board, myPosition, piece.getTeamColor(), possibilities);
         }
-        if(piece.getPieceType() == PieceType.PAWN){
-            possibilities = calculator.PawnMovesCalculator(board, myPosition, piece.getTeamColor(), possibilities);
+        if(piece.getPieceType() == PieceType.QUEEN){
+            possibilities = calculator.QueenMovesCalculator(board, myPosition, piece.getTeamColor(), possibilities);
         }
         return possibilities;
     }
