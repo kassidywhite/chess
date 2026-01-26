@@ -1,487 +1,365 @@
 package chess;
 
-import java.util.Arrays;
-import java.util.Collection;
 import java.util.ArrayList;
-import java.util.List;
+import java.util.Collection;
 
 public class PieceMovesCalculator {
-    public PieceMovesCalculator(){
+    Collection<ChessMove> possibilities;
+    int curr_row;
+    int curr_col;
+    ChessPosition myPosition;
+    ChessGame.TeamColor teamColor;
+    ChessBoard board;
+    ChessPiece.PieceType type;
 
+    public PieceMovesCalculator(ChessBoard board, ChessPosition position) {
+        possibilities = new ArrayList<>();
+        myPosition = position;
+        curr_row = myPosition.getRow();
+        curr_col = myPosition.getColumn();
+        teamColor = board.getPiece(position).getTeamColor();
+        this.board = board;
+        type = board.getPiece(position).getPieceType();
     }
 
-    /**
-     * Adds valid chess positions to the array called possibilities
-     * Checks to see if they are at a valid row/column
-     * Calls add_this to see if there is another piece in row/column
-     * @param board current chess board
-     * @param myPosition current piece position
-     * @param pieceColor current piece color
-     * @param possibilities array of possible chess moves, starts off as an empty array
-     * @return possibilities
-     */
-    public Collection<ChessMove> KingMovesCalculator(ChessBoard board, ChessPosition myPosition, ChessGame.TeamColor pieceColor, Collection<ChessMove> possibilities){
-        int curr_row = myPosition.getRow();
-        int curr_col = myPosition.getColumn();
-        boolean col_minus_1_worked = false;
-        boolean col_plus_1_worked = false;
-        // Add possibilities below piece
-        if(curr_row - 1 > 1){
-            if(curr_col - 1 > 1){
-                add_this(board, myPosition, pieceColor, curr_row - 1, curr_col - 1, possibilities, null);
-                col_minus_1_worked = true;
-            }
-            add_this(board, myPosition, pieceColor, curr_row - 1, curr_col, possibilities, null);
-            if(curr_col + 1 <= 7){
-                add_this(board, myPosition, pieceColor, curr_row - 1, curr_col + 1, possibilities, null);
-                col_plus_1_worked = true;
-            }
-        }
-        // Add possibilities next to piece
-        if(col_minus_1_worked){
-            add_this(board, myPosition, pieceColor, curr_row, curr_col - 1, possibilities, null);
-        }
-        if(col_plus_1_worked){
-            add_this(board, myPosition, pieceColor, curr_row, curr_col + 1, possibilities, null);
-        }
-        // Add possibilities above piece
-        if(curr_row + 1 <= 7){
-            if(col_minus_1_worked){
-                add_this(board, myPosition, pieceColor, curr_row + 1, curr_col - 1, possibilities, null);
-            }
-            add_this(board, myPosition, pieceColor, curr_row + 1, curr_col, possibilities, null);
-            if(col_plus_1_worked){
-                add_this(board, myPosition, pieceColor, curr_row + 1, curr_col + 1, possibilities, null);
-            }
-        }
-        return possibilities;
-    }
-
-    /**
-     * checks the upper left, then lower right, then lower left, then upper right quadrants of the bishop piece
-     * adds valid positions to possibilities array
-     *
-     * @param board takes in the current chess board
-     * @param myPosition takes in the current piece position
-     * @param pieceColor the current piece's team color
-     * @param possibilities the array of the piece's possibilities
-     * @return possibilities
-     */
-    public Collection<ChessMove> BishopMovesCalculator(ChessBoard board, ChessPosition myPosition, ChessGame.TeamColor pieceColor, Collection<ChessMove> possibilities){
-        // Checks the upper left side of the bishop
-        int curr_row = myPosition.getRow();
-        int curr_col = myPosition.getColumn();
-        while((curr_row < 8) && (curr_row > 1) && (curr_col > 1) && (curr_col < 8)){
-            curr_row += 1;
-            curr_col -= 1;
-            if(add_this_boolean(board, myPosition, pieceColor, curr_row, curr_col, possibilities, null)){
-                break;
-            }
-        }
-        // Checks the lower right side of the bishop
-        curr_row = myPosition.getRow();
-        curr_col = myPosition.getColumn();
-        while((curr_row < 8) && (curr_row > 1) && (curr_col > 1) && (curr_col < 8)){
-            curr_row -= 1;
-            curr_col += 1;
-            if(add_this_boolean(board, myPosition, pieceColor, curr_row, curr_col, possibilities, null)){
-                break;
-            }
-        }
-        // Checks the lower left side of the bishop
-        curr_row = myPosition.getRow();
-        curr_col = myPosition.getColumn();
-        while((curr_row < 8) && (curr_row > 1) && (curr_col > 1) && (curr_col < 8)){
-            curr_row -= 1;
-            curr_col -= 1;
-            if(add_this_boolean(board, myPosition, pieceColor, curr_row, curr_col, possibilities, null)){
-                break;
-            }
-        }
-        // Checks the upper right side of the bishop
-        curr_row = myPosition.getRow();
-        curr_col = myPosition.getColumn();
-        while((curr_row < 8) && (curr_row > 1) && (curr_col > 1) && (curr_col < 8)){
-            curr_row += 1;
-            curr_col += 1;
-            if(add_this_boolean(board, myPosition, pieceColor, curr_row, curr_col, possibilities, null)){
-                break;
-            }
-        }
-
-
-        return possibilities;
-    }
-
-    /**
-     * checks below, then left, then right, then above current piece to find index of closest piece in referred directions
-     * uses closest piece to determine
-     * @param board
-     * @param myPosition
-     * @param pieceColor
-     * @param possibilities
-     * @return
-     */
-    public Collection<ChessMove> RookMovesCalculator(ChessBoard board, ChessPosition myPosition, ChessGame.TeamColor pieceColor, Collection<ChessMove> possibilities){
-        int curr_row = myPosition.getRow();
-        int curr_col = myPosition.getColumn();
-
-        // Check below
-        int[] close_piece = closest_piece_straight(board, curr_row, curr_col, "down");
-        for(int i = close_piece[0]; i < curr_row; i++){
-            add_this(board, myPosition, pieceColor, i, curr_col, possibilities, null);
-        }
-
-        //check left
-        close_piece = closest_piece_straight(board, curr_row, curr_col, "left");
-        for(int i = close_piece[1]; i < curr_col; i++){
-            add_this(board, myPosition, pieceColor, curr_row, i, possibilities, null);
-        }
-
-        //check right
-        close_piece = closest_piece_straight(board, curr_row, curr_col, "right");
-        for(int i = close_piece[1]; i > curr_col; i--){
-            add_this(board, myPosition, pieceColor, curr_row, i, possibilities, null);
-        }
-
-        // Check up
-        close_piece = closest_piece_straight(board, curr_row, curr_col, "up");
-        for(int i = close_piece[0]; i > curr_row; i--){
-            add_this(board, myPosition, pieceColor, i, curr_col, possibilities, null);
-        }
-        return possibilities;
-    }
-
-    /**
-     * checks below, left, above, right, lower left, lower right, upper left, upper right if queen can move there
-     *
-     * @param board current chess board
-     * @param myPosition current piece position
-     * @param pieceColor current team color
-     * @param possibilities collection of chess move possibilities
-     * @return possibilities
-     */
-    public Collection<ChessMove> QueenMovesCalculator(ChessBoard board, ChessPosition myPosition, ChessGame.TeamColor pieceColor, Collection<ChessMove> possibilities){
-        int curr_row = myPosition.getRow();
-        int curr_col = myPosition.getColumn();
-
-        // Check below
-        int[] close_piece_straight = closest_piece_straight(board, curr_row, curr_col, "down");
-        for(int i = close_piece_straight[0]; i < curr_row; i++){
-            add_this(board, myPosition, pieceColor, i, curr_col, possibilities, null);
-        }
-
-        //check left
-        close_piece_straight = closest_piece_straight(board, curr_row, curr_col, "left");
-        for(int i = close_piece_straight[1]; i < curr_col; i++){
-            add_this(board, myPosition, pieceColor, curr_row, i, possibilities, null);
-        }
-
-        //check right
-        close_piece_straight = closest_piece_straight(board, curr_row, curr_col, "right");
-        for(int i = close_piece_straight[1]; i > curr_col; i--){
-            add_this(board, myPosition, pieceColor, curr_row, i, possibilities, null);
-        }
-
-        // Check up
-        close_piece_straight = closest_piece_straight(board, curr_row, curr_col, "up");
-        for(int i = close_piece_straight[0]; i > curr_row; i--){
-            add_this(board, myPosition, pieceColor, i, curr_col, possibilities, null);
-        }
-
-        // Checks the lower left side of the bishop
-        curr_row = myPosition.getRow();
-        curr_col = myPosition.getColumn();
-        while((curr_row < 8) && (curr_row > 1) && (curr_col > 1) && (curr_col < 8)){
-            curr_row -= 1;
-            curr_col -= 1;
-            if(add_this_boolean(board, myPosition, pieceColor, curr_row, curr_col, possibilities, null)){
-                break;
-            }
-        }
-        // Checks the lower right side of the bishop
-        curr_row = myPosition.getRow();
-        curr_col = myPosition.getColumn();
-        while((curr_row < 8) && (curr_row > 1) && (curr_col < 8)){
-            curr_row -= 1;
-            curr_col += 1;
-            if(add_this_boolean(board, myPosition, pieceColor, curr_row, curr_col, possibilities, null)){
-                break;
-            }
-        }
-        // Checks the upper left side of the bishop
-        curr_row = myPosition.getRow();
-        curr_col = myPosition.getColumn();
-        while((curr_row < 8) && (curr_row > 1) && (curr_col > 1) && (curr_col < 8)){
-            curr_row += 1;
-            curr_col -= 1;
-            if(add_this_boolean(board, myPosition, pieceColor, curr_row, curr_col, possibilities, null)){
-                break;
-            }
-        }
-        // Checks the upper right side of the bishop
-        curr_row = myPosition.getRow();
-        curr_col = myPosition.getColumn();
-        while((curr_row < 8) && (curr_row > 1) && (curr_col < 8)){
-            curr_row += 1;
-            curr_col += 1;
-            if(add_this_boolean(board, myPosition, pieceColor, curr_row, curr_col, possibilities, null)){
-                break;
-            }
-        }
-        return possibilities;
-    }
-
-    /**
-     * checks the piece that is 1 to the bottom, above, left, and right and 1 below/right and 1 above/left of current piece
-     * @param board current board
-     * @param myPosition current position
-     * @param pieceColor current team color
-     * @param possibilities collection of possible moves
-     * @return possibilities
-     */
-    public Collection<ChessMove> KnightMovesCalculator(ChessBoard board, ChessPosition myPosition, ChessGame.TeamColor pieceColor, Collection<ChessMove> possibilities){
-        int curr_row = myPosition.getRow();;
-        int curr_col = myPosition.getColumn();
-
-        //checks bottom
-        int r = curr_row - 2;
-        for(int c = curr_col - 1; c <= curr_col + 1; c += 2){
-            if(c <= 8 && c >= 1 && r <= 8 && r >= 1){
-                add_this(board, myPosition, pieceColor, r, c, possibilities, null);
-            }
-        }
-        // checks above
-        r = curr_row + 2;
-        for(int c = curr_col - 1; c <= curr_col + 1; c += 2){
-            if(c <= 8 && c >= 1 && r <= 8 && r >= 1){
-                add_this(board, myPosition, pieceColor, r, c, possibilities, null);
-            }
-        }
-        //checks left
-        int c = curr_col - 2;
-        for(r = curr_row - 1; r <= curr_row + 1; r += 2){
-            if(r <= 8 && r >= 1 && c <= 8 && c>=1){
-                add_this(board, myPosition, pieceColor, r, c, possibilities, null);
-            }
-        }
-
-        c = curr_col + 2;
-        for(r = curr_row - 1; r <= curr_row + 1; r += 2){
-            if(r <= 8 && r >= 1 && c <= 8 && c>=1){
-                add_this(board, myPosition, pieceColor, r, c, possibilities, null);
-            }
-        }
-        return possibilities;
-    }
-
-    public Collection<ChessMove> PawnMovesCalculator(ChessBoard board, ChessPosition myPosition, ChessGame.TeamColor pieceColor, Collection<ChessMove> possibilities){
-        int curr_row = myPosition.getRow();
-        int curr_col = myPosition.getColumn();
-        List<ChessPiece.PieceType> pieceTypes = new ArrayList<>(Arrays.asList(ChessPiece.PieceType.KNIGHT, ChessPiece.PieceType.ROOK, ChessPiece.PieceType.QUEEN, ChessPiece.PieceType.BISHOP));
-
-        // for white pawns
-        if(pieceColor.equals(ChessGame.TeamColor.WHITE)){
-            //handling attacks
+    public Collection<ChessMove> PawnMovesCalculator(){
+        // check white
+        if(teamColor == ChessGame.TeamColor.WHITE){
+            int[] close_piece = get_closest_piece_straight("up");
             if(curr_row + 1 < 8){
-                if(curr_col + 1 < 8 && curr_col - 1 > 1){
-                    pawn_attack(board, myPosition, pieceColor, curr_row + 1, curr_col + 1, possibilities, null);
+                if(close_piece[0] != curr_row + 1){
+                    add_this(new ChessPosition(curr_row + 1, curr_col), null);
+                    if(close_piece[0] != curr_row + 2 && curr_row == 2){
+                        add_this(new ChessPosition(curr_row + 2, curr_col), null);
+                    }
                 }
-                if(curr_col - 1 > 0){
-                    pawn_attack(board, myPosition, pieceColor, curr_row + 1, curr_col - 1, possibilities, null);
+                if(curr_col - 1 >= 1){
+                    pawn_attack(new ChessPosition(curr_row + 1, curr_col - 1), null);
+                }
+                if(curr_col + 1 <= 8){
+                    pawn_attack(new ChessPosition(curr_row + 1, curr_col + 1), null);
+                }
+            } else {
+                ChessPiece.PieceType[] pieces = {
+                        ChessPiece.PieceType.ROOK,
+                        ChessPiece.PieceType.KNIGHT,
+                        ChessPiece.PieceType.QUEEN,
+                        ChessPiece.PieceType.BISHOP
+                };
+                if(close_piece[0] != curr_row + 1){
+                    for(int i = 0; i < 4; i++){
+                        add_this(new ChessPosition(curr_row + 1, curr_col), pieces[i]);
+                        if(curr_col - 1 >= 1){
+                            pawn_attack(new ChessPosition(curr_row + 1, curr_col - 1), pieces[i]);
+                        }
+                        if(curr_col + 1 <= 8){
+                            pawn_attack(new ChessPosition(curr_row + 1, curr_col + 1), pieces[i]);
+                        }
+                    }
                 }
             }
-
-            // checking if can move forward
-            int[] close_piece = closest_piece_straight(board, curr_row, curr_col, "up");
-            if (close_piece[0] != curr_row + 1){
-                add_this(board, myPosition, pieceColor, curr_row + 1, curr_col, possibilities, null);
-            }
-
-            // is it a promotion piece?
-            if(curr_row + 1 == 8 && curr_col - 1 > 0 && curr_col + 1 <= 8){
-                for(int i = 0; i < 4; i++){
-                    ChessPiece.PieceType promotionPiece = pieceTypes.get(i);
-                    add_this(board, myPosition, pieceColor, curr_row + 1, curr_col, possibilities, promotionPiece);
-                    pawn_attack(board, myPosition, pieceColor, curr_row + 1, curr_col + 1, possibilities, promotionPiece);
-                    pawn_attack(board, myPosition, pieceColor, curr_row + 1, curr_col - 1, possibilities, promotionPiece);
+        }
+        // check black
+        if(teamColor == ChessGame.TeamColor.BLACK){
+            int[] close_piece = get_closest_piece_straight("down");
+            if(curr_row - 1 > 1){
+                if(close_piece[0] != curr_row - 1){
+                    add_this(new ChessPosition(curr_row - 1, curr_col), null);
+                    if(close_piece[0] != curr_row - 2 && curr_row == 7){
+                        add_this(new ChessPosition(curr_row - 2, curr_col), null);
+                    }
                 }
-
-            }
-            if(curr_row == 2){
-                if(close_piece[0] != curr_row + 2 && close_piece[0] != curr_row + 1){
-                    add_this(board, myPosition, pieceColor, curr_row + 2, curr_col, possibilities, null);
+                if(curr_col - 1 >= 1){
+                    pawn_attack(new ChessPosition(curr_row - 1, curr_col - 1), null);
+                }
+                if(curr_col + 1 <= 8){
+                    pawn_attack(new ChessPosition(curr_row - 1, curr_col + 1), null);
+                }
+            } else {
+                ChessPiece.PieceType[] pieces = {
+                        ChessPiece.PieceType.ROOK,
+                        ChessPiece.PieceType.KNIGHT,
+                        ChessPiece.PieceType.QUEEN,
+                        ChessPiece.PieceType.BISHOP
+                };
+                if(close_piece[0] != curr_row - 1){
+                    for(int i = 0; i < 4; i++){
+                        add_this(new ChessPosition(curr_row - 1, curr_col), pieces[i]);
+                        if(curr_col - 1 >= 1){
+                            pawn_attack(new ChessPosition(curr_row - 1, curr_col - 1), pieces[i]);
+                        }
+                        if(curr_col + 1 <= 8){
+                            pawn_attack(new ChessPosition(curr_row - 1, curr_col + 1), pieces[i]);
+                        }
+                    }
                 }
             }
         }
 
-        //for black pawns
-        if(pieceColor.equals(ChessGame.TeamColor.BLACK)){
-            //handling attacks
-            if(curr_row - 1 > 1){
-                if(curr_col - 1 > 1 && curr_col + 1 < 8){
-                    pawn_attack(board, myPosition, pieceColor, curr_row - 1, curr_col + 1, possibilities, null);
-                }
-                if(curr_col - 1 > 0){
-                    pawn_attack(board, myPosition, pieceColor, curr_row - 1, curr_col - 1, possibilities, null);
-                }
-            }
+        return possibilities;
+    }
 
-            // checking if can move forward
-            int[] close_piece = closest_piece_straight(board, curr_row, curr_col, "down");
-            if (close_piece[0] != curr_row - 1){
-                add_this(board, myPosition, pieceColor, curr_row - 1, curr_col, possibilities, null);
+    public Collection<ChessMove> KnightMovesCalculator(){
+        // check below
+        if (curr_row - 2 >= 1){
+            if(curr_col - 1 >= 1){
+                add_this(new ChessPosition(curr_row - 2, curr_col - 1), null);
             }
+            if(curr_col + 1 <= 8){
+                add_this(new ChessPosition(curr_row - 2, curr_col + 1), null);
+            }
+        }
+        // check above
+        if (curr_row + 2 <= 8){
+            if(curr_col - 1 >= 1){
+                add_this(new ChessPosition(curr_row + 2, curr_col - 1), null);
+            }
+            if(curr_col + 1 <= 8){
+                add_this(new ChessPosition(curr_row + 2, curr_col + 1), null);
+            }
+        }
+        // check left
+        if(curr_col - 2 >= 1){
+            if(curr_row - 1 >= 1){
+                add_this(new ChessPosition(curr_row - 1, curr_col - 2), null);
+            }
+            if(curr_row + 1 <= 8){
+                add_this(new ChessPosition(curr_row + 1, curr_col - 2), null);
+            }
+        }
+        // check right
+        if(curr_col + 2 <= 8){
+            if(curr_row - 1 >= 1){
+                add_this(new ChessPosition(curr_row - 1, curr_col + 2), null);
+            }
+            if(curr_row + 1 <= 8){
+                add_this(new ChessPosition(curr_row + 1, curr_col + 2), null);
+            }
+        }
 
-            // is it a promotion piece?
-            if(curr_row - 1 == 1 && curr_col - 1 > 0 && curr_col + 1 <= 8){
-                for(int i = 0; i < 4; i++){
-                    ChessPiece.PieceType promotionPiece = pieceTypes.get(i);
-                    add_this(board, myPosition, pieceColor, 1, curr_col, possibilities, promotionPiece);
-                    pawn_attack(board, myPosition, pieceColor, 1, curr_col + 1, possibilities, promotionPiece);
-                    pawn_attack(board, myPosition, pieceColor, 1, curr_col - 1, possibilities, promotionPiece);
-                }
+        return possibilities;
+    }
 
+    public Collection<ChessMove> QueenMovesCalculator(){
+        RookMovesCalculator();
+        BishopMovesCalculator();
+        return possibilities;
+    }
+
+    public Collection<ChessMove> RookMovesCalculator(){
+        // check down
+        int[] close_piece = get_closest_piece_straight("down");
+        if(close_piece[0] != 0){
+            for(int r = curr_row - 1; r >= close_piece[0]; r -= 1){
+                add_this(new ChessPosition(r, curr_col), null);
             }
-            if(curr_row == 7){
-                if(close_piece[0] != curr_row - 2 && close_piece[0] != curr_row - 1){
-                    add_this(board, myPosition, pieceColor, curr_row - 2, curr_col, possibilities, null);
+        } else {
+            int r = curr_row - 1;
+            while(r >= 1){
+                if(add_this_bool(new ChessPosition(r, curr_col), null)){
+                    break;
                 }
+                r -= 1;
             }
+        }
+        // check up
+        close_piece = get_closest_piece_straight("up");
+        if(close_piece[0] != 0){
+            for(int r = curr_row + 1; r <= close_piece[0]; r += 1){
+                add_this(new ChessPosition(r, curr_col), null);
+            }
+        } else {
+            int r = curr_row + 1;
+            while(r <= 8){
+                if(add_this_bool(new ChessPosition(r, curr_col), null)){
+                    break;
+                }
+                r += 1;
+            }
+        }
+        // check left
+        close_piece = get_closest_piece_straight("left");
+        if(close_piece[0] != 0){
+            for(int c = curr_col - 1; c >= close_piece[1]; c -= 1){
+                add_this(new ChessPosition(curr_row, c), null);
+            }
+        } else {
+            int c = curr_col - 1;
+            while (c >= 1) {
+                if (add_this_bool(new ChessPosition(curr_row, c), null)) {
+                    break;
+                }
+                c -= 1;
+            }
+        }
+        // check right
+        close_piece = get_closest_piece_straight("right");
+        if(close_piece[0] != 0){
+            for(int c = curr_col + 1; c <= close_piece[1]; c += 1){
+                add_this(new ChessPosition(curr_row, c), null);
+            }
+        } else {
+            int c = curr_col + 1;
+            while (c <= 8) {
+                if(add_this_bool(new ChessPosition(curr_row, c), null)) {
+                    break;
+                }
+                c += 1;
+            }
+        }
+
+        return possibilities;
+    }
+
+    public Collection<ChessMove> BishopMovesCalculator(){
+        // checks lower left
+        int r = curr_row - 1;
+        int c = curr_col - 1;
+        while(c <= 8 && c >= 1 && r <= 8 && r >= 1){
+            if(add_this_bool(new ChessPosition(r, c), null)){
+                break;
+            }
+            c -= 1;
+            r -= 1;
+        }
+        //checks lower right
+        r = curr_row - 1;
+        c = curr_col + 1;
+        while(c <= 8 && c >= 1 && r <= 8 && r >= 1){
+            if(add_this_bool(new ChessPosition(r, c), null)){
+                break;
+            }
+            c += 1;
+            r -= 1;
+        }
+        //checks upper left
+        r = curr_row + 1;
+        c = curr_col - 1;
+        while(c <= 8 && c >= 1 && r <= 8 && r >= 1){
+            if(add_this_bool(new ChessPosition(r, c), null)){
+                break;
+            }
+            c -= 1;
+            r += 1;
+        }
+        //checks upper right
+        r = curr_row + 1;
+        c = curr_col + 1;
+        while(c <= 8 && c >= 1 && r <= 8 && r >= 1){
+            if(add_this_bool(new ChessPosition(r, c), null)){
+                break;
+            }
+            c += 1;
+            r += 1;
         }
         return possibilities;
     }
 
-    public void pawn_attack(ChessBoard board, ChessPosition myPosition, ChessGame.TeamColor pieceColor, int new_row, int new_col, Collection<ChessMove> possibilities, ChessPiece.PieceType promotion){
-        ChessPosition testing = new ChessPosition(new_row, new_col);
-        boolean is_piece = false;
-        if(board.getPiece(testing) != null){
-            if(board.getPiece(testing).getTeamColor() != pieceColor){
-                possibilities.add(new ChessMove(new ChessPosition(myPosition.getRow(), myPosition.getColumn()), new ChessPosition(new_row, new_col), promotion));
+    public Collection<ChessMove> KingMovesCalculator(){
+        if(curr_row - 1 >= 1){
+            add_this(new ChessPosition(curr_row - 1, curr_col), null);
+            if(curr_col - 1 >= 1){
+                add_this(new ChessPosition(curr_row - 1, curr_col - 1), null);
+            }
+            if(curr_col + 1 <= 8){
+                add_this(new ChessPosition(curr_row - 1, curr_col + 1), null);
+            }
+        }
+        if(curr_col - 1 >= 1){
+            add_this(new ChessPosition(curr_row, curr_col - 1), null);
+        }
+        if(curr_col + 1 <= 8){
+            add_this(new ChessPosition(curr_row, curr_col + 1), null);
+        }
+        if(curr_row + 1 <= 8){
+            add_this(new ChessPosition(curr_row + 1, curr_col), null);
+            if(curr_col - 1 >= 1){
+                add_this(new ChessPosition(curr_row + 1, curr_col - 1), null);
+            }
+            if(curr_col + 1 <= 8){
+                add_this(new ChessPosition(curr_row + 1, curr_col + 1), null);
+            }
+        }
+
+        return possibilities;
+    }
+
+    public void pawn_attack(ChessPosition position, ChessPiece.PieceType promotion){
+        if(board.getPiece(position) != null) {
+            if(board.getPiece(position).getTeamColor() != teamColor) {
+                possibilities.add(new ChessMove(myPosition, new ChessPosition(position.getRow(), position.getColumn()), promotion));
             }
         }
     }
 
-
-
-    /**
-     * Checks to see if there is a piece at new_row, new_col
-     * If yes, checks to see if piece is opposing team color
-     * If all cases passed, adds piece to array of ChessMoves called possibilities
-     * Only used for the KingMovesCalculator method
-     * @param board current chess board
-     * @param myPosition current position
-     * @param pieceColor current team color
-     * @param new_row what row you want to check
-     * @param new_col what column you want to check
-     * @param possibilities collection of possibilities
-     */
-    public void add_this(ChessBoard board, ChessPosition myPosition, ChessGame.TeamColor pieceColor, int new_row, int new_col, Collection<ChessMove> possibilities, ChessPiece.PieceType promotion){
-        ChessPosition testing = new ChessPosition(new_row, new_col);
-        if(board.getPiece(testing) == null){
-            possibilities.add(new ChessMove(new ChessPosition(myPosition.getRow(), myPosition.getColumn()), testing, promotion));
-        } else {
-            if(board.getPiece(testing).getTeamColor() != pieceColor){
-                possibilities.add(new ChessMove(new ChessPosition(myPosition.getRow(), myPosition.getColumn()), new ChessPosition(new_row, new_col), promotion));
+    public void add_this(ChessPosition position, ChessPiece.PieceType promotion){
+        if(board.getPiece(position) != null){
+            if(board.getPiece(position).getTeamColor() != teamColor){
+                possibilities.add(new ChessMove(myPosition, new ChessPosition(position.getRow(), position.getColumn()), promotion));
             }
+        } else {
+            possibilities.add(new ChessMove(myPosition, new ChessPosition(position.getRow(), position.getColumn()), promotion));
         }
     }
 
-    /**
-     * Checks to see if there is a piece at new_row, new_col
-     * If yes, checks to see if piece is opposing team color
-     * Marks that it has captured a piece and returns a boolean reporting that a piece was captured
-     *
-     * @param board current chess board
-     * @param myPosition current piece position
-     * @param pieceColor current piece color
-     * @param new_row row we want to check
-     * @param new_col column we want to check
-     * @param possibilities array of piece move possibilities
-     * @return took_piece boolean
-     */
-    public boolean add_this_boolean(ChessBoard board, ChessPosition myPosition, ChessGame.TeamColor pieceColor, int new_row, int new_col, Collection<ChessMove> possibilities, ChessPiece.PieceType promotion){
-        ChessPosition testing = new ChessPosition(new_row, new_col);
+    public boolean add_this_bool(ChessPosition position, ChessPiece.PieceType promotion){
         boolean is_piece = false;
-        if(board.getPiece(testing) == null){
-            possibilities.add(new ChessMove(new ChessPosition(myPosition.getRow(), myPosition.getColumn()), testing, promotion));
-        } else {
-            if(board.getPiece(testing).getTeamColor() != pieceColor){
-                possibilities.add(new ChessMove(new ChessPosition(myPosition.getRow(), myPosition.getColumn()), new ChessPosition(new_row, new_col), promotion));
-            }
+        if(board.getPiece(position) != null){
+            add_this(position, promotion);
             is_piece = true;
+        } else {
+            add_this(position, promotion);
         }
         return is_piece;
     }
 
-    /**
-     * returns the row and col values of the closest piece that is either down, up , left, or right of current piece
-     * @param board current chess board
-     * @param new_row current piece's row position
-     * @param new_col current piece's column position
-     * @param direction which direction you want to check (down, up, left, right)
-     * @return int[] closest_piece, where first index is row position, second index is column position
-     */
-    public int[] closest_piece_straight(ChessBoard board, int new_row, int new_col, String direction){
-        int[] closest_piece = new int[2];
-        boolean is_piece = false;
-        // check down
+    public int[] get_closest_piece_straight(String direction){
+        int[] close_piece = new int[2];
+
+        // check bottom
+        int r = curr_row;
+        int c = curr_col;
         if(direction.equals("down")){
-            for(int i = new_row - 1; i >= 1; i--){
-                ChessPosition testing = new ChessPosition(i, new_col);
-                if(board.getPiece(testing) != null){
-                    closest_piece[0] = i;
-                    is_piece = true;
+            r -= 1;
+            while(c <= 8 && c >= 1 && r <= 8 && r >= 1){
+                if(board.getPiece(new ChessPosition(r, c)) != null){
+                    close_piece[0] = r;
+                    close_piece[1] = c;
+                    break;
                 }
+                r -= 1;
             }
-            if(!is_piece){
-                closest_piece[0] = 1;
-                return closest_piece;
+        } else if(direction.equals("up")){
+            r += 1;
+            while(c <= 8 && c >= 1 && r <= 8 && r >= 1){
+                if(board.getPiece(new ChessPosition(r, c)) != null){
+                    close_piece[0] = r;
+                    close_piece[1] = c;
+                    break;
+                }
+                r += 1;
+            }
+        } else if(direction.equals("left")){
+            c -= 1;
+            while(c <= 8 && c >= 1 && r <= 8 && r >= 1){
+                if(board.getPiece(new ChessPosition(r, c)) != null){
+                    close_piece[0] = r;
+                    close_piece[1] = c;
+                    break;
+                }
+                c -= 1;
+            }
+        } else if(direction.equals("right")){
+            c += 1;
+            while(c <= 8 && c >= 1 && r <= 8 && r >= 1){
+                if(board.getPiece(new ChessPosition(r, c)) != null){
+                    close_piece[0] = r;
+                    close_piece[1] = c;
+                    break;
+                }
+                c += 1;
             }
         }
-        // check above
-        if(direction.equals("up")){
-            for(int i = new_row + 1; i <= 8; i++){
-                ChessPosition testing = new ChessPosition(i, new_col);
-                if(board.getPiece(testing) != null){
-                    closest_piece[0] = i;
-                    is_piece = true;
-                }
-            }
-            if(!is_piece){
-                closest_piece[0] = 8;
-                return closest_piece;
-            }
-        }
-        //check left
-        if(direction.equals("left")){
-            for(int i = new_col - 1; i >= 1; i--){
-                ChessPosition testing = new ChessPosition(new_row, i);
-                if(board.getPiece(testing) != null){
-                    closest_piece[1] = i;
-                    is_piece = true;
-                }
-            }
-            if(!is_piece){
-                closest_piece[1] = 1;
-                return closest_piece;
-            }
-        }
-        //check right
-        if(direction.equals("right")){
-            for(int i = new_col + 1; i <= 8; i++){
-                ChessPosition testing = new ChessPosition(new_row, i);
-                if(board.getPiece(testing) != null){
-                    closest_piece[1] = i;
-                    is_piece = true;
-                }
-            }
-            if(!is_piece){
-                closest_piece[1] = 8;
-                return closest_piece;
-            }
-        }
-        return closest_piece;
+        return close_piece;
     }
 }
-

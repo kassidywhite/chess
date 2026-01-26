@@ -2,7 +2,6 @@ package chess;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.List;
 import java.util.Objects;
 
 /**
@@ -12,9 +11,8 @@ import java.util.Objects;
  * signature of the existing methods.
  */
 public class ChessPiece {
-
-    private final ChessGame.TeamColor pieceColor;
-    private final PieceType type;
+    ChessGame.TeamColor pieceColor;
+    ChessPiece.PieceType type;
 
     public ChessPiece(ChessGame.TeamColor pieceColor, ChessPiece.PieceType type) {
         this.pieceColor = pieceColor;
@@ -44,7 +42,7 @@ public class ChessPiece {
      * @return which type of chess piece this piece is
      */
     public PieceType getPieceType() {
-        return type;
+        return this.type;
     }
 
     /**
@@ -55,26 +53,25 @@ public class ChessPiece {
      * @return Collection of valid moves
      */
     public Collection<ChessMove> pieceMoves(ChessBoard board, ChessPosition myPosition) {
-        ChessPiece piece = board.getPiece(myPosition);
-        PieceMovesCalculator calculator = new PieceMovesCalculator();
+        PieceMovesCalculator calculator = new PieceMovesCalculator(board, myPosition);
         Collection<ChessMove> possibilities = new ArrayList<>();
-        if (piece.getPieceType() == PieceType.KING){
-            possibilities = calculator.KingMovesCalculator(board, myPosition, piece.getTeamColor(), possibilities);
+        if(board.getPiece(myPosition).getPieceType().equals(PieceType.KING)){
+            possibilities = calculator.KingMovesCalculator();
         }
-        if(piece.getPieceType() == PieceType.BISHOP){
-            possibilities = calculator.BishopMovesCalculator(board, myPosition, piece.getTeamColor(), possibilities);
+        if(board.getPiece(myPosition).getPieceType().equals(PieceType.BISHOP)){
+            possibilities = calculator.BishopMovesCalculator();
         }
-        if(piece.getPieceType() == PieceType.ROOK){
-            possibilities = calculator.RookMovesCalculator(board, myPosition, piece.getTeamColor(), possibilities);
+        if(board.getPiece(myPosition).getPieceType().equals(PieceType.ROOK)){
+            possibilities = calculator.RookMovesCalculator();
         }
-        if(piece.getPieceType() == PieceType.QUEEN){
-            possibilities = calculator.QueenMovesCalculator(board, myPosition, piece.getTeamColor(), possibilities);
+        if(board.getPiece(myPosition).getPieceType().equals(PieceType.QUEEN)){
+            possibilities = calculator.QueenMovesCalculator();
         }
-        if(piece.getPieceType() == PieceType.KNIGHT){
-            possibilities = calculator.KnightMovesCalculator(board, myPosition, piece.getTeamColor(), possibilities);
+        if(board.getPiece(myPosition).getPieceType().equals(PieceType.KNIGHT)){
+            possibilities = calculator.KnightMovesCalculator();
         }
-        if(piece.getPieceType() == PieceType.PAWN){
-            possibilities = calculator.PawnMovesCalculator(board, myPosition, piece.getTeamColor(), possibilities);
+        if(board.getPiece(myPosition).getPieceType().equals(PieceType.PAWN)){
+            possibilities = calculator.PawnMovesCalculator();
         }
         return possibilities;
     }
@@ -91,13 +88,5 @@ public class ChessPiece {
     @Override
     public int hashCode() {
         return Objects.hash(pieceColor, type);
-    }
-
-    @Override
-    public String toString() {
-        return "ChessPiece{" +
-                "pieceColor=" + pieceColor +
-                ", type=" + type +
-                '}';
     }
 }
