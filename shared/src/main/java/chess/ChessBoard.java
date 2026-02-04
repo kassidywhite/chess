@@ -64,7 +64,17 @@ public class ChessBoard implements Cloneable {
     @Override
     public ChessBoard clone(){
        try{
-           return (ChessBoard) super.clone();
+           ChessBoard copy = (ChessBoard) super.clone();
+           copy.squares = new ChessPiece[8][8];
+           for (int i = 0; i < 8; i++){
+               for (int j = 0; j < 8; j++){
+                   if(this.squares[i][j] != null){
+                       copy.squares[i][j] = this.squares[i][j].clone();
+                   }
+               }
+           }
+
+           return copy;
 
        } catch (CloneNotSupportedException e) {
            throw new RuntimeException(e);
@@ -87,8 +97,7 @@ public class ChessBoard implements Cloneable {
 
     @Override
     public String toString() {
-        return "[" +
-                "squares:" + Arrays.toString(squares) +
+        return "[" + Arrays.toString(squares) +
                 ']';
     }
 }
