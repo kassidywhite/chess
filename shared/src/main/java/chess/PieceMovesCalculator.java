@@ -46,15 +46,15 @@ public class PieceMovesCalculator {
                         ChessPiece.PieceType.QUEEN,
                         ChessPiece.PieceType.BISHOP
                 };
-                if(close_piece[0] != curr_row + 1){
-                    for(int i = 0; i < 4; i++){
+                for(int i = 0; i < 4; i++){
+                    if(close_piece[0] != curr_row + 1){
                         add_this(new ChessPosition(curr_row + 1, curr_col), pieces[i]);
-                        if(curr_col - 1 >= 1){
-                            pawn_attack(new ChessPosition(curr_row + 1, curr_col - 1), pieces[i]);
-                        }
-                        if(curr_col + 1 <= 8){
-                            pawn_attack(new ChessPosition(curr_row + 1, curr_col + 1), pieces[i]);
-                        }
+                    }
+                    if(curr_col - 1 >= 1){
+                        pawn_attack(new ChessPosition(curr_row + 1, curr_col - 1), pieces[i]);
+                    }
+                    if(curr_col + 1 <= 8){
+                        pawn_attack(new ChessPosition(curr_row + 1, curr_col + 1), pieces[i]);
                     }
                 }
             }

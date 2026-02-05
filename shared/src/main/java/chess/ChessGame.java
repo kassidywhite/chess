@@ -14,12 +14,13 @@ public class ChessGame {
     TeamColor teamTurn;
     ChessBoard board;
     TeamColor teamColor;
-    ChessPiece checkPiece;
+    Collection<ChessMove> pieces_putting_in_check;
 
     public ChessGame() {
         teamTurn = TeamColor.WHITE;
         board = new ChessBoard();
         Collection<ChessPiece> pieces = new ArrayList<>();
+        pieces_putting_in_check = new ArrayList<>();
     }
 
     /**
@@ -97,11 +98,12 @@ public class ChessGame {
                 }
                 for(ChessMove move: opponentMoves){
                     ChessPiece target = board_copy.getPiece(move.getEndPosition());
-                    if(target != null && target.getPieceType() == ChessPiece.PieceType.KING){
-                        checkPiece = target;
+                    if(target != null && target.getTeamColor() == teamColor && target.getPieceType() == ChessPiece.PieceType.KING){
+                        piece_putting_in_check = board_copy.getPiece(new ChessPosition(move.getStartPosition().getRow(), move.getStartPosition().getColumn()));
                         inCheck = true;
                     }
                 }
+                opponentMoves.clear();
             }
         }
         return inCheck;
@@ -114,6 +116,13 @@ public class ChessGame {
      * @return True if the specified team is in checkmate
      */
     public boolean isInCheckmate(TeamColor teamColor) {
+        if(!isInCheck(teamColor)){
+            return false;
+        }
+        return checkIfCanKill(teamColor);
+    }
+
+    public boolean checkIfCanKill(TeamColor teamColor){
         ChessBoard board_copy = board.clone();
         TeamColor opponentColor;
         if(teamColor.equals(TeamColor.WHITE)){
@@ -121,18 +130,20 @@ public class ChessGame {
         } else {
             opponentColor = TeamColor.WHITE;
         }
-        boolean checkMate = false;
         if(isInCheck(teamColor)){
-            // check if we can kill check piece
-            Collection<ChessPosition> opponentPositions = getOpponentPositions(teamColor);
-            for(ChessPosition position: opponentPositions){
+            // check if we can kill piece putting in check
+            Collection<ChessPosition> ourPositions = getOpponentPositions(opponentColor);
+            for(ChessPosition position: ourPositions){
                 Collection<ChessMove> moves = ChessPiece.pieceMoves(board_copy, position);
                 for(ChessMove move: moves){
-
+                    ChessPiece target = board_copy.getPiece(move.getEndPosition());
+                    if(target != null && target.equals(piece_putting_in_check)){
+                        return false;
+                    }
                 }
             }
         }
-        return false;
+        return true;
     }
 
     public Collection<ChessPosition> getOpponentPositions(TeamColor teamColor){
@@ -185,12 +196,12 @@ public class ChessGame {
             return false;
         }
         ChessGame chessGame = (ChessGame) o;
-        return Objects.equals(whiteMoves, chessGame.whiteMoves) && Objects.equals(blackMoves, chessGame.blackMoves) && teamTurn == chessGame.teamTurn && Objects.equals(board, chessGame.board) && teamColor == chessGame.teamColor;
+        return teamTurn == chessGame.teamTurn && Objects.equals(board, chessGame.board) && teamColor == chessGame.teamColor && Objects.equals(piece_putting_in_check, chessGame.piece_putting_in_check);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(whiteMoves, blackMoves, teamTurn, board, teamColor);
+        return Objects.hash(teamTurn, board, teamColor, piece_putting_in_check);
     }
 
     @Override
