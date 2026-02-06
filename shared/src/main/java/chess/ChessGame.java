@@ -13,15 +13,12 @@ import java.util.Objects;
 public class ChessGame {
     TeamColor teamTurn;
     ChessBoard board;
-    TeamColor teamColor;
-    Collection<ChessPosition> pieces_putting_in_check;
     ChessBoard board_copy;
 
     public ChessGame() {
         teamTurn = TeamColor.WHITE;
         board = new ChessBoard();
         board.resetBoard();
-        pieces_putting_in_check = new ArrayList<>();
         board_copy = board.clone();
     }
 
@@ -78,10 +75,10 @@ public class ChessGame {
      * @param move ChessMove
      */
     public void movePiece(ChessMove move) {
-        board_copy.addPiece(move.getStartPosition(), null);
-        ChessPosition curr_pos = move.getStartPosition();
+        ChessPiece curr_piece = board.getPiece(move.getStartPosition());
         ChessPosition this_pos = new ChessPosition(move.getEndPosition().getRow(), move.getEndPosition().getColumn());
-        ChessPiece add_this = new ChessPiece(board.getPiece(curr_pos).getTeamColor(), board.getPiece(curr_pos).getPieceType());
+        ChessPiece add_this = new ChessPiece(curr_piece.getTeamColor(), curr_piece.getPieceType());
+        board_copy.addPiece(move.getStartPosition(), null);
         board_copy.addPiece(this_pos, add_this);
     }
 
@@ -169,26 +166,10 @@ public class ChessGame {
     }
 
     /**
-     *
-     * @param teamColor
-     * @return the position of teamColor's king position
+     * returns the piece positions of giden teamColor
+     * @param teamColor TeamColor
+     * @return a collection of the team color's positions
      */
-    public ChessPosition getKingPosition(TeamColor teamColor){
-        int row = 0;
-        int col = 0;
-        for(int r = 1; r <= 8; r++){
-            for(int c = 1; c<=8; c++){
-                ChessPiece this_piece = board.getPiece(new ChessPosition(r, c));
-                if(this_piece != null && this_piece.getTeamColor().equals(teamColor) && this_piece.getPieceType().equals(ChessPiece.PieceType.KING)){
-                    row = r;
-                    col = c;
-                    break;
-                }
-            }
-        }
-        return new ChessPosition(row, col);
-    }
-
     public Collection<ChessPosition> getPositions(TeamColor teamColor){
         ChessBoard board_copy = board.clone();
         Collection<ChessPosition> myPositions = new ArrayList<>();
@@ -250,17 +231,16 @@ public class ChessGame {
             return false;
         }
         ChessGame chessGame = (ChessGame) o;
-        return teamTurn == chessGame.teamTurn && Objects.equals(board, chessGame.board) && teamColor == chessGame.teamColor && Objects.equals(pieces_putting_in_check, chessGame.pieces_putting_in_check);
+        return teamTurn == chessGame.teamTurn && Objects.equals(board, chessGame.board) && Objects.equals(board_copy, chessGame.board_copy);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(teamTurn, board, teamColor, pieces_putting_in_check);
+        return Objects.hash(teamTurn, board, board_copy);
     }
 
     @Override
     public String toString() {
-        return ", board=" + board +
-                ", teamColor=" + teamColor;
+        return ", board=" + board;
     }
 }
