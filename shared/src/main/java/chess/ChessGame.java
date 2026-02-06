@@ -212,18 +212,17 @@ public class ChessGame {
      * @return True if the specified team is in stalemate, otherwise false
      */
     public boolean isInStalemate(TeamColor teamColor) {
-        boolean stalemate = false;
         if(isInCheck(teamColor)){
-            return stalemate;
+            return false;
         }
         Collection<ChessPosition> myPositions = getPositions(teamColor);
         for(ChessPosition pos: myPositions){
             Collection<ChessMove> valid_moves = validMoves(pos);
-            if(valid_moves.isEmpty()){
-                stalemate = true;
+            if(!valid_moves.isEmpty()){
+                return false;
             }
         }
-        return stalemate;
+        return true;
     }
 
     /**
