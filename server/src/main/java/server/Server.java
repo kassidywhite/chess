@@ -6,12 +6,10 @@ import io.javalin.http.Context;
 import model.*;
 import com.google.gson.Gson;
 import model.request.LoginRequest;
+import model.request.LogoutRequest;
 import model.request.NewGameRequest;
 import model.request.RegisterRequest;
-import model.result.DeleteResult;
-import model.result.LoginResult;
-import model.result.NewGameResult;
-import model.result.RegisterResult;
+import model.result.*;
 import service.Service;
 import dataaccess.*;
 import service.exceptions.AlreadyTakenException;
@@ -31,6 +29,7 @@ public class Server {
         javalin = Javalin.create(config -> config.staticFiles.add("web"));
         javalin.post("/user", this::register);
         javalin.post("/session", this::login);
+        javalin.delete("/session", this::logout);
         javalin.post("/game", this::createGame);
         javalin.delete("/db", this::clear);
 
@@ -65,6 +64,12 @@ public class Server {
         } catch (ServiceException e){
             serviceExceptionHandler(ctx, e);
         }
+    }
+
+    private void logout(Context ctx) {
+        LogoutRequest logout_request = serializer.fromJson(ctx.body(), LogoutRequest.class);
+        LogoutResult logout_result = service.logout(logout_request);
+        ctx.result(serializer.toJson(logout_result));
     }
 
     private void createGame(Context ctx){

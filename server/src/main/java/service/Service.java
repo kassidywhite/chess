@@ -4,12 +4,10 @@ import model.AuthData;
 import model.UserData;
 import dataaccess.*;
 import model.request.LoginRequest;
+import model.request.LogoutRequest;
 import model.request.NewGameRequest;
 import model.request.RegisterRequest;
-import model.result.DeleteResult;
-import model.result.LoginResult;
-import model.result.NewGameResult;
-import model.result.RegisterResult;
+import model.result.*;
 import service.exceptions.AlreadyTakenException;
 import service.exceptions.BadRequestException;
 import service.exceptions.ServiceException;
@@ -57,6 +55,12 @@ public class Service {
         AuthData authToken = new AuthData(user.username());
         authAccess.addAuth(authToken);
         return new LoginResult(user.username(), authToken.authToken());
+    }
+
+    public LogoutResult logout(LogoutRequest request) {
+        // check if authentication is valid/ if user exists
+
+        return new LogoutResult();
     }
 
     public NewGameResult createGame(NewGameRequest request) {
