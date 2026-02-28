@@ -6,9 +6,11 @@ import io.javalin.http.Context;
 import model.*;
 import com.google.gson.Gson;
 import model.request.LoginRequest;
+import model.request.NewGameRequest;
 import model.request.RegisterRequest;
 import model.result.DeleteResult;
 import model.result.LoginResult;
+import model.result.NewGameResult;
 import model.result.RegisterResult;
 import service.Service;
 import dataaccess.*;
@@ -29,6 +31,7 @@ public class Server {
         javalin = Javalin.create(config -> config.staticFiles.add("web"));
         javalin.post("/user", this::register);
         javalin.post("/session", this::login);
+        javalin.post("/game", this::createGame);
         javalin.delete("/db", this::clear);
 
         // Register your endpoints and exception handlers here.
@@ -62,6 +65,12 @@ public class Server {
         } catch (ServiceException e){
             serviceExceptionHandler(ctx, e);
         }
+    }
+
+    private void createGame(Context ctx){
+        NewGameRequest game_request = serializer.fromJson(ctx.body(), NewGameRequest.class);
+        NewGameResult game_result = service.createGame(game_request);
+        ctx.result(serializer.toJson(game_result));
     }
 
     private void clear(Context ctx) {
