@@ -19,6 +19,6 @@ public interface UserDAO {
     //update
 
     //delete
-    DeleteResult deleteUser(String username);
-    DeleteResult deleteAllUsers();
+    void deleteUser(String username);
+    void deleteAllUsers();
 }

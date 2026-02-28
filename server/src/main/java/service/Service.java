@@ -57,9 +57,13 @@ public class Service {
         return new LoginResult(user.username(), authToken.authToken());
     }
 
-    public LogoutResult logout(LogoutRequest request) {
-        // check if authentication is valid/ if user exists
-
+    public LogoutResult logout(String token) throws ServiceException{
+        AuthData auth = authAccess.getAuthByToken(token);
+        if(auth == null){
+            throw new UnauthorizedException("Error: unauthorized");
+        }
+        authAccess.deleteAuth(token);
+        userAccess.deleteUser(auth.username());
         return new LogoutResult();
     }
 
@@ -78,7 +82,7 @@ public class Service {
         userAccess.deleteAllUsers();
         authAccess.deleteAllAuth();
         //gameAccess.deleteAllGames();
-        return userAccess.deleteAllUsers();
+        return new DeleteResult();
     }
 
     public Collection<UserData> listUsers(){

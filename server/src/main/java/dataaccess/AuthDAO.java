@@ -13,8 +13,9 @@ public interface AuthDAO {
 
     ArrayList<AuthData> listAuth();
 
-    AuthData getAuth(String token);
+    AuthData getAuthByToken(String token);
+    AuthData getAuthByUser(String username);
 
-    DeleteResult deleteAuth(String token);
-    DeleteResult deleteAllAuth();
+    void deleteAuth(String token);
+    void deleteAllAuth();
 }

@@ -67,9 +67,14 @@ public class Server {
     }
 
     private void logout(Context ctx) {
-        LogoutRequest logout_request = serializer.fromJson(ctx.body(), LogoutRequest.class);
-        LogoutResult logout_result = service.logout(logout_request);
-        ctx.result(serializer.toJson(logout_result));
+        try{
+            String authToken = ctx.header("Authorization");
+            //LogoutRequest logout_request = serializer.fromJson(ctx.body(), LogoutRequest.class);
+            LogoutResult logout_result = service.logout(authToken);
+            ctx.result(serializer.toJson(logout_result));
+        } catch (ServiceException e){
+            serviceExceptionHandler(ctx, e);
+        }
     }
 
     private void createGame(Context ctx){

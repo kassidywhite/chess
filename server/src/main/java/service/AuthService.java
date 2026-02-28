@@ -13,7 +13,7 @@ public class AuthService {
     public AuthService(){}
 
     public AuthData getAuth(String username){
-        return authAccess.getAuth(username);
+        return authAccess.getAuthByUser(username);
     }
 
     public ArrayList<AuthData> listAuth(){
