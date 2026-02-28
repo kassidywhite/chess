@@ -5,6 +5,9 @@ import model.UserData;
 import dataaccess.*;
 import model.result.DeleteResult;
 import model.result.RegisterResult;
+import service.exceptions.AlreadyTakenException;
+import service.exceptions.BadRequestException;
+import service.exceptions.ServiceException;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -17,9 +20,12 @@ public class Service {
 
     public Service(){}
 
-    public RegisterResult register(UserData user) throws DataAccessException{
+    public RegisterResult register(UserData user) throws ServiceException {
+        if(user.username() == null || user.password() == null || user.email() == null){
+            throw new BadRequestException("Error: bad request");
+        }
         if(userAccess.getUser(user.username()) != null){
-            throw new DataAccessException("Error: Username already taken");
+            throw new AlreadyTakenException("Error: already taken");
         }
         AuthData authToken = new AuthData(user.username());
         userAccess.addUser(user);
@@ -30,7 +36,7 @@ public class Service {
         userAccess.addUser(data);
     }
 
-    public DeleteResult deleteAll(String token) throws DataAccessException {
+    public DeleteResult deleteAll(String token) {
         // check if authToken is valid
         userAccess.deleteAllUsers();
         authAccess.deleteAllAuth();

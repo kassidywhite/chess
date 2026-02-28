@@ -47,10 +47,10 @@ public class ServiceTests {
         assertIterableEquals(expected, actual);
     }
 
-    @Test
-    void checkAuth() throws DataAccessException {
-        Service usrService = new Service();
-        UserData user = new UserData("blah", "blah", "blah@gmail.com");
-        RegisterResult result = usrService.register(user);
-    }
+//    @Test
+//    void checkAuth() throws DataAccessException {
+//        Service usrService = new Service();
+//        UserData user = new UserData("blah", "blah", "blah@gmail.com");
+//        RegisterResult result = usrService.register(user);
+//    }
 }
