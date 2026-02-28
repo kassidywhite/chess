@@ -15,9 +15,8 @@ public class MemoryAuthDAO implements AuthDAO {
     }
 
     @Override
-    public RegisterResult addAuth(AuthData data) {
-        tokens.put(data.authToken(), data);
-        return new RegisterResult(data.username(), data.authToken());
+    public void addAuth(AuthData data) {
+        tokens.put(data.username(), data);
     }
 
     @Override
@@ -27,9 +26,9 @@ public class MemoryAuthDAO implements AuthDAO {
 
 
     @Override
-    public AuthData getAuth(String token) {
-        if(tokens.containsKey(token)){
-            return tokens.get(token);
+    public AuthData getAuth(String username) {
+        if(tokens.containsKey(username)){
+            return tokens.get(username);
         }
         return null;
     }

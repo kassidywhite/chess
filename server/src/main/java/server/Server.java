@@ -5,7 +5,9 @@ import io.javalin.*;
 import io.javalin.http.Context;
 import model.*;
 import com.google.gson.Gson;
+import model.request.LoginRequest;
 import model.result.DeleteResult;
+import model.result.LoginResult;
 import model.result.RegisterResult;
 import service.Service;
 import dataaccess.*;
@@ -24,6 +26,7 @@ public class Server {
     public Server() {
         javalin = Javalin.create(config -> config.staticFiles.add("web"));
         javalin.post("/user", this::register);
+        javalin.post("/session", this::login);
         javalin.delete("/db", this::clear);
 
         // Register your endpoints and exception handlers here.
@@ -58,6 +61,33 @@ public class Server {
                     ctx.result(serializer.toJson(Map.of("message", e.getMessage())));
                 }
                     //"Error: " + e.getMessage();
+                default -> {
+                    ctx.contentType("application/json");
+                    ctx.status(500);
+                    ctx.result(serializer.toJson(Map.of("message", e.getMessage())));
+                }
+            }
+        }
+    }
+
+    private void login(Context ctx) {
+        try{
+            LoginRequest login_request = serializer.fromJson(ctx.body(), LoginRequest.class);
+            LoginResult login_result = service.login(login_request);
+            ctx.result(serializer.toJson(login_result));
+        } catch (ServiceException e){
+            switch (e) {
+                case BadRequestException ex -> {
+                    ctx.contentType("application/json");
+                    ctx.status(400);
+                    ctx.result(serializer.toJson(Map.of("message", e.getMessage())));
+                }
+                case AlreadyTakenException ex ->  {
+                    ctx.contentType("application/json");
+                    ctx.status(403);
+                    ctx.result(serializer.toJson(Map.of("message", e.getMessage())));
+                }
+                //"Error: " + e.getMessage();
                 default -> {
                     ctx.contentType("application/json");
                     ctx.status(500);

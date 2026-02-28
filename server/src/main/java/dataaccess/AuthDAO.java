@@ -9,7 +9,7 @@ import java.util.ArrayList;
 public interface AuthDAO {
     void AuthDAO();
 
-    RegisterResult addAuth(AuthData data);
+    void addAuth(AuthData data);
 
     ArrayList<AuthData> listAuth();
 

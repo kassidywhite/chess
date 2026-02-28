@@ -3,14 +3,18 @@ import dataaccess.*;
 import model.AuthData;
 import model.UserData;
 import dataaccess.*;
+import model.request.LoginRequest;
 import model.result.DeleteResult;
+import model.result.LoginResult;
 import model.result.RegisterResult;
 import service.exceptions.AlreadyTakenException;
 import service.exceptions.BadRequestException;
 import service.exceptions.ServiceException;
+import service.exceptions.UnauthorizedException;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Objects;
 
 public class Service {
 
@@ -29,7 +33,24 @@ public class Service {
         }
         AuthData authToken = new AuthData(user.username());
         userAccess.addUser(user);
-        return authAccess.addAuth(authToken);
+        authAccess.addAuth(authToken);
+        authAccess.addAuth(authToken);
+        RegisterResult result = new RegisterResult(user.username(), authToken.authToken());
+        return result;
+    }
+
+    public LoginResult login(LoginRequest request) throws ServiceException {
+        UserData user = userAccess.getUser(request.username());
+        if(user == null){
+            throw new BadRequestException("Error: bad request");
+        }
+        if(!Objects.equals(request.password(), user.password())){
+            throw new UnauthorizedException("Error: unauthorized");
+        }
+        AuthData authToken = new AuthData(user.username());
+        authAccess.addAuth(authToken);
+        LoginResult result = new LoginResult(user.username(), authToken.authToken());
+        return result;
     }
 
     public void addUser(UserData data){
