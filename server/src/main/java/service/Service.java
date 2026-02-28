@@ -4,6 +4,7 @@ import model.AuthData;
 import model.UserData;
 import dataaccess.*;
 import model.request.LoginRequest;
+import model.request.RegisterRequest;
 import model.result.DeleteResult;
 import model.result.LoginResult;
 import model.result.RegisterResult;
@@ -24,14 +25,15 @@ public class Service {
 
     public Service(){}
 
-    public RegisterResult register(UserData user) throws ServiceException {
-        if(user.username() == null || user.password() == null || user.email() == null){
+    public RegisterResult register(RegisterRequest request) throws ServiceException {
+        if(request.username() == null || request.password() == null || request.email() == null){
             throw new BadRequestException("Error: bad request");
         }
-        if(userAccess.getUser(user.username()) != null){
+        if(userAccess.getUser(request.username()) != null){
             throw new AlreadyTakenException("Error: already taken");
         }
-        AuthData authToken = new AuthData(user.username());
+        UserData user = new UserData(request.username(), request.password(), request.email());
+        AuthData authToken = new AuthData(request.username());
         userAccess.addUser(user);
         authAccess.addAuth(authToken);
         authAccess.addAuth(authToken);

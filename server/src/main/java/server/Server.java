@@ -6,6 +6,7 @@ import io.javalin.http.Context;
 import model.*;
 import com.google.gson.Gson;
 import model.request.LoginRequest;
+import model.request.RegisterRequest;
 import model.result.DeleteResult;
 import model.result.LoginResult;
 import model.result.RegisterResult;
@@ -45,8 +46,8 @@ public class Server {
 
     private void register(Context ctx) {
         try{
-            UserData user = serializer.fromJson(ctx.body(), UserData.class);
-            RegisterResult register_result = service.register(user);
+            RegisterRequest register_request = serializer.fromJson(ctx.body(), RegisterRequest.class);
+            RegisterResult register_result = service.register(register_request);
             ctx.result(serializer.toJson(register_result));
         } catch (ServiceException e) {
             serviceExceptionHandler(ctx, e);
