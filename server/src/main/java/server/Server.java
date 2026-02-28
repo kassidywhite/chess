@@ -14,6 +14,7 @@ import dataaccess.*;
 import service.exceptions.AlreadyTakenException;
 import service.exceptions.BadRequestException;
 import service.exceptions.ServiceException;
+import service.exceptions.UnauthorizedException;
 
 import java.util.Map;
 
@@ -48,25 +49,7 @@ public class Server {
             RegisterResult register_result = service.register(user);
             ctx.result(serializer.toJson(register_result));
         } catch (ServiceException e) {
-            switch (e) {
-                case BadRequestException ex -> {
-                    ctx.contentType("application/json");
-                    ctx.status(400);
-                    ctx.result(serializer.toJson(Map.of("message", e.getMessage())));
-                    //"Error: " + ex.getMessage();
-                }
-                case AlreadyTakenException ex ->  {
-                    ctx.contentType("application/json");
-                    ctx.status(403);
-                    ctx.result(serializer.toJson(Map.of("message", e.getMessage())));
-                }
-                    //"Error: " + e.getMessage();
-                default -> {
-                    ctx.contentType("application/json");
-                    ctx.status(500);
-                    ctx.result(serializer.toJson(Map.of("message", e.getMessage())));
-                }
-            }
+            serviceExceptionHandler(ctx, e);
         }
     }
 
@@ -76,24 +59,7 @@ public class Server {
             LoginResult login_result = service.login(login_request);
             ctx.result(serializer.toJson(login_result));
         } catch (ServiceException e){
-            switch (e) {
-                case BadRequestException ex -> {
-                    ctx.contentType("application/json");
-                    ctx.status(400);
-                    ctx.result(serializer.toJson(Map.of("message", e.getMessage())));
-                }
-                case AlreadyTakenException ex ->  {
-                    ctx.contentType("application/json");
-                    ctx.status(403);
-                    ctx.result(serializer.toJson(Map.of("message", e.getMessage())));
-                }
-                //"Error: " + e.getMessage();
-                default -> {
-                    ctx.contentType("application/json");
-                    ctx.status(500);
-                    ctx.result(serializer.toJson(Map.of("message", e.getMessage())));
-                }
-            }
+            serviceExceptionHandler(ctx, e);
         }
     }
 
@@ -103,5 +69,30 @@ public class Server {
         ctx.result(serializer.toJson(delete_result));
         ctx.status(200);
 
+    }
+
+    private void serviceExceptionHandler(Context ctx, ServiceException e){
+        switch (e) {
+            case BadRequestException ex -> {
+                ctx.contentType("application/json");
+                ctx.status(400);
+                ctx.result(serializer.toJson(Map.of("message", e.getMessage())));
+            }
+            case UnauthorizedException ex -> {
+                ctx.contentType("application/json");
+                ctx.status(401);
+                ctx.result(serializer.toJson(Map.of("message", e.getMessage())));
+            }
+            case AlreadyTakenException ex ->  {
+                ctx.contentType("application/json");
+                ctx.status(403);
+                ctx.result(serializer.toJson(Map.of("message", e.getMessage())));
+            }
+            default -> {
+                ctx.contentType("application/json");
+                ctx.status(500);
+                ctx.result(serializer.toJson(Map.of("message", e.getMessage())));
+            }
+        }
     }
 }

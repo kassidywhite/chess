@@ -40,17 +40,19 @@ public class Service {
     }
 
     public LoginResult login(LoginRequest request) throws ServiceException {
-        UserData user = userAccess.getUser(request.username());
-        if(user == null){
+        if(request.username() == null || request.password() == null){
             throw new BadRequestException("Error: bad request");
         }
-        if(!Objects.equals(request.password(), user.password())){
+        UserData user = userAccess.getUser(request.username());
+        if(user == null){
+            throw new UnauthorizedException("Error: unauthorized");
+        }
+        if(!request.password().equals(user.password())){
             throw new UnauthorizedException("Error: unauthorized");
         }
         AuthData authToken = new AuthData(user.username());
         authAccess.addAuth(authToken);
-        LoginResult result = new LoginResult(user.username(), authToken.authToken());
-        return result;
+        return new LoginResult(user.username(), authToken.authToken());
     }
 
     public void addUser(UserData data){
