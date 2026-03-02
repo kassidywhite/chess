@@ -2,9 +2,7 @@ package service;
 import dataaccess.*;
 import model.AuthData;
 import model.UserData;
-import dataaccess.*;
 import model.request.LoginRequest;
-import model.request.LogoutRequest;
 import model.request.NewGameRequest;
 import model.request.RegisterRequest;
 import model.result.*;
@@ -13,9 +11,7 @@ import service.exceptions.BadRequestException;
 import service.exceptions.ServiceException;
 import service.exceptions.UnauthorizedException;
 
-import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Objects;
 
 public class Service {
 

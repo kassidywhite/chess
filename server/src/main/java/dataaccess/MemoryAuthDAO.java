@@ -5,6 +5,7 @@ import model.result.RegisterResult;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Map;
 
 public class MemoryAuthDAO implements AuthDAO {
     final private HashMap<String, AuthData> tokens = new HashMap<>();
@@ -33,7 +34,12 @@ public class MemoryAuthDAO implements AuthDAO {
     }
 
     public AuthData getAuthByToken(String token) {
-        if(tokens.containsValue(token)){
+        for(Map.Entry<String, AuthData> entry : tokens.entrySet()) {
+            if(entry.getValue().getToken().equals(token)){
+                return entry.getValue();
+            }
+        }
+        if(tokens.get(token) != null){
             return new AuthData(tokens.get(token).username(), token);
         } else {
             return null;
@@ -42,7 +48,7 @@ public class MemoryAuthDAO implements AuthDAO {
 
     @Override
     public void deleteAuth(String token) {
-        tokens.remove(token);
+        tokens.remove(getAuthByToken(token).username());
     }
 
     @Override

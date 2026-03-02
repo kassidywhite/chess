@@ -1,17 +1,13 @@
 package server;
 
-import com.google.gson.JsonObject;
 import io.javalin.*;
 import io.javalin.http.Context;
-import model.*;
 import com.google.gson.Gson;
 import model.request.LoginRequest;
-import model.request.LogoutRequest;
 import model.request.NewGameRequest;
 import model.request.RegisterRequest;
 import model.result.*;
 import service.Service;
-import dataaccess.*;
 import service.exceptions.AlreadyTakenException;
 import service.exceptions.BadRequestException;
 import service.exceptions.ServiceException;
@@ -69,7 +65,6 @@ public class Server {
     private void logout(Context ctx) {
         try{
             String authToken = ctx.header("Authorization");
-            //LogoutRequest logout_request = serializer.fromJson(ctx.body(), LogoutRequest.class);
             LogoutResult logout_result = service.logout(authToken);
             ctx.result(serializer.toJson(logout_result));
         } catch (ServiceException e){
