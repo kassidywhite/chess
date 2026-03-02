@@ -8,6 +8,7 @@ public interface GameDAO {
 
     void GameDAO();
 
+    int createNewGame(String gameName);
     void addGame(GameData game);
 
     GameData getGameByName(String gameName);

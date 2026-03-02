@@ -39,8 +39,7 @@ public class Service {
         userAccess.addUser(user);
         authAccess.addAuth(authToken);
         authAccess.addAuth(authToken);
-        RegisterResult result = new RegisterResult(user.username(), authToken.authToken());
-        return result;
+        return new RegisterResult(user.username(), authToken.authToken());
     }
 
     public LoginResult login(LoginRequest request) throws ServiceException {
@@ -73,11 +72,9 @@ public class Service {
             throw new BadRequestException("Error: bad request");
         }
         if(gameAccess.getGameByName(request.gameName()) != null) {
-            throw new UnauthorizedException("Error: unauthorized");
+            throw new AlreadyTakenException("Error: already taken");
         }
-        GameData game = new GameData(null, null, request.gameName(), new ChessGame());
-        gameAccess.addGame(game);
-        return new NewGameResult(123);
+        return new NewGameResult(gameAccess.createNewGame(request.gameName()));
     }
 
     public ListGamesResult listGames(String token) throws ServiceException {
@@ -95,21 +92,25 @@ public class Service {
         if(Objects.equals(request.playerColor(), "WHITE")) {
             if(curr_game.whiteUsername() == null) {
                 AuthData curr_user = authAccess.getAuthByToken(token);
-                GameData new_game = new GameData(curr_user.username(), curr_game.blackUsername(), curr_game.gameName(), curr_game.game());
+                GameData new_game = new GameData(curr_game.gameID(), curr_user.username(), curr_game.blackUsername(), curr_game.gameName(), curr_game.game());
                 gameAccess.deleteGame(curr_game.gameName());
                 gameAccess.addGame(new_game);
+                return new JoinGameResult();
+            } else {
+                throw new UnauthorizedException("Error: unauthorized");
             }
         } else if(Objects.equals(request.playerColor(), "BLACK")) {
             if(curr_game.blackUsername() == null) {
                 AuthData curr_user = authAccess.getAuthByToken(token);
-                GameData new_game = new GameData(curr_game.whiteUsername(), curr_user.username(), curr_game.gameName(), curr_game.game());
+                GameData new_game = new GameData(curr_game.gameID(), curr_game.whiteUsername(), curr_user.username(), curr_game.gameName(), curr_game.game());
                 gameAccess.deleteGame(curr_game.gameName());
                 gameAccess.addGame(new_game);
+                return new JoinGameResult();
             }
         } else {
-            throw new AlreadyTakenException("Error: already taken");
+            throw new BadRequestException("Error: bad request");
         }
-        return new JoinGameResult();
+        throw new AlreadyTakenException("Error: already taken");
     }
 
     private void validAuth(String token) throws ServiceException{

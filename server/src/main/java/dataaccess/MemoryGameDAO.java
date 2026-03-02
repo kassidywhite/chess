@@ -1,5 +1,6 @@
 package dataaccess;
 
+import chess.ChessGame;
 import model.AuthData;
 import model.GameData;
 
@@ -10,13 +11,20 @@ import java.util.Map;
 
 public class MemoryGameDAO implements GameDAO {
     final private HashMap<String, GameData> games = new HashMap<>();
+    private int gameCount;
 
     @Override
     public void GameDAO() {
 
     }
 
-    @Override
+    public int createNewGame(String gameName) {
+        gameCount += 1;
+        GameData new_game = new GameData(gameCount, null, null, gameName, new ChessGame());
+        games.put(gameName, new_game);
+        return gameCount;
+    }
+
     public void addGame(GameData game) {
         games.put(game.gameName(), game);
     }
