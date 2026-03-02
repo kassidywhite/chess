@@ -12,7 +12,9 @@ import service.exceptions.BadRequestException;
 import service.exceptions.ServiceException;
 import service.exceptions.UnauthorizedException;
 
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
 
 public class Service {
 
@@ -56,20 +58,14 @@ public class Service {
 
     public LogoutResult logout(String token) throws ServiceException{
         AuthData auth = authAccess.getAuthByToken(token);
-        if(!validAuth(token)){
-            throw new UnauthorizedException("Error: unauthorized");
-        }
+        validAuth(token);
         authAccess.deleteAuth(token);
         userAccess.deleteUser(auth.username());
         return new LogoutResult();
     }
 
     public NewGameResult createGame(NewGameRequest request, String authToken) throws ServiceException {
-        // check authorization
-        // check if game already exists
-        if(!validAuth(authToken)){
-            throw new UnauthorizedException("Error: unauthorized");
-        }
+        validAuth(authToken);
         if(request.gameName() == null) {
             throw new BadRequestException("Error: bad request");
         }
@@ -81,9 +77,17 @@ public class Service {
         return new NewGameResult(123);
     }
 
-    private boolean validAuth(String token){
+    public ListGamesResult listGames(String token) throws ServiceException {
+        validAuth(token);
+        List<GameData> games = gameAccess.listGames();
+        return new ListGamesResult(games);
+    }
+
+    private void validAuth(String token) throws ServiceException{
         AuthData auth = authAccess.getAuthByToken(token);
-        return auth != null;
+        if(auth == null){
+            throw new UnauthorizedException("Error: unauthorized");
+        }
     }
 
     public void addUser(UserData data){

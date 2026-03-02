@@ -2,7 +2,10 @@ package dataaccess;
 
 import model.GameData;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 public class MemoryGameDAO implements GameDAO {
     final private HashMap<String, GameData> games = new HashMap<>();
@@ -23,6 +26,15 @@ public class MemoryGameDAO implements GameDAO {
             return games.get(gameName);
         }
         return null;
+    }
+
+    @Override
+    public List<GameData> listGames() {
+        List<GameData> gameList = new ArrayList<>();
+        for(Map.Entry<String, GameData> entry : games.entrySet()) {
+            gameList.add(entry.getValue());
+        }
+        return gameList;
     }
 
     @Override

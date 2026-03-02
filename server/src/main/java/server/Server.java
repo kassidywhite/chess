@@ -27,6 +27,7 @@ public class Server {
         javalin.post("/session", this::login);
         javalin.delete("/session", this::logout);
         javalin.post("/game", this::createGame);
+        javalin.get("/game", this::listGames);
         javalin.delete("/db", this::clear);
 
         // Register your endpoints and exception handlers here.
@@ -85,7 +86,9 @@ public class Server {
 
     private void listGames(Context ctx){
         try{
-            //something
+            String authToken = ctx.header("Authorization");
+            ListGamesResult list_games_result = service.listGames(authToken);
+            ctx.result(serializer.toJson(list_games_result));
         } catch (ServiceException e) {
             serviceExceptionHandler(ctx, e);
         }
