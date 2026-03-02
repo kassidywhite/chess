@@ -73,9 +73,13 @@ public class Server {
     }
 
     private void createGame(Context ctx){
-        NewGameRequest game_request = serializer.fromJson(ctx.body(), NewGameRequest.class);
-        NewGameResult game_result = service.createGame(game_request);
-        ctx.result(serializer.toJson(game_result));
+        try {
+            NewGameRequest game_request = serializer.fromJson(ctx.body(), NewGameRequest.class);
+            NewGameResult game_result = service.createGame(game_request);
+            ctx.result(serializer.toJson(game_result));
+        } catch (ServiceException e) {
+            serviceExceptionHandler(ctx, e);
+        }
     }
 
     private void clear(Context ctx) {

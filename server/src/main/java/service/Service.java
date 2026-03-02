@@ -1,6 +1,7 @@
 package service;
 import dataaccess.*;
 import model.AuthData;
+import model.GameData;
 import model.UserData;
 import model.request.LoginRequest;
 import model.request.NewGameRequest;
@@ -63,9 +64,17 @@ public class Service {
         return new LogoutResult();
     }
 
-    public NewGameResult createGame(NewGameRequest request) {
+    public NewGameResult createGame(NewGameRequest request) throws ServiceException {
         // check authorization
         // check if game already exists
+        if(request.gameName() == null) {
+            throw new BadRequestException("Error: bad request");
+        }
+        if(gameAccess.getGame(request.gameName()) != null) {
+            throw new UnauthorizedException("Error: unauthorized");
+        }
+        GameData game = new GameData(request.gameName());
+        gameAccess.addGame(game);
         return new NewGameResult(123);
     }
 
@@ -77,7 +86,7 @@ public class Service {
         // check if authToken is valid
         userAccess.deleteAllUsers();
         authAccess.deleteAllAuth();
-        //gameAccess.deleteAllGames();
+        gameAccess.deleteAllGames();
         return new DeleteResult();
     }
 
