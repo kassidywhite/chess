@@ -10,7 +10,8 @@ public interface GameDAO {
 
     void addGame(GameData game);
 
-    GameData getGame(String gameName);
+    GameData getGameByName(String gameName);
+    GameData getGameByID(int ID);
     List<GameData> listGames();
 
     void deleteGame(String gameName);

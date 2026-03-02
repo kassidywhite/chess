@@ -39,11 +39,7 @@ public class MemoryAuthDAO implements AuthDAO {
                 return entry.getValue();
             }
         }
-        if(tokens.get(token) != null){
-            return new AuthData(tokens.get(token).username(), token);
-        } else {
-            return null;
-        }
+        return null;
     }
 
     @Override

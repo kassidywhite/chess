@@ -1,5 +1,6 @@
 package model;
 import chess.ChessGame;
+import java.util.Random;
 
 public record GameData (
         int gameID,
@@ -8,18 +9,18 @@ public record GameData (
         String gameName,
         ChessGame game
 ) {
-    static int i = 0;
 
-    public GameData(String name) {
-        this(generateInt(), null, null, name, createGame());
+    public GameData(String whiteUser, String blackUser, String name, ChessGame game) {
+        this(generateInt(), whiteUser, blackUser, name, game);
     }
 
     public static int generateInt() {
-        i += 1;
-        return i;
+        Random random = new Random();
+        return random.nextInt(1000);
     }
 
     public static ChessGame createGame() {
         return new ChessGame();
     }
+
 }

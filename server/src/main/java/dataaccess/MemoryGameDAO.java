@@ -1,5 +1,6 @@
 package dataaccess;
 
+import model.AuthData;
 import model.GameData;
 
 import java.util.ArrayList;
@@ -21,9 +22,19 @@ public class MemoryGameDAO implements GameDAO {
     }
 
     @Override
-    public GameData getGame(String gameName) {
+    public GameData getGameByName(String gameName) {
         if(games.containsKey(gameName)){
             return games.get(gameName);
+        }
+        return null;
+    }
+
+    @Override
+    public GameData getGameByID(int ID) {
+        for(Map.Entry<String, GameData> entry : games.entrySet()) {
+            if(entry.getValue().gameID() == ID){
+                return entry.getValue();
+            }
         }
         return null;
     }

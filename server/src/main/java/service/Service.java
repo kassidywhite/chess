@@ -1,8 +1,10 @@
 package service;
+import chess.ChessGame;
 import dataaccess.*;
 import model.AuthData;
 import model.GameData;
 import model.UserData;
+import model.request.JoinGameRequest;
 import model.request.LoginRequest;
 import model.request.NewGameRequest;
 import model.request.RegisterRequest;
@@ -15,6 +17,7 @@ import service.exceptions.UnauthorizedException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.Objects;
 
 public class Service {
 
@@ -69,10 +72,10 @@ public class Service {
         if(request.gameName() == null) {
             throw new BadRequestException("Error: bad request");
         }
-        if(gameAccess.getGame(request.gameName()) != null) {
+        if(gameAccess.getGameByName(request.gameName()) != null) {
             throw new UnauthorizedException("Error: unauthorized");
         }
-        GameData game = new GameData(request.gameName());
+        GameData game = new GameData(null, null, request.gameName(), new ChessGame());
         gameAccess.addGame(game);
         return new NewGameResult(123);
     }
@@ -81,6 +84,32 @@ public class Service {
         validAuth(token);
         List<GameData> games = gameAccess.listGames();
         return new ListGamesResult(games);
+    }
+
+    public JoinGameResult joinGame(JoinGameRequest request, String token) throws ServiceException {
+        validAuth(token);
+        GameData curr_game = gameAccess.getGameByID(request.gameID());
+        if(curr_game == null) {
+            throw new BadRequestException("Error: bad request");
+        }
+        if(Objects.equals(request.playerColor(), "WHITE")) {
+            if(curr_game.whiteUsername() == null) {
+                AuthData curr_user = authAccess.getAuthByToken(token);
+                GameData new_game = new GameData(curr_user.username(), curr_game.blackUsername(), curr_game.gameName(), curr_game.game());
+                gameAccess.deleteGame(curr_game.gameName());
+                gameAccess.addGame(new_game);
+            }
+        } else if(Objects.equals(request.playerColor(), "BLACK")) {
+            if(curr_game.blackUsername() == null) {
+                AuthData curr_user = authAccess.getAuthByToken(token);
+                GameData new_game = new GameData(curr_game.whiteUsername(), curr_user.username(), curr_game.gameName(), curr_game.game());
+                gameAccess.deleteGame(curr_game.gameName());
+                gameAccess.addGame(new_game);
+            }
+        } else {
+            throw new AlreadyTakenException("Error: already taken");
+        }
+        return new JoinGameResult();
     }
 
     private void validAuth(String token) throws ServiceException{

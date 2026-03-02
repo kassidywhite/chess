@@ -3,6 +3,7 @@ package server;
 import io.javalin.*;
 import io.javalin.http.Context;
 import com.google.gson.Gson;
+import model.request.JoinGameRequest;
 import model.request.LoginRequest;
 import model.request.NewGameRequest;
 import model.request.RegisterRequest;
@@ -28,6 +29,7 @@ public class Server {
         javalin.delete("/session", this::logout);
         javalin.post("/game", this::createGame);
         javalin.get("/game", this::listGames);
+        javalin.put("/game", this::joinGame);
         javalin.delete("/db", this::clear);
 
         // Register your endpoints and exception handlers here.
@@ -89,6 +91,17 @@ public class Server {
             String authToken = ctx.header("Authorization");
             ListGamesResult list_games_result = service.listGames(authToken);
             ctx.result(serializer.toJson(list_games_result));
+        } catch (ServiceException e) {
+            serviceExceptionHandler(ctx, e);
+        }
+    }
+
+    private void joinGame(Context ctx) {
+        try{
+            String authToken = ctx.header("Authorization");
+            JoinGameRequest join_request = serializer.fromJson(ctx.body(), JoinGameRequest.class);
+            JoinGameResult join_result = service.joinGame(join_request, authToken);
+            ctx.result(serializer.toJson(join_result));
         } catch (ServiceException e) {
             serviceExceptionHandler(ctx, e);
         }
