@@ -74,9 +74,18 @@ public class Server {
 
     private void createGame(Context ctx){
         try {
+            String authToken = ctx.header("Authorization");
             NewGameRequest game_request = serializer.fromJson(ctx.body(), NewGameRequest.class);
-            NewGameResult game_result = service.createGame(game_request);
+            NewGameResult game_result = service.createGame(game_request, authToken);
             ctx.result(serializer.toJson(game_result));
+        } catch (ServiceException e) {
+            serviceExceptionHandler(ctx, e);
+        }
+    }
+
+    private void listGames(Context ctx){
+        try{
+            //something
         } catch (ServiceException e) {
             serviceExceptionHandler(ctx, e);
         }

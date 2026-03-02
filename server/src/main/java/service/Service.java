@@ -56,7 +56,7 @@ public class Service {
 
     public LogoutResult logout(String token) throws ServiceException{
         AuthData auth = authAccess.getAuthByToken(token);
-        if(auth == null){
+        if(!validAuth(token)){
             throw new UnauthorizedException("Error: unauthorized");
         }
         authAccess.deleteAuth(token);
@@ -64,9 +64,12 @@ public class Service {
         return new LogoutResult();
     }
 
-    public NewGameResult createGame(NewGameRequest request) throws ServiceException {
+    public NewGameResult createGame(NewGameRequest request, String authToken) throws ServiceException {
         // check authorization
         // check if game already exists
+        if(!validAuth(authToken)){
+            throw new UnauthorizedException("Error: unauthorized");
+        }
         if(request.gameName() == null) {
             throw new BadRequestException("Error: bad request");
         }
@@ -76,6 +79,11 @@ public class Service {
         GameData game = new GameData(request.gameName());
         gameAccess.addGame(game);
         return new NewGameResult(123);
+    }
+
+    private boolean validAuth(String token){
+        AuthData auth = authAccess.getAuthByToken(token);
+        return auth != null;
     }
 
     public void addUser(UserData data){
