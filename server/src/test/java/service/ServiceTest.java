@@ -1,6 +1,18 @@
 package service;
 
+import dataaccess.MemoryAuthDAO;
+import dataaccess.MemoryGameDAO;
+import dataaccess.MemoryUserDAO;
+import model.UserData;
+import model.request.JoinGameRequest;
+import model.request.LoginRequest;
+import model.request.NewGameRequest;
+import model.request.RegisterRequest;
+import org.eclipse.jetty.server.Authentication;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import service.exceptions.BadRequestException;
+import service.exceptions.ServiceException;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -8,41 +20,172 @@ class ServiceTest {
 
     @Test
     void registerPositive() {
+        Service service = new Service();
+        try{
+            service.register(new RegisterRequest("john", "123abc", "john@gmail.com"));
+        } catch (Exception ex) {
+            fail();
+        }
+
     }
 
     @Test
     void registerNegative() {
+        Service service = new Service();
+        assertThrows(BadRequestException.class, () ->
+                service.register(new RegisterRequest("john", null, "john@email.com")));
     }
 
     @Test
-    void login() {
+    void loginPositive() {
+        Service service = new Service();
+        try{
+            service.register(new RegisterRequest("john", "2241", "john@gmail.com"));
+            service.login(new LoginRequest("john", "2241"));
+        } catch (Exception ex) {
+            fail();
+        }
     }
 
     @Test
-    void logout() {
+    void loginNegative() {
+        Service service = new Service();
+        try{
+            service.register(new RegisterRequest("john", "iluvdogs", "dogs@gmail.com"));
+        } catch (Exception ex) {
+            fail();
+        }
+        assertThrows(ServiceException.class, () ->
+                service.login(new LoginRequest("john", "iluvhorses")));
     }
 
     @Test
-    void createGame() {
+    void logoutPositive() {
+        Service service = new Service();
+        try{
+            service.register(new RegisterRequest("Daniel", "daniel", "daniel@daniel.com"));
+            service.login(new LoginRequest("Daniel", "daniel"));
+            service.logout(service.authAccess.getAuthByUser("Daniel"));
+        } catch (Exception ex) {
+            fail();
+        }
     }
 
     @Test
-    void listGames() {
+    void logoutNegative() {
+        Service service = new Service();
+        try{
+            service.register(new RegisterRequest("Daniel", "daniel", "daniel@daniel.com"));
+            service.login(new LoginRequest("Daniel", "daniel"));
+        } catch (Exception ex) {
+            fail();
+        }
+        assertThrows(ServiceException.class, () ->
+                service.logout(service.authAccess.getAuthByUser("Shelby")));
     }
 
     @Test
-    void joinGame() {
+    void createGamePositive() {
+        Service service = new Service();
+        try {
+            service.register(new RegisterRequest("Daniel", "daniel", "daniel@daniel.com"));
+            service.login(new LoginRequest("Daniel", "daniel"));
+            service.createGame(new NewGameRequest("queens gambit"), service.authAccess.getAuthByUser("Daniel"));
+        } catch (Exception ex) {
+            fail();
+        }
     }
 
     @Test
-    void addUser() {
+    void createGameNegative() {
+        Service service = new Service();
+        try {
+            service.register(new RegisterRequest("Daniel", "daniel", "daniel@daniel.com"));
+            service.login(new LoginRequest("Daniel", "daniel"));
+        } catch (Exception ex) {
+            fail();
+        }
+        assertThrows(ServiceException.class, () ->
+                service.createGame(new NewGameRequest(null), service.authAccess.getAuthByUser("Daniel")));
+    }
+
+    @Test
+    void listGamesPositive() {
+        Service service = new Service();
+        try{
+            service.register(new RegisterRequest("Daniel", "daniel", "daniel@daniel.com"));
+            service.login(new LoginRequest("Daniel", "daniel"));
+            service.createGame(new NewGameRequest("queens gambit"), service.authAccess.getAuthByUser("Daniel"));
+            service.register(new RegisterRequest("Jenny", "jenny", "daniel@daniel.com"));
+            service.login(new LoginRequest("Jenny", "jenny"));
+            service.createGame(new NewGameRequest("i luv chess"), service.authAccess.getAuthByUser("Jenny"));
+            service.createGame(new NewGameRequest("yuhhh"), service.authAccess.getAuthByUser("Jenny"));
+            service.listGames(service.authAccess.getAuthByUser("Jenny"));
+        } catch (Exception ex) {
+            fail();
+        }
+    }
+
+    @Test
+    void listGamesNegative() {
+        Service service = new Service();
+        try{
+            service.register(new RegisterRequest("Jenny", "jenny", "daniel@daniel.com"));
+            service.login(new LoginRequest("Jenny", "jenny"));
+            service.createGame(new NewGameRequest("i luv chess"), service.authAccess.getAuthByUser("Jenny"));
+            service.createGame(new NewGameRequest("yuhhh"), service.authAccess.getAuthByUser("Jenny"));
+        } catch (Exception ex) {
+            fail();
+        }
+        assertThrows(ServiceException.class, () ->
+                service.listGames(service.authAccess.getAuthByUser("Daniel")));
+    }
+
+    @Test
+    void joinGamePositive() {
+        Service service = new Service();
+        try {
+            service.register(new RegisterRequest("Jenny", "jenny", "daniel@daniel.com"));
+            service.login(new LoginRequest("Jenny", "jenny"));
+            service.createGame(new NewGameRequest("i luv chess"), service.authAccess.getAuthByUser("Jenny"));
+            service.register(new RegisterRequest("Daniel", "daniel", "daniel@daniel.com"));
+            service.login(new LoginRequest("Daniel", "daniel"));
+            service.joinGame(new JoinGameRequest("WHITE", service.gameAccess.getGameByName("i luv chess").gameID()), service.authAccess.getAuthByUser("Daniel"));
+        } catch (Exception ex) {
+            fail();
+        }
+    }
+
+    @Test
+    void joinGameNegative() {
+        Service service = new Service();
+        try {
+            service.register(new RegisterRequest("Jenny", "jenny", "daniel@daniel.com"));
+            service.login(new LoginRequest("Jenny", "jenny"));
+            service.createGame(new NewGameRequest("i luv chess"), service.authAccess.getAuthByUser("Jenny"));
+            service.register(new RegisterRequest("Daniel", "daniel", "daniel@daniel.com"));
+            service.login(new LoginRequest("Daniel", "daniel"));
+            service.joinGame(new JoinGameRequest("WHITE", service.gameAccess.getGameByName("i luv chess").gameID()), service.authAccess.getAuthByUser("Daniel"));
+        } catch (Exception ex) {
+            fail();
+        }
+        assertThrows(ServiceException.class, () ->
+                service.joinGame(new JoinGameRequest("WHITE", service.gameAccess.getGameByName("i luv chess").gameID()), service.authAccess.getAuthByUser("Jenny")));
     }
 
     @Test
     void deleteAll() {
-    }
-
-    @Test
-    void listUsers() {
+        Service service = new Service();
+        try {
+            service.register(new RegisterRequest("Jenny", "jenny", "daniel@daniel.com"));
+            service.login(new LoginRequest("Jenny", "jenny"));
+            service.createGame(new NewGameRequest("i luv chess"), service.authAccess.getAuthByUser("Jenny"));
+            service.createGame(new NewGameRequest("queens gambit"), service.authAccess.getAuthByUser("Jenny"));
+            service.createGame(new NewGameRequest("todays challenge"), service.authAccess.getAuthByUser("Jenny"));
+            service.deleteAll(service.authAccess.getAuthByUser("Jenny"));
+        } catch (Exception ex) {
+            fail();
+        }
+        assertEquals(0, service.gameAccess.listGames().size());
     }
 }
