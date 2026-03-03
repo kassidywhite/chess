@@ -60,37 +60,39 @@ public class PieceMovesCalculator {
             }
         }
         // check black
-        if(teamColor == ChessGame.TeamColor.BLACK){
-            int[] closePiece = getClosestStraightPiece("down");
-            if(currRow - 1 > 1){
-                if(closePiece[0] != currRow - 1){
-                    addThis(new ChessPosition(currRow - 1, currCol), null);
-                    if(closePiece[0] != currRow - 2 && currRow == 7){
-                        addThis(new ChessPosition(currRow - 2, currCol), null);
+        if(teamColor != ChessGame.TeamColor.BLACK){
+            return possibilities;
+        }
+
+        int[] closePiece = getClosestStraightPiece("down");
+        if(currRow - 1 > 1){
+            if(closePiece[0] != currRow - 1){
+                addThis(new ChessPosition(currRow - 1, currCol), null);
+                if(closePiece[0] != currRow - 2 && currRow == 7){
+                    addThis(new ChessPosition(currRow - 2, currCol), null);
+                }
+            }
+            if(currCol - 1 >= 1){
+                pawnAttack(new ChessPosition(currRow - 1, currCol - 1), null);
+            }
+            if(currCol + 1 <= 8){
+                pawnAttack(new ChessPosition(currRow - 1, currCol + 1), null);
+            }
+        } else {
+            ChessPiece.PieceType[] pieces = {
+                    ChessPiece.PieceType.ROOK,
+                    ChessPiece.PieceType.KNIGHT,
+                    ChessPiece.PieceType.QUEEN,
+                    ChessPiece.PieceType.BISHOP
+            };
+            if(closePiece[0] != currRow - 1){
+                for(int i = 0; i < 4; i++){
+                    addThis(new ChessPosition(currRow - 1, currCol), pieces[i]);
+                    if(currCol - 1 >= 1){
+                        pawnAttack(new ChessPosition(currRow - 1, currCol - 1), pieces[i]);
                     }
-                }
-                if(currCol - 1 >= 1){
-                    pawnAttack(new ChessPosition(currRow - 1, currCol - 1), null);
-                }
-                if(currCol + 1 <= 8){
-                    pawnAttack(new ChessPosition(currRow - 1, currCol + 1), null);
-                }
-            } else {
-                ChessPiece.PieceType[] pieces = {
-                        ChessPiece.PieceType.ROOK,
-                        ChessPiece.PieceType.KNIGHT,
-                        ChessPiece.PieceType.QUEEN,
-                        ChessPiece.PieceType.BISHOP
-                };
-                if(closePiece[0] != currRow - 1){
-                    for(int i = 0; i < 4; i++){
-                        addThis(new ChessPosition(currRow - 1, currCol), pieces[i]);
-                        if(currCol - 1 >= 1){
-                            pawnAttack(new ChessPosition(currRow - 1, currCol - 1), pieces[i]);
-                        }
-                        if(currCol + 1 <= 8){
-                            pawnAttack(new ChessPosition(currRow - 1, currCol + 1), pieces[i]);
-                        }
+                    if(currCol + 1 <= 8){
+                        pawnAttack(new ChessPosition(currRow - 1, currCol + 1), pieces[i]);
                     }
                 }
             }
