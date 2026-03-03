@@ -7,12 +7,12 @@ public class PieceMovesCalculator {
     Collection<ChessMove> possibilities;
     int currRow;
     int currCol;
-    ChessMove myPosition;
+    ChessPosition myPosition;
     ChessGame.TeamColor teamColor;
     ChessBoard board;
     ChessPiece.PieceType type;
 
-    public PieceMovesCalculator(ChessBoard board, ChessMove position) {
+    public PieceMovesCalculator(ChessBoard board, ChessPosition position) {
         possibilities = new ArrayList<>();
         myPosition = position;
         currRow = myPosition.getRow();
@@ -284,7 +284,7 @@ public class PieceMovesCalculator {
         return possibilities;
     }
 
-    public void pawnAttack(ChessMove position, ChessPiece.PieceType promotion){
+    public void pawnAttack(ChessPosition position, ChessPiece.PieceType promotion){
         if(board.getPiece(position) != null) {
             if(board.getPiece(position).getTeamColor() != teamColor) {
                 possibilities.add(new ChessMove(myPosition, new ChessPosition(position.getRow(), position.getColumn()), promotion));
@@ -292,7 +292,7 @@ public class PieceMovesCalculator {
         }
     }
 
-    public void addThis(ChessMove position, ChessPiece.PieceType promotion){
+    public void addThis(ChessPosition position, ChessPiece.PieceType promotion){
         if(board.getPiece(position) != null){
             pawnAttack(position, promotion);
         } else {
@@ -300,7 +300,7 @@ public class PieceMovesCalculator {
         }
     }
 
-    public boolean addThisBool(ChessMove position, ChessPiece.PieceType promotion){
+    public boolean addThisBool(ChessPosition position, ChessPiece.PieceType promotion){
         boolean isPiece = false;
         if(board.getPiece(position) != null){
             addThis(position, promotion);

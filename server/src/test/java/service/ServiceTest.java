@@ -169,14 +169,16 @@ class ServiceTest {
     @Test
     void joinGameNegative() {
         Service service = new Service();
-        int id = service.gameAccess.getGameByName("i luv chess").gameID();
-        String authToken = service.authAccess.getAuthByUser("Daniel");
         try {
             createJennyAndDanny(service);
+            String authToken = service.authAccess.getAuthByUser("Daniel");
+            int id = service.gameAccess.getGameByName("i luv chess").gameID();
             service.joinGame(new JoinGameRequest("WHITE", id), authToken);
         } catch (Exception ex) {
             fail();
         }
+        String authToken = service.authAccess.getAuthByUser("Daniel");
+        int id = service.gameAccess.getGameByName("i luv chess").gameID();
         assertThrows(ServiceException.class, () ->
                 service.joinGame(new JoinGameRequest("WHITE", id), authToken));
     }

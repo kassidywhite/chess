@@ -22,7 +22,7 @@ public class ChessBoard implements Cloneable {
      * @param position where to add the piece to
      * @param piece    the piece to add
      */
-    public void addPiece(ChessMove position, ChessPiece piece) {
+    public void addPiece(ChessPosition position, ChessPiece piece) {
         squares[position.getRow() - 1][position.getColumn() - 1] = piece;
     }
 
@@ -33,7 +33,7 @@ public class ChessBoard implements Cloneable {
      * @return Either the piece at the position, or null if no piece is at that
      * position
      */
-    public ChessPiece getPiece(ChessMove position) {
+    public ChessPiece getPiece(ChessPosition position) {
         return squares[position.getRow() - 1][position.getColumn() - 1];
     }
 
