@@ -59,10 +59,8 @@ public class Service {
     }
 
     public LogoutResult logout(String token) throws ServiceException{
-        AuthData auth = authAccess.getAuthByToken(token);
         validAuth(token);
         authAccess.deleteAuth(token);
-        userAccess.deleteUser(auth.username());
         return new LogoutResult();
     }
 
@@ -91,8 +89,8 @@ public class Service {
         }
         if(Objects.equals(request.playerColor(), "WHITE")) {
             if(curr_game.whiteUsername() == null) {
-                AuthData curr_user = authAccess.getAuthByToken(token);
-                GameData new_game = new GameData(curr_game.gameID(), curr_user.username(), curr_game.blackUsername(), curr_game.gameName(), curr_game.game());
+                String curr_user = authAccess.getUserByAuth(token);
+                GameData new_game = new GameData(curr_game.gameID(), curr_user, curr_game.blackUsername(), curr_game.gameName(), curr_game.game());
                 gameAccess.deleteGame(curr_game.gameName());
                 gameAccess.addGame(new_game);
                 return new JoinGameResult();
@@ -101,8 +99,8 @@ public class Service {
             }
         } else if(Objects.equals(request.playerColor(), "BLACK")) {
             if(curr_game.blackUsername() == null) {
-                AuthData curr_user = authAccess.getAuthByToken(token);
-                GameData new_game = new GameData(curr_game.gameID(), curr_game.whiteUsername(), curr_user.username(), curr_game.gameName(), curr_game.game());
+                String curr_user = authAccess.getUserByAuth(token);
+                GameData new_game = new GameData(curr_game.gameID(), curr_game.whiteUsername(), curr_user, curr_game.gameName(), curr_game.game());
                 gameAccess.deleteGame(curr_game.gameName());
                 gameAccess.addGame(new_game);
                 return new JoinGameResult();
@@ -114,7 +112,7 @@ public class Service {
     }
 
     private void validAuth(String token) throws ServiceException{
-        AuthData auth = authAccess.getAuthByToken(token);
+        String auth = authAccess.getUserByAuth(token);
         if(auth == null){
             throw new UnauthorizedException("Error: unauthorized");
         }

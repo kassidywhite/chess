@@ -11,10 +11,10 @@ public interface AuthDAO {
 
     void addAuth(AuthData data);
 
-    ArrayList<AuthData> listAuth();
+    ArrayList<String> listAuth();
 
-    AuthData getAuthByToken(String token);
-    AuthData getAuthByUser(String username);
+    String getAuthByUser(String username);
+    String getUserByAuth(String token);
 
     void deleteAuth(String token);
     void deleteAllAuth();

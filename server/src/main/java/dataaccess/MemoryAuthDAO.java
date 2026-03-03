@@ -1,14 +1,12 @@
 package dataaccess;
 import model.*;
-import model.result.DeleteResult;
-import model.result.RegisterResult;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
 public class MemoryAuthDAO implements AuthDAO {
-    final private HashMap<String, AuthData> tokens = new HashMap<>();
+    final private HashMap<String, String> tokens = new HashMap<>();
 
     @Override
     public void AuthDAO() {
@@ -17,34 +15,34 @@ public class MemoryAuthDAO implements AuthDAO {
 
     @Override
     public void addAuth(AuthData data) {
-        tokens.put(data.username(), data);
+        tokens.put(data.authToken(), data.username());
     }
 
     @Override
-    public ArrayList<AuthData> listAuth() {
+    public ArrayList<String> listAuth() {
         return new ArrayList<>(tokens.values());
     }
 
 
-    public AuthData getAuthByUser(String username) {
-        if(tokens.containsKey(username)){
-            return tokens.get(username);
+    public String getAuthByUser(String username) {
+        for(Map.Entry<String, String> entry: tokens.entrySet()){
+            if(entry.getValue().equals(username)){
+                return entry.getKey();
+            }
         }
         return null;
     }
 
-    public AuthData getAuthByToken(String token) {
-        for(Map.Entry<String, AuthData> entry : tokens.entrySet()) {
-            if(entry.getValue().authToken().equals(token)){
-                return entry.getValue();
-            }
+    public String getUserByAuth(String token) {
+        if(tokens.containsKey(token)){
+            return tokens.get(token);
         }
         return null;
     }
 
     @Override
     public void deleteAuth(String token) {
-        tokens.remove(getAuthByToken(token).username());
+        tokens.remove(token);
     }
 
     @Override
