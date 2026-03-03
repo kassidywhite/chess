@@ -52,26 +52,26 @@ public class ChessPiece implements Cloneable {
      *
      * @return Collection of valid moves
      */
-    public static Collection<ChessMove> pieceMoves(ChessBoard board, ChessPosition myPosition) {
+    public static Collection<ChessMove> pieceMoves(ChessBoard board, ChessMove myPosition) {
         PieceMovesCalculator calculator = new PieceMovesCalculator(board, myPosition);
         Collection<ChessMove> possibilities = new ArrayList<>();
         if(board.getPiece(myPosition).getPieceType().equals(PieceType.KING)){
-            possibilities = calculator.KingMovesCalculator();
+            possibilities = calculator.kingMovesCalculator();
         }
         if(board.getPiece(myPosition).getPieceType().equals(PieceType.BISHOP)){
-            possibilities = calculator.BishopMovesCalculator();
+            possibilities = calculator.bishopMovesCalculator();
         }
         if(board.getPiece(myPosition).getPieceType().equals(PieceType.ROOK)){
-            possibilities = calculator.RookMovesCalculator();
+            possibilities = calculator.rookMovesCalculator();
         }
         if(board.getPiece(myPosition).getPieceType().equals(PieceType.QUEEN)){
-            possibilities = calculator.QueenMovesCalculator();
+            possibilities = calculator.queenMovesCalculator();
         }
         if(board.getPiece(myPosition).getPieceType().equals(PieceType.KNIGHT)){
-            possibilities = calculator.KnightMovesCalculator();
+            possibilities = calculator.knightMovesCalculator();
         }
         if(board.getPiece(myPosition).getPieceType().equals(PieceType.PAWN)){
-            possibilities = calculator.PawnMovesCalculator();
+            possibilities = calculator.pawnMovesCalculator();
         }
         return possibilities;
     }

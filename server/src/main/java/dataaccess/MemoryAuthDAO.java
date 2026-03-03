@@ -9,18 +9,8 @@ public class MemoryAuthDAO implements AuthDAO {
     final private HashMap<String, String> tokens = new HashMap<>();
 
     @Override
-    public void AuthDAO() {
-
-    }
-
-    @Override
     public void addAuth(AuthData data) {
         tokens.put(data.authToken(), data.username());
-    }
-
-    @Override
-    public ArrayList<String> listAuth() {
-        return new ArrayList<>(tokens.values());
     }
 
 

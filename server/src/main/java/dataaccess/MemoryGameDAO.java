@@ -13,15 +13,10 @@ public class MemoryGameDAO implements GameDAO {
     final private HashMap<String, GameData> games = new HashMap<>();
     private int gameCount;
 
-    @Override
-    public void GameDAO() {
-
-    }
-
     public int createNewGame(String gameName) {
         gameCount += 1;
-        GameData new_game = new GameData(gameCount, null, null, gameName, new ChessGame());
-        games.put(gameName, new_game);
+        GameData newGame = new GameData(gameCount, null, null, gameName, new ChessGame());
+        games.put(gameName, newGame);
         return gameCount;
     }
 
@@ -38,9 +33,9 @@ public class MemoryGameDAO implements GameDAO {
     }
 
     @Override
-    public GameData getGameByID(int ID) {
+    public GameData getGameByID(int id) {
         for(Map.Entry<String, GameData> entry : games.entrySet()) {
-            if(entry.getValue().gameID() == ID){
+            if(entry.getValue().gameID() == id){
                 return entry.getValue();
             }
         }

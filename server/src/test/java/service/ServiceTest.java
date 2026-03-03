@@ -141,16 +141,26 @@ class ServiceTest {
                 service.listGames(service.authAccess.getAuthByUser("Daniel")));
     }
 
-    @Test
-    void joinGamePositive() {
-        Service service = new Service();
-        try {
+    void createJennyAndDanny(Service service){
+        try{
             service.register(new RegisterRequest("Jenny", "jenny", "daniel@daniel.com"));
             service.login(new LoginRequest("Jenny", "jenny"));
             service.createGame(new NewGameRequest("i luv chess"), service.authAccess.getAuthByUser("Jenny"));
             service.register(new RegisterRequest("Daniel", "daniel", "daniel@daniel.com"));
             service.login(new LoginRequest("Daniel", "daniel"));
-            service.joinGame(new JoinGameRequest("WHITE", service.gameAccess.getGameByName("i luv chess").gameID()), service.authAccess.getAuthByUser("Daniel"));
+        } catch (Exception ex) {
+            fail();
+        }
+    }
+
+    @Test
+    void joinGamePositive() {
+        Service service = new Service();
+        try {
+            createJennyAndDanny(service);
+            String token = service.authAccess.getAuthByUser("Daniel");
+            int gameID = service.gameAccess.getGameByName("i luv chess").gameID();
+            service.joinGame(new JoinGameRequest("WHITE", gameID), token);
         } catch (Exception ex) {
             fail();
         }
@@ -159,18 +169,16 @@ class ServiceTest {
     @Test
     void joinGameNegative() {
         Service service = new Service();
+        int id = service.gameAccess.getGameByName("i luv chess").gameID();
+        String authToken = service.authAccess.getAuthByUser("Daniel");
         try {
-            service.register(new RegisterRequest("Jenny", "jenny", "daniel@daniel.com"));
-            service.login(new LoginRequest("Jenny", "jenny"));
-            service.createGame(new NewGameRequest("i luv chess"), service.authAccess.getAuthByUser("Jenny"));
-            service.register(new RegisterRequest("Daniel", "daniel", "daniel@daniel.com"));
-            service.login(new LoginRequest("Daniel", "daniel"));
-            service.joinGame(new JoinGameRequest("WHITE", service.gameAccess.getGameByName("i luv chess").gameID()), service.authAccess.getAuthByUser("Daniel"));
+            createJennyAndDanny(service);
+            service.joinGame(new JoinGameRequest("WHITE", id), authToken);
         } catch (Exception ex) {
             fail();
         }
         assertThrows(ServiceException.class, () ->
-                service.joinGame(new JoinGameRequest("WHITE", service.gameAccess.getGameByName("i luv chess").gameID()), service.authAccess.getAuthByUser("Jenny")));
+                service.joinGame(new JoinGameRequest("WHITE", id), authToken));
     }
 
     @Test

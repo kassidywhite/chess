@@ -83,26 +83,26 @@ public class Service {
 
     public JoinGameResult joinGame(JoinGameRequest request, String token) throws ServiceException {
         validAuth(token);
-        GameData curr_game = gameAccess.getGameByID(request.gameID());
-        if(curr_game == null) {
+        GameData currGame = gameAccess.getGameByID(request.gameID());
+        if(currGame == null) {
             throw new BadRequestException("Error: bad request");
         }
         if(Objects.equals(request.playerColor(), "WHITE")) {
-            if(curr_game.whiteUsername() == null) {
-                String curr_user = authAccess.getUserByAuth(token);
-                GameData new_game = new GameData(curr_game.gameID(), curr_user, curr_game.blackUsername(), curr_game.gameName(), curr_game.game());
-                gameAccess.deleteGame(curr_game.gameName());
-                gameAccess.addGame(new_game);
+            if(currGame.whiteUsername() == null) {
+                String currUser = authAccess.getUserByAuth(token);
+                GameData newGame = new GameData(currGame.gameID(), currUser, currGame.blackUsername(), currGame.gameName(), currGame.game());
+                gameAccess.deleteGame(currGame.gameName());
+                gameAccess.addGame(newGame);
                 return new JoinGameResult();
             } else {
                 throw new UnauthorizedException("Error: unauthorized");
             }
         } else if(Objects.equals(request.playerColor(), "BLACK")) {
-            if(curr_game.blackUsername() == null) {
-                String curr_user = authAccess.getUserByAuth(token);
-                GameData new_game = new GameData(curr_game.gameID(), curr_game.whiteUsername(), curr_user, curr_game.gameName(), curr_game.game());
-                gameAccess.deleteGame(curr_game.gameName());
-                gameAccess.addGame(new_game);
+            if(currGame.blackUsername() == null) {
+                String currUser = authAccess.getUserByAuth(token);
+                GameData newGame = new GameData(currGame.gameID(), currGame.whiteUsername(), currUser, currGame.gameName(), currGame.game());
+                gameAccess.deleteGame(currGame.gameName());
+                gameAccess.addGame(newGame);
                 return new JoinGameResult();
             }
         } else {

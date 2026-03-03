@@ -6,13 +6,11 @@ import java.util.List;
 
 public interface GameDAO {
 
-    void GameDAO();
-
     int createNewGame(String gameName);
     void addGame(GameData game);
 
     GameData getGameByName(String gameName);
-    GameData getGameByID(int ID);
+    GameData getGameByID(int id);
     List<GameData> listGames();
 
     void deleteGame(String gameName);

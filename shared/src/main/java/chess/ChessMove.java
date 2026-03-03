@@ -9,11 +9,11 @@ import java.util.Objects;
  * signature of the existing methods.
  */
 public class ChessMove {
-    ChessPosition startPosition;
-    ChessPosition endPosition;
+    ChessMove startPosition;
+    ChessMove endPosition;
     ChessPiece.PieceType promotionPiece;
 
-    public ChessMove(ChessPosition startPosition, ChessPosition endPosition,
+    public ChessMove(ChessMove startPosition, ChessMove endPosition,
                      ChessPiece.PieceType promotionPiece) {
         this.startPosition = startPosition;
         this.endPosition = endPosition;
@@ -23,14 +23,14 @@ public class ChessMove {
     /**
      * @return ChessPosition of starting location
      */
-    public ChessPosition getStartPosition() {
+    public ChessMove getStartPosition() {
         return startPosition;
     }
 
     /**
      * @return ChessPosition of ending location
      */
-    public ChessPosition getEndPosition() {
+    public ChessMove getEndPosition() {
         return endPosition;
     }
 
@@ -50,7 +50,9 @@ public class ChessMove {
             return false;
         }
         ChessMove chessMove = (ChessMove) o;
-        return Objects.equals(startPosition, chessMove.startPosition) && Objects.equals(endPosition, chessMove.endPosition) && promotionPiece == chessMove.promotionPiece;
+        boolean correctStart = Objects.equals(startPosition, chessMove.startPosition);
+        boolean correctEnd = Objects.equals(endPosition, chessMove.endPosition);
+        return correctStart  && correctEnd && promotionPiece == chessMove.promotionPiece;
     }
 
     @Override

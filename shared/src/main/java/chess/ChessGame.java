@@ -13,54 +13,36 @@ import java.util.Objects;
 public class ChessGame {
     TeamColor teamTurn;
     ChessBoard board;
-    ChessBoard board_copy;
+    ChessBoard boardCopy;
 
     public ChessGame() {
         teamTurn = TeamColor.WHITE;
         board = new ChessBoard();
         board.resetBoard();
-        board_copy = board.clone();
+        boardCopy = board.clone();
     }
 
-    /**
-     * @return Which team's turn it is
-     */
     public TeamColor getTeamTurn() {
         return teamTurn;
     }
 
-    /**
-     * Set's which teams turn it is
-     *
-     * @param team the team whose turn it is
-     */
     public void setTeamTurn(TeamColor team) {
         teamTurn = team;
     }
 
-    /**
-     * Enum identifying the 2 possible teams in a chess game
-     */
     public enum TeamColor {
         WHITE,
         BLACK
     }
 
-    /**
-     * Gets a valid moves for a piece at the given location
-     *
-     * @param startPosition the piece to get valid moves for
-     * @return Set of valid moves for requested piece, or null if no piece at
-     * startPosition
-     */
-    public Collection<ChessMove> validMoves(ChessPosition startPosition) {
+    public Collection<ChessMove> validMoves(ChessMove startPosition) {
         Collection<ChessMove> moves = new ArrayList<>();
         if(board.getPiece(startPosition) == null){
             return moves;
         }
         Collection<ChessMove> possibilities = ChessPiece.pieceMoves(board, startPosition);
         for(ChessMove poss: possibilities){
-            board_copy = board.clone();
+            boardCopy = board.clone();
             movePiece(poss);
             if(!isInCheck(board.getPiece(startPosition).getTeamColor())){
                 moves.add(new ChessMove(poss.getStartPosition(), poss.getEndPosition(), poss.getPromotionPiece()));
@@ -70,24 +52,14 @@ public class ChessGame {
         return moves;
     }
 
-    /**
-     * Adds a piece to board_copy at indicated move
-     * @param move ChessMove
-     */
     public void movePiece(ChessMove move) {
-        ChessPiece curr_piece = board.getPiece(move.getStartPosition());
-        ChessPosition this_pos = new ChessPosition(move.getEndPosition().getRow(), move.getEndPosition().getColumn());
-        ChessPiece add_this = new ChessPiece(curr_piece.getTeamColor(), curr_piece.getPieceType());
-        board_copy.addPiece(move.getStartPosition(), null);
-        board_copy.addPiece(this_pos, add_this);
+        ChessPiece currPiece = board.getPiece(move.getStartPosition());
+        ChessMove thisPos = new ChessPosition(move.getEndPosition().getRow(), move.getEndPosition().getColumn());
+        ChessPiece addThis = new ChessPiece(currPiece.getTeamColor(), currPiece.getPieceType());
+        boardCopy.addPiece(move.getStartPosition(), null);
+        boardCopy.addPiece(thisPos, addThis);
     }
 
-    /**
-     * Makes a move in a chess game
-     *
-     * @param move chess move to perform
-     * @throws InvalidMoveException if move is invalid
-     */
     public void makeMove(ChessMove move) throws InvalidMoveException {
         ChessPiece piece = board.getPiece(move.getStartPosition());
         if(piece == null){
@@ -96,19 +68,19 @@ public class ChessGame {
         if(piece.getTeamColor() != teamTurn){
             throw new InvalidMoveException();
         }
-        Collection<ChessMove> valid_moves = validMoves(move.getStartPosition());
-        if(!valid_moves.contains(move)){
+        Collection<ChessMove> validMoves = validMoves(move.getStartPosition());
+        if(!validMoves.contains(move)){
             throw new InvalidMoveException();
         }
         if(!isInCheck(teamTurn)){
-            ChessPosition curr_pos = move.getStartPosition();
-            ChessPosition this_pos = new ChessPosition(move.getEndPosition().getRow(), move.getEndPosition().getColumn());
-            ChessPiece add_this = new ChessPiece(board.getPiece(curr_pos).getTeamColor(), board.getPiece(curr_pos).getPieceType());
+            ChessMove currPos = move.getStartPosition();
+            ChessMove thisPos = new ChessPosition(move.getEndPosition().getRow(), move.getEndPosition().getColumn());
+            ChessPiece addThis = new ChessPiece(board.getPiece(currPos).getTeamColor(), board.getPiece(currPos).getPieceType());
             if(move.getPromotionPiece() != null){
-                add_this = new ChessPiece(board.getPiece(curr_pos).getTeamColor(), move.getPromotionPiece());
+                addThis = new ChessPiece(board.getPiece(currPos).getTeamColor(), move.getPromotionPiece());
             }
             board.addPiece(move.getStartPosition(), null);
-            board.addPiece(this_pos, add_this);
+            board.addPiece(thisPos, addThis);
         } else {
             throw new InvalidMoveException();
         }
@@ -119,22 +91,16 @@ public class ChessGame {
         }
     }
 
-    /**
-     * Determines if the given team is in check
-     *
-     * @param teamColor which team to check for check
-     * @return True if the specified team is in check
-     */
     public boolean isInCheck(TeamColor teamColor) {
         Collection<ChessMove> opponentMoves = new ArrayList<>();
         for(int r = 1; r <= 8; r++){
             for(int c = 1; c <= 8; c++){
                 // check if there is a piece and if that piece is the correct color
-                if(board_copy.getPiece(new ChessPosition(r, c)) != null && board_copy.getPiece(new ChessPosition(r, c)).getTeamColor() != teamColor){
-                    opponentMoves = ChessPiece.pieceMoves(board_copy, new ChessPosition(r, c));
+                if(boardCopy.getPiece(new ChessPosition(r, c)) != null && boardCopy.getPiece(new ChessPosition(r, c)).getTeamColor() != teamColor){
+                    opponentMoves = ChessPiece.pieceMoves(boardCopy, new ChessPosition(r, c));
                 }
                 for(ChessMove move: opponentMoves){
-                    ChessPiece target = board_copy.getPiece(move.getEndPosition());
+                    ChessPiece target = boardCopy.getPiece(move.getEndPosition());
                     if(target != null && target.getTeamColor() == teamColor && target.getPieceType() == ChessPiece.PieceType.KING){
                         return true;
                     }
@@ -145,38 +111,27 @@ public class ChessGame {
         return false;
     }
 
-    /**
-     * Determines if the given team is in checkmate
-     *
-     * @param teamColor which team to check for checkmate
-     * @return True if the specified team is in checkmate
-     */
     public boolean isInCheckmate(TeamColor teamColor) {
         if(!isInCheck(teamColor)){
             return false;
         }
-        Collection<ChessPosition> my_positions = getPositions(teamColor);
-        for(ChessPosition position: my_positions){
-            Collection<ChessMove> valid_moves = validMoves(position);
-            if(valid_moves.size() > 0){
+        Collection<ChessMove> myPositions = getPositions(teamColor);
+        for(ChessMove position: myPositions){
+            Collection<ChessMove> validMoves = validMoves(position);
+            if(validMoves.size() > 0){
                 return false;
             }
         }
         return true;
     }
 
-    /**
-     * returns the piece positions of giden teamColor
-     * @param teamColor TeamColor
-     * @return a collection of the team color's positions
-     */
-    public Collection<ChessPosition> getPositions(TeamColor teamColor){
-        ChessBoard board_copy = board.clone();
-        Collection<ChessPosition> myPositions = new ArrayList<>();
+    public Collection<ChessMove> getPositions(TeamColor teamColor){
+        ChessBoard boardCopy = board.clone();
+        Collection<ChessMove> myPositions = new ArrayList<>();
         for(int r = 1; r <= 8; r++){
             for(int c = 1; c <= 8; c++){
-                if(board_copy.getPiece(new ChessPosition(r, c)) != null){
-                    if(board_copy.getPiece(new ChessPosition(r, c)).getTeamColor() == teamColor) {
+                if(boardCopy.getPiece(new ChessPosition(r, c)) != null){
+                    if(boardCopy.getPiece(new ChessPosition(r, c)).getTeamColor() == teamColor) {
                         myPositions.add(new ChessPosition(r, c));
                     }
                 }
@@ -185,42 +140,25 @@ public class ChessGame {
         return myPositions;
     }
 
-    /**
-     * Determines if the given team is in stalemate, which here is defined as having
-     * no valid moves while not in check.
-     *
-     * @param teamColor which team to check for stalemate
-     * @return True if the specified team is in stalemate, otherwise false
-     */
     public boolean isInStalemate(TeamColor teamColor) {
         if(isInCheck(teamColor)){
             return false;
         }
-        Collection<ChessPosition> myPositions = getPositions(teamColor);
-        for(ChessPosition pos: myPositions){
-            Collection<ChessMove> valid_moves = validMoves(pos);
-            if(!valid_moves.isEmpty()){
+        Collection<ChessMove> myPositions = getPositions(teamColor);
+        for(ChessMove pos: myPositions){
+            Collection<ChessMove> validMoves = validMoves(pos);
+            if(!validMoves.isEmpty()){
                 return false;
             }
         }
         return true;
     }
 
-    /**
-     * Sets this game's chessboard with a given board
-     *
-     * @param board the new board to use
-     */
     public void setBoard(ChessBoard board) {
         this.board = board;
-        board_copy = board.clone();
+        boardCopy = board.clone();
     }
 
-    /**
-     * Gets the current chessboard
-     *
-     * @return the chessboard
-     */
     public ChessBoard getBoard() {
         return board;
     }
@@ -231,12 +169,12 @@ public class ChessGame {
             return false;
         }
         ChessGame chessGame = (ChessGame) o;
-        return teamTurn == chessGame.teamTurn && Objects.equals(board, chessGame.board) && Objects.equals(board_copy, chessGame.board_copy);
+        return teamTurn == chessGame.teamTurn && Objects.equals(board, chessGame.board) && Objects.equals(boardCopy, chessGame.boardCopy);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(teamTurn, board, board_copy);
+        return Objects.hash(teamTurn, board, boardCopy);
     }
 
     @Override

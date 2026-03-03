@@ -47,9 +47,9 @@ public class Server {
 
     private void register(Context ctx) {
         try{
-            RegisterRequest register_request = serializer.fromJson(ctx.body(), RegisterRequest.class);
-            RegisterResult register_result = service.register(register_request);
-            ctx.result(serializer.toJson(register_result));
+            RegisterRequest registerRequest = serializer.fromJson(ctx.body(), RegisterRequest.class);
+            RegisterResult registerResult = service.register(registerRequest);
+            ctx.result(serializer.toJson(registerResult));
         } catch (ServiceException e) {
             serviceExceptionHandler(ctx, e);
         }
@@ -57,9 +57,9 @@ public class Server {
 
     private void login(Context ctx) {
         try{
-            LoginRequest login_request = serializer.fromJson(ctx.body(), LoginRequest.class);
-            LoginResult login_result = service.login(login_request);
-            ctx.result(serializer.toJson(login_result));
+            LoginRequest loginRequest = serializer.fromJson(ctx.body(), LoginRequest.class);
+            LoginResult loginResult = service.login(loginRequest);
+            ctx.result(serializer.toJson(loginResult));
         } catch (ServiceException e){
             serviceExceptionHandler(ctx, e);
         }
@@ -68,8 +68,8 @@ public class Server {
     private void logout(Context ctx) {
         try{
             String authToken = ctx.header("Authorization");
-            LogoutResult logout_result = service.logout(authToken);
-            ctx.result(serializer.toJson(logout_result));
+            LogoutResult logoutResult = service.logout(authToken);
+            ctx.result(serializer.toJson(logoutResult));
         } catch (ServiceException e){
             serviceExceptionHandler(ctx, e);
         }
@@ -78,9 +78,9 @@ public class Server {
     private void createGame(Context ctx){
         try {
             String authToken = ctx.header("Authorization");
-            NewGameRequest game_request = serializer.fromJson(ctx.body(), NewGameRequest.class);
-            NewGameResult game_result = service.createGame(game_request, authToken);
-            ctx.result(serializer.toJson(game_result));
+            NewGameRequest gameRequest = serializer.fromJson(ctx.body(), NewGameRequest.class);
+            NewGameResult gameResult = service.createGame(gameRequest, authToken);
+            ctx.result(serializer.toJson(gameResult));
         } catch (ServiceException e) {
             serviceExceptionHandler(ctx, e);
         }
@@ -89,8 +89,8 @@ public class Server {
     private void listGames(Context ctx){
         try{
             String authToken = ctx.header("Authorization");
-            ListGamesResult list_games_result = service.listGames(authToken);
-            ctx.result(serializer.toJson(list_games_result));
+            ListGamesResult listGamesResult = service.listGames(authToken);
+            ctx.result(serializer.toJson(listGamesResult));
         } catch (ServiceException e) {
             serviceExceptionHandler(ctx, e);
         }
@@ -99,9 +99,9 @@ public class Server {
     private void joinGame(Context ctx) {
         try{
             String authToken = ctx.header("Authorization");
-            JoinGameRequest join_request = serializer.fromJson(ctx.body(), JoinGameRequest.class);
-            JoinGameResult join_result = service.joinGame(join_request, authToken);
-            ctx.result(serializer.toJson(join_result));
+            JoinGameRequest joinRequest = serializer.fromJson(ctx.body(), JoinGameRequest.class);
+            JoinGameResult joinResult = service.joinGame(joinRequest, authToken);
+            ctx.result(serializer.toJson(joinResult));
         } catch (ServiceException e) {
             serviceExceptionHandler(ctx, e);
         }
@@ -109,8 +109,8 @@ public class Server {
 
     private void clear(Context ctx) {
         String authToken = ctx.header("Authorization");
-        DeleteResult delete_result = service.deleteAll(authToken);
-        ctx.result(serializer.toJson(delete_result));
+        DeleteResult deleteResult = service.deleteAll(authToken);
+        ctx.result(serializer.toJson(deleteResult));
         ctx.status(200);
 
     }
