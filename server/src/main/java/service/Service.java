@@ -21,9 +21,9 @@ import java.util.Objects;
 
 public class Service {
 
-    final UserDAO userAccess = new MemoryUserDAO();
-    final AuthDAO authAccess = new MemoryAuthDAO();
-    final GameDAO gameAccess = new MemoryGameDAO();
+    final UserDAO userAccess = new SQLUserDAO();
+    final AuthDAO authAccess = new SQLAuthDAO();
+    final GameDAO gameAccess = new SQLGameDAO();
 
     public Service(){}
 
