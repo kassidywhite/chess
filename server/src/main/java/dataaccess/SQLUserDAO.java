@@ -1,9 +1,12 @@
 package dataaccess;
 
+import com.google.gson.Gson;
 import model.UserData;
 
 import javax.xml.crypto.Data;
 import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 
@@ -30,8 +33,7 @@ public class SQLUserDAO implements UserDAO {
                 `username` varchar(256) NOT NULL,
                 `password` varchar(256) NOT NULL,
                 `email` varchar(256) NOT NULL,
-               PRIMARY KEY (`username`),
-               INDEX(username)
+               PRIMARY KEY (`username`)
             )
             """
     };
@@ -59,6 +61,23 @@ public class SQLUserDAO implements UserDAO {
 
     @Override
     public UserData getUser(String username) {
+        try (Connection conn = DatabaseManager.getConnection()){
+            var statement = "SELECT username, password, email FROM users WHERE username = ?";
+            try (PreparedStatement ps = conn.prepareStatement(statement)){
+                ps.setString(1, username);
+                try(ResultSet rs = ps.executeQuery()) {
+                    if (!rs.next()){
+                        return null;
+                    }
+                    String name = rs.getString("username");
+                    if(name.equals(username)){
+                        return new UserData(rs.getString("username"), rs.getString("password"), rs.getString("email"));
+                    }
+                }
+            }
+        } catch (DataAccessException | SQLException e) {
+            throw new RuntimeException();
+        }
         return null;
     }
 

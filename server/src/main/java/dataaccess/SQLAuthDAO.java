@@ -58,12 +58,46 @@ public class SQLAuthDAO implements AuthDAO {
 
     @Override
     public String getAuthByUser(String username) {
-        return "";
+        try (Connection conn = DatabaseManager.getConnection()){
+            var statement = "SELECT authToken, username FROM tokens WHERE username = ?";
+            try (PreparedStatement ps = conn.prepareStatement(statement)) {
+                ps.setString(1, username);
+                try(ResultSet rs = ps.executeQuery()) {
+                    if (!rs.next()){
+                        return null;
+                    }
+                    String name = rs.getString("username");
+                    if(name.equals(username)){
+                        return rs.getString("authToken");
+                    }
+                }
+            }
+        } catch (SQLException | DataAccessException e) {
+            throw new RuntimeException(e);
+        }
+        return null;
     }
 
     @Override
     public String getUserByAuth(String token) {
-        return "";
+        try (Connection conn = DatabaseManager.getConnection()){
+            var statement = "SELECT authToken, username FROM tokens WHERE username = ?";
+            try (PreparedStatement ps = conn.prepareStatement(statement)) {
+                ps.setString(1, token);
+                try(ResultSet rs = ps.executeQuery()) {
+                    if (!rs.next()){
+                        return null;
+                    }
+                    String auth = rs.getString("authToken");
+                    if(auth.equals(token)){
+                        return rs.getString("username");
+                    }
+                }
+            }
+        } catch (SQLException | DataAccessException e) {
+            throw new RuntimeException(e);
+        }
+        return null;
     }
 
     @Override
@@ -82,26 +116,4 @@ public class SQLAuthDAO implements AuthDAO {
         }
     }
 
-    private int executeUpdate(String statement, Object... params){
-        try (Connection conn = DatabaseManager.getConnection()){
-            try (PreparedStatement ps = conn.prepareStatement(statement, RETURN_GENERATED_KEYS)) {
-                for (int i = 0; i < params.length; i++) {
-                    Object param = params[i];
-                    if (param instanceof String p) ps.setString(i + 1, p);
-                    else if (param instanceof Integer p) ps.setInt(i + 1, p);
-                    else if (param == null) ps.setNull(i + 1, NULL);
-                }
-                ps.executeUpdate();
-
-                ResultSet rs = ps.getGeneratedKeys();
-                if (rs.next()) {
-                    return rs.getInt(1);
-                }
-
-                return 0;
-            }
-        } catch (SQLException | DataAccessException e) {
-            throw new RuntimeException(e);
-        }
-    }
 }
