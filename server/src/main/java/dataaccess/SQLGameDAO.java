@@ -68,6 +68,12 @@ public class SQLGameDAO implements GameDAO {
 
     @Override
     public void deleteAllGames() {
-
+        var statement = "DROP TABLE games";
+        try (Connection conn = DatabaseManager.getConnection()){
+            var preparedStatement = conn.prepareStatement(statement);
+            preparedStatement.executeUpdate();
+        } catch (SQLException | DataAccessException e) {
+            throw new RuntimeException(e);
+        }
     }
 }

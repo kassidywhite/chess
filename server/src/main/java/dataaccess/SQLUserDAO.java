@@ -38,7 +38,18 @@ public class SQLUserDAO implements UserDAO {
 
     @Override
     public void addUser(UserData data) {
+        var statement = "INSERT INTO users (username, password, email) VALUES (?, ?, ?)";
+        try (Connection conn = DatabaseManager.getConnection()){
+            var preparedStatement = conn.prepareStatement(statement);
+            preparedStatement.setString(1, data.username());
+            preparedStatement.setString(2, data.password());
+            preparedStatement.setString(3, data.email());
 
+            preparedStatement.executeUpdate();
+
+        } catch (DataAccessException | SQLException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     @Override
@@ -53,6 +64,12 @@ public class SQLUserDAO implements UserDAO {
 
     @Override
     public void deleteAllUsers() {
-
+        var statement = "DROP TABLE users";
+        try (Connection conn = DatabaseManager.getConnection()){
+            var preparedStatement = conn.prepareStatement(statement);
+            preparedStatement.executeUpdate();
+        } catch (SQLException | DataAccessException e) {
+            throw new RuntimeException(e);
+        }
     }
 }

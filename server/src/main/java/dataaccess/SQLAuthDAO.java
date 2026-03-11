@@ -41,9 +41,7 @@ public class SQLAuthDAO implements AuthDAO {
 
     @Override
     public void addAuth(AuthData data) {
-        var statement = "INSERT INTO tokens (authToken, username) VALUE (?, ?)";
-        String json = new Gson().toJson(data);
-        executeUpdate(data.authToken(), data.username());
+        var statement = "INSERT INTO tokens (authToken, username) VALUES (?, ?)";
         try (Connection conn = DatabaseManager.getConnection()){
             var preparedStatement = conn.prepareStatement(statement);
             preparedStatement.setString(1, data.authToken());
@@ -53,9 +51,7 @@ public class SQLAuthDAO implements AuthDAO {
             preparedStatement.executeUpdate();
             // select statement would be executeQuery ^^
 
-        } catch (DataAccessException e) {
-            throw new RuntimeException(e);
-        } catch (SQLException e) {
+        } catch (DataAccessException | SQLException e) {
             throw new RuntimeException(e);
         }
     }
@@ -77,7 +73,13 @@ public class SQLAuthDAO implements AuthDAO {
 
     @Override
     public void deleteAllAuth() {
-
+        var statement = "DROP TABLE tokens";
+        try (Connection conn = DatabaseManager.getConnection()){
+            var preparedStatement = conn.prepareStatement(statement);
+            preparedStatement.executeUpdate();
+        } catch (SQLException | DataAccessException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     private int executeUpdate(String statement, Object... params){

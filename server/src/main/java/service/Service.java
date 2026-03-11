@@ -38,7 +38,6 @@ public class Service {
         AuthData authToken = new AuthData(request.username());
         userAccess.addUser(user);
         authAccess.addAuth(authToken);
-        authAccess.addAuth(authToken);
         return new RegisterResult(user.username(), authToken.authToken());
     }
 
