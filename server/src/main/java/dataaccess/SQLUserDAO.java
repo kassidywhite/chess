@@ -48,7 +48,7 @@ public class SQLUserDAO implements UserDAO {
             preparedStatement.executeUpdate();
 
         } catch (DataAccessException | SQLException e) {
-            throw new RuntimeException(e);
+            throw new RuntimeException();
         }
     }
 
@@ -64,7 +64,7 @@ public class SQLUserDAO implements UserDAO {
 
     @Override
     public void deleteAllUsers() {
-        var statement = "DROP TABLE users";
+        var statement = "TRUNCATE TABLE users";
         try (Connection conn = DatabaseManager.getConnection()){
             var preparedStatement = conn.prepareStatement(statement);
             preparedStatement.executeUpdate();

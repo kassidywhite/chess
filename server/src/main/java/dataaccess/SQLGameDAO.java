@@ -68,7 +68,7 @@ public class SQLGameDAO implements GameDAO {
 
     @Override
     public void deleteAllGames() {
-        var statement = "DROP TABLE games";
+        var statement = "TRUNCATE TABLE games";
         try (Connection conn = DatabaseManager.getConnection()){
             var preparedStatement = conn.prepareStatement(statement);
             preparedStatement.executeUpdate();
