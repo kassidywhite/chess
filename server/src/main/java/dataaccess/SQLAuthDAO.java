@@ -47,9 +47,7 @@ public class SQLAuthDAO implements AuthDAO {
             preparedStatement.setString(1, data.authToken());
             preparedStatement.setString(2, data.username());
 
-            //this is where it executes
             preparedStatement.executeUpdate();
-            // select statement would be executeQuery ^^
 
         } catch (DataAccessException | SQLException e) {
             throw new RuntimeException(e);

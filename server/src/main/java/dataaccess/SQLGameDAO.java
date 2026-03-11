@@ -1,10 +1,16 @@
 package dataaccess;
 
+import chess.ChessGame;
+import com.google.gson.Gson;
 import model.GameData;
 
 import java.sql.Connection;
+import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Statement;
 import java.util.List;
+
+import static java.sql.Statement.RETURN_GENERATED_KEYS;
 
 public class SQLGameDAO implements GameDAO {
 
@@ -38,6 +44,23 @@ public class SQLGameDAO implements GameDAO {
 
     @Override
     public int createNewGame(String gameName) {
+        var statement = "INSERT INTO games (gameName, game) VALUES (?, ?)";
+        try (Connection conn = DatabaseManager.getConnection()){
+            var preparedStatement = conn.prepareStatement(statement, RETURN_GENERATED_KEYS);
+            ChessGame game = new ChessGame();
+            String json = new Gson().toJson(game);
+            preparedStatement.setString(1, gameName);
+            preparedStatement.setString(2, json);
+
+            preparedStatement.executeUpdate();
+
+            ResultSet rs = preparedStatement.getGeneratedKeys();
+            if(rs.next()) {
+                return rs.getInt(1);
+            }
+        } catch (DataAccessException | SQLException e) {
+            throw new RuntimeException(e);
+        }
         return 0;
     }
 
@@ -48,6 +71,11 @@ public class SQLGameDAO implements GameDAO {
 
     @Override
     public GameData getGameByName(String gameName) {
+        try (Connection conn = DatabaseManager.getConnection()){
+            var statement = "SELECT gameName, gameID, blackUsername, whiteUsername, game FROM games WHERE gameName = ?";
+        } catch (DataAccessException | SQLException e) {
+            throw new RuntimeException(e);
+        }
         return null;
     }
 
