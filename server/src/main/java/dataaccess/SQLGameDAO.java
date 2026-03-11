@@ -4,10 +4,7 @@ import chess.ChessGame;
 import com.google.gson.Gson;
 import model.GameData;
 
-import java.sql.Connection;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Statement;
+import java.sql.*;
 import java.util.List;
 
 import static java.sql.Statement.RETURN_GENERATED_KEYS;
@@ -66,7 +63,20 @@ public class SQLGameDAO implements GameDAO {
 
     @Override
     public void addGame(GameData game) {
+        var statement = "Insert INTO games (gameID, whiteUsername, blackUsername, gameName, game) VALUES (?, ?, ?, ?, ?)";
+        try (Connection conn = DatabaseManager.getConnection()){
+            var ps = conn.prepareStatement(statement);
+            String json = new Gson().toJson(game.game());
+            ps.setInt(1, game.gameID());
+            ps.setString(2, game.whiteUsername());
+            ps.setString(3, game.blackUsername());
+            ps.setString(4, game.gameName());
+            ps.setString(5, json);
 
+            ps.executeUpdate();
+        } catch (DataAccessException | SQLException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     @Override
@@ -91,7 +101,15 @@ public class SQLGameDAO implements GameDAO {
 
     @Override
     public void deleteGame(String gameName) {
-
+        var statement = "DELETE FROM games WHERE gameName = ?";
+        try (Connection conn = DatabaseManager.getConnection()){
+            try (PreparedStatement ps = conn.prepareStatement(statement)){
+                ps.setString(1, gameName);
+                ps.executeUpdate();
+            }
+        } catch (SQLException | DataAccessException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     @Override
