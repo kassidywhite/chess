@@ -8,10 +8,10 @@ import java.util.ArrayList;
 
 public interface UserDAO {
 
-    void addUser(UserData data);
+    void addUser(UserData data) throws DataAccessException;
 
-    ArrayList<UserData> listUsers();
-    UserData getUser(String username);
+    ArrayList<UserData> listUsers() throws DataAccessException;
+    UserData getUser(String username) throws DataAccessException;
 
-    void deleteAllUsers();
+    void deleteAllUsers() throws DataAccessException;
 }

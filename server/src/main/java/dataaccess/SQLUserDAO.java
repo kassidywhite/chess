@@ -39,23 +39,24 @@ public class SQLUserDAO implements UserDAO {
     };
 
     @Override
-    public void addUser(UserData data) {
+    public void addUser(UserData data) throws DataAccessException{
         var statement = "INSERT INTO users (username, password, email) VALUES (?, ?, ?)";
         try (Connection conn = DatabaseManager.getConnection()){
             var preparedStatement = conn.prepareStatement(statement);
+            String hashedPassword = BCrypt.hashpw(data.password(), BCrypt.gensalt());
             preparedStatement.setString(1, data.username());
-            preparedStatement.setString(2, data.password());
+            preparedStatement.setString(2, hashedPassword);
             preparedStatement.setString(3, data.email());
 
             preparedStatement.executeUpdate();
 
-        } catch (DataAccessException | SQLException e) {
-            throw new RuntimeException();
+        } catch (SQLException e) {
+            throw new DataAccessException("Internal Service Error");
         }
     }
 
     @Override
-    public ArrayList<UserData> listUsers() {
+    public ArrayList<UserData> listUsers() throws DataAccessException {
         ArrayList<UserData> result = new ArrayList<>();
         var statement = "SELECT * FROM users";
         try (Connection conn = DatabaseManager.getConnection()){
@@ -69,14 +70,14 @@ public class SQLUserDAO implements UserDAO {
                     }
                 }
             }
-        } catch (SQLException | DataAccessException e) {
-            throw new RuntimeException(e);
+        } catch (SQLException e) {
+            throw new DataAccessException("Internal Service Error");
         }
         return result;
     }
 
     @Override
-    public UserData getUser(String username) {
+    public UserData getUser(String username) throws DataAccessException {
         try (Connection conn = DatabaseManager.getConnection()){
             var statement = "SELECT username, password, email FROM users WHERE username = ?";
             try (PreparedStatement ps = conn.prepareStatement(statement)){
@@ -91,20 +92,20 @@ public class SQLUserDAO implements UserDAO {
                     }
                 }
             }
-        } catch (DataAccessException | SQLException e) {
-            throw new RuntimeException();
+        } catch (SQLException e) {
+            throw new DataAccessException("Internal Service Error");
         }
         return null;
     }
 
     @Override
-    public void deleteAllUsers() {
+    public void deleteAllUsers() throws DataAccessException {
         var statement = "TRUNCATE TABLE users";
         try (Connection conn = DatabaseManager.getConnection()){
             var preparedStatement = conn.prepareStatement(statement);
             preparedStatement.executeUpdate();
-        } catch (SQLException | DataAccessException e) {
-            throw new RuntimeException(e);
+        } catch (SQLException  e) {
+            throw new DataAccessException("Internal Service Error");
         }
     }
 }

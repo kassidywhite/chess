@@ -1,5 +1,6 @@
 package service;
 
+import dataaccess.DataAccessException;
 import dataaccess.MemoryAuthDAO;
 import dataaccess.MemoryGameDAO;
 import dataaccess.MemoryUserDAO;
@@ -167,7 +168,7 @@ class ServiceTest {
     }
 
     @Test
-    void joinGameNegative() {
+    void joinGameNegative() throws DataAccessException {
         Service service = new Service();
         try {
             createJennyAndDanny(service);
@@ -184,7 +185,7 @@ class ServiceTest {
     }
 
     @Test
-    void deleteAll() {
+    void deleteAll() throws DataAccessException {
         Service service = new Service();
         try {
             service.register(new RegisterRequest("Jenny", "jenny", "daniel@daniel.com"));

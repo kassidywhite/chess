@@ -40,7 +40,7 @@ public class SQLAuthDAO implements AuthDAO {
     };
 
     @Override
-    public void addAuth(AuthData data) {
+    public void addAuth(AuthData data) throws DataAccessException{
         var statement = "INSERT INTO tokens (authToken, username) VALUES (?, ?)";
         try (Connection conn = DatabaseManager.getConnection()){
             var preparedStatement = conn.prepareStatement(statement);
@@ -49,13 +49,13 @@ public class SQLAuthDAO implements AuthDAO {
 
             preparedStatement.executeUpdate();
 
-        } catch (DataAccessException | SQLException e) {
-            throw new RuntimeException(e);
+        } catch (SQLException e) {
+            throw new DataAccessException("Internal Service Error");
         }
     }
 
     @Override
-    public String getAuthByUser(String username) {
+    public String getAuthByUser(String username) throws DataAccessException {
         try (Connection conn = DatabaseManager.getConnection()){
             var statement = "SELECT authToken, username FROM tokens WHERE username = ?";
             try (PreparedStatement ps = conn.prepareStatement(statement)) {
@@ -70,14 +70,14 @@ public class SQLAuthDAO implements AuthDAO {
                     }
                 }
             }
-        } catch (SQLException | DataAccessException e) {
-            throw new RuntimeException(e);
+        } catch (SQLException e) {
+            throw new DataAccessException("Internal Service Error");
         }
         return null;
     }
 
     @Override
-    public String getUserByAuth(String token) {
+    public String getUserByAuth(String token) throws DataAccessException{
         try (Connection conn = DatabaseManager.getConnection()){
             var statement = "SELECT authToken, username FROM tokens WHERE authToken = ?";
             try (PreparedStatement ps = conn.prepareStatement(statement)) {
@@ -92,33 +92,33 @@ public class SQLAuthDAO implements AuthDAO {
                     }
                 }
             }
-        } catch (SQLException | DataAccessException e) {
-            throw new RuntimeException(e);
+        } catch (SQLException e) {
+            throw new DataAccessException("Internal Service Error");
         }
         return null;
     }
 
     @Override
-    public void deleteAuth(String token) {
+    public void deleteAuth(String token) throws DataAccessException{
         var statement = "DELETE FROM tokens WHERE authToken = ?";
         try (Connection conn = DatabaseManager.getConnection()){
             try (PreparedStatement ps = conn.prepareStatement(statement)){
                 ps.setString(1, token);
                 ps.executeUpdate();
             }
-        } catch (SQLException | DataAccessException e) {
-            throw new RuntimeException(e);
+        } catch (SQLException e) {
+            throw new DataAccessException("Internal Service Error");
         }
     }
 
     @Override
-    public void deleteAllAuth() {
+    public void deleteAllAuth() throws DataAccessException {
         var statement = "TRUNCATE TABLE tokens";
         try (Connection conn = DatabaseManager.getConnection()){
             var preparedStatement = conn.prepareStatement(statement);
             preparedStatement.executeUpdate();
-        } catch (SQLException | DataAccessException e) {
-            throw new RuntimeException(e);
+        } catch (SQLException e) {
+            throw new DataAccessException("Internal Service Error");
         }
     }
 

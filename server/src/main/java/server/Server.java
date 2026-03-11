@@ -1,5 +1,6 @@
 package server;
 
+import dataaccess.DataAccessException;
 import io.javalin.*;
 import io.javalin.http.Context;
 import com.google.gson.Gson;
@@ -108,10 +109,14 @@ public class Server {
     }
 
     private void clear(Context ctx) {
-        String authToken = ctx.header("Authorization");
-        DeleteResult deleteResult = service.deleteAll(authToken);
-        ctx.result(serializer.toJson(deleteResult));
-        ctx.status(200);
+        try {
+            String authToken = ctx.header("Authorization");
+            DeleteResult deleteResult = service.deleteAll(authToken);
+            ctx.result(serializer.toJson(deleteResult));
+            ctx.status(200);
+        } catch (ServiceException e) {
+            serviceExceptionHandler(ctx, e);
+        }
 
     }
 

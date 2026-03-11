@@ -8,11 +8,11 @@ import java.util.ArrayList;
 
 public interface AuthDAO {
 
-    void addAuth(AuthData data);
+    void addAuth(AuthData data) throws DataAccessException;
 
-    String getAuthByUser(String username);
-    String getUserByAuth(String token);
+    String getAuthByUser(String username) throws DataAccessException;
+    String getUserByAuth(String token) throws DataAccessException;
 
-    void deleteAuth(String token);
-    void deleteAllAuth();
+    void deleteAuth(String token) throws DataAccessException;
+    void deleteAllAuth() throws DataAccessException;
 }

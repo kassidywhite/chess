@@ -42,7 +42,7 @@ public class SQLGameDAO implements GameDAO {
     };
 
     @Override
-    public int createNewGame(String gameName) {
+    public int createNewGame(String gameName) throws DataAccessException {
         var statement = "INSERT INTO games (gameName, game) VALUES (?, ?)";
         try (Connection conn = DatabaseManager.getConnection()){
             var preparedStatement = conn.prepareStatement(statement, RETURN_GENERATED_KEYS);
@@ -57,14 +57,14 @@ public class SQLGameDAO implements GameDAO {
             if(rs.next()) {
                 return rs.getInt(1);
             }
-        } catch (DataAccessException | SQLException e) {
-            throw new RuntimeException(e);
+        } catch (SQLException e) {
+            throw new DataAccessException("Internal Service Error");
         }
         return 0;
     }
 
     @Override
-    public void addGame(GameData game) {
+    public void addGame(GameData game) throws DataAccessException {
         var statement = "INSERT INTO games (gameID, whiteUsername, blackUsername, gameName, game) VALUES (?, ?, ?, ?, ?)";
         try (Connection conn = DatabaseManager.getConnection()){
             var ps = conn.prepareStatement(statement);
@@ -76,23 +76,23 @@ public class SQLGameDAO implements GameDAO {
             ps.setString(5, json);
 
             ps.executeUpdate();
-        } catch (DataAccessException | SQLException e) {
-            throw new RuntimeException(e);
+        } catch (SQLException e) {
+            throw new DataAccessException("Internal Service Error");
         }
     }
 
     @Override
-    public GameData getGameByName(String gameName) {
+    public GameData getGameByName(String gameName) throws DataAccessException {
         try (Connection conn = DatabaseManager.getConnection()){
             var statement = "SELECT gameName, gameID, blackUsername, whiteUsername, game FROM games WHERE gameName = ?";
-        } catch (DataAccessException | SQLException e) {
-            throw new RuntimeException(e);
+        } catch (SQLException e) {
+            throw new DataAccessException("Internal Service Error");
         }
         return null;
     }
 
     @Override
-    public GameData getGameByID(int id) {
+    public GameData getGameByID(int id) throws DataAccessException {
         try (Connection conn = DatabaseManager.getConnection()){
             var statement = "SELECT gameName, gameID, blackUsername, whiteUsername, game FROM games WHERE gameID = ?";
             try (PreparedStatement ps = conn.prepareStatement(statement)) {
@@ -112,14 +112,14 @@ public class SQLGameDAO implements GameDAO {
                     }
                 }
             }
-        } catch (SQLException | DataAccessException e) {
-            throw new RuntimeException(e);
+        } catch (SQLException e) {
+            throw new DataAccessException("Internal Service Error");
         }
         return null;
     }
 
     @Override
-    public List<GameData> listGames() {
+    public List<GameData> listGames() throws DataAccessException {
         List<GameData> result = new ArrayList<>();
         var statement = "SELECT * FROM games";
         try (Connection conn = DatabaseManager.getConnection()){
@@ -134,24 +134,24 @@ public class SQLGameDAO implements GameDAO {
                         ChessGame game = new Gson().fromJson(gameAsString, ChessGame.class);
                         result.add(new GameData(gameID, whiteUser, blackUser, name, game));
                     }
+                    return result;
                 }
             }
-        } catch (SQLException | DataAccessException e) {
-            throw new RuntimeException(e);
+        } catch (SQLException e) {
+            throw new DataAccessException("Internal Service Error");
         }
-        return result;
     }
 
     @Override
-    public void deleteGame(String gameName) {
+    public void deleteGame(String gameName) throws DataAccessException {
         var statement = "DELETE FROM games WHERE gameName = ?";
         try (Connection conn = DatabaseManager.getConnection()){
             try (PreparedStatement ps = conn.prepareStatement(statement)){
                 ps.setString(1, gameName);
                 ps.executeUpdate();
             }
-        } catch (SQLException | DataAccessException e) {
-            throw new RuntimeException(e);
+        } catch (SQLException e) {
+            throw new DataAccessException("Internal Service Error");
         }
     }
 
