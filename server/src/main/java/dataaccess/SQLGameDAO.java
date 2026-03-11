@@ -4,7 +4,9 @@ import chess.ChessGame;
 import com.google.gson.Gson;
 import model.GameData;
 
+import javax.xml.crypto.Data;
 import java.sql.*;
+import java.util.ArrayList;
 import java.util.List;
 
 import static java.sql.Statement.RETURN_GENERATED_KEYS;
@@ -63,7 +65,7 @@ public class SQLGameDAO implements GameDAO {
 
     @Override
     public void addGame(GameData game) {
-        var statement = "Insert INTO games (gameID, whiteUsername, blackUsername, gameName, game) VALUES (?, ?, ?, ?, ?)";
+        var statement = "INSERT INTO games (gameID, whiteUsername, blackUsername, gameName, game) VALUES (?, ?, ?, ?, ?)";
         try (Connection conn = DatabaseManager.getConnection()){
             var ps = conn.prepareStatement(statement);
             String json = new Gson().toJson(game.game());
@@ -91,12 +93,53 @@ public class SQLGameDAO implements GameDAO {
 
     @Override
     public GameData getGameByID(int id) {
+        try (Connection conn = DatabaseManager.getConnection()){
+            var statement = "SELECT gameName, gameID, blackUsername, whiteUsername, game FROM games WHERE gameID = ?";
+            try (PreparedStatement ps = conn.prepareStatement(statement)) {
+                ps.setInt(1, id);
+                try(ResultSet rs = ps.executeQuery()) {
+                    if (!rs.next()){
+                        return null;
+                    }
+                    var gameID = rs.getInt("gameID");
+                    var whiteUser = rs.getString("whiteUsername");
+                    var blackUser = rs.getString("blackUsername");
+                    var name = rs.getString("gameName");
+                    var gameAsString = rs.getString("game");
+                    ChessGame game = new Gson().fromJson(gameAsString, ChessGame.class);
+                    if(gameID == id){
+                        return new GameData(gameID, whiteUser, blackUser, name, game);
+                    }
+                }
+            }
+        } catch (SQLException | DataAccessException e) {
+            throw new RuntimeException(e);
+        }
         return null;
     }
 
     @Override
     public List<GameData> listGames() {
-        return List.of();
+        List<GameData> result = new ArrayList<>();
+        var statement = "SELECT * FROM games";
+        try (Connection conn = DatabaseManager.getConnection()){
+            try (PreparedStatement ps = conn.prepareStatement(statement)){
+                try(ResultSet rs = ps.executeQuery()) {
+                    while(rs.next()){
+                        var gameID = rs.getInt("gameID");
+                        var whiteUser = rs.getString("whiteUsername");
+                        var blackUser = rs.getString("blackUsername");
+                        var name = rs.getString("gameName");
+                        var gameAsString = rs.getString("game");
+                        ChessGame game = new Gson().fromJson(gameAsString, ChessGame.class);
+                        result.add(new GameData(gameID, whiteUser, blackUser, name, game));
+                    }
+                }
+            }
+        } catch (SQLException | DataAccessException e) {
+            throw new RuntimeException(e);
+        }
+        return result;
     }
 
     @Override

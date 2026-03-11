@@ -1,13 +1,13 @@
 package dataaccess;
 
+import chess.ChessGame;
 import com.google.gson.Gson;
+import model.GameData;
 import model.UserData;
+import org.mindrot.jbcrypt.BCrypt;
 
 import javax.xml.crypto.Data;
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
+import java.sql.*;
 import java.util.ArrayList;
 
 public class SQLUserDAO implements UserDAO {
@@ -56,7 +56,23 @@ public class SQLUserDAO implements UserDAO {
 
     @Override
     public ArrayList<UserData> listUsers() {
-        return null;
+        ArrayList<UserData> result = new ArrayList<>();
+        var statement = "SELECT * FROM users";
+        try (Connection conn = DatabaseManager.getConnection()){
+            try (PreparedStatement ps = conn.prepareStatement(statement)){
+                try(ResultSet rs = ps.executeQuery()) {
+                    while(rs.next()){
+                        var name = rs.getString("username");
+                        var pass = rs.getString("password");
+                        var email = rs.getString("email");
+                        result.add(new UserData(name, pass, email));
+                    }
+                }
+            }
+        } catch (SQLException | DataAccessException e) {
+            throw new RuntimeException(e);
+        }
+        return result;
     }
 
     @Override
