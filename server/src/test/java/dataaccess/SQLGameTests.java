@@ -6,10 +6,11 @@ import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.*;
 
 class SQLGameTests {
+    GameDAO gameAccess = new SQLGameDAO();
 
     @Test
     void createNewGamePositive() {
-        GameDAO gameAccess = new SQLGameDAO();
+
 
     }
 

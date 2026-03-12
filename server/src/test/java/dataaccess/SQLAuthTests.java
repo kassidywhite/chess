@@ -61,15 +61,32 @@ class SQLAuthTests {
 
     @Test
     void deleteAuthPositive() throws DataAccessException {
-
+        AuthData auth = new AuthData("penelope");
+        tokens.addAuth(auth);
+        String token = auth.authToken();
+        tokens.deleteAuth(token);
+        assert tokens.getAuthByUser("penelope") == null;
     }
 
     @Test
     void deleteAuthNegative() throws DataAccessException {
-
+        AuthData auth = new AuthData("jerod");
+        tokens.addAuth(auth);
+        String token = auth.authToken();
+        tokens.deleteAuth("123456");
+        assert !tokens.getAuthByUser("jerod").isEmpty();
     }
 
     @Test
     void deleteAllAuth() throws DataAccessException {
+        tokens.addAuth(new AuthData("I want cookies"));
+        tokens.addAuth(new AuthData("C"));
+        tokens.addAuth(new AuthData("O"));
+        tokens.addAuth(new AuthData("O"));
+        tokens.addAuth(new AuthData("K"));
+        tokens.addAuth(new AuthData("I"));
+        tokens.addAuth(new AuthData("E"));
+        tokens.deleteAllAuth();
+        assert tokens.getAuthByUser("I want cookies") == null;
     }
 }
