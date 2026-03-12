@@ -4,6 +4,7 @@ import chess.ChessGame;
 import model.GameData;
 import model.UserData;
 import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -11,8 +12,8 @@ import static org.junit.jupiter.api.Assertions.*;
 class SQLGameTests {
     static GameDAO games = new SQLGameDAO();
 
-    @BeforeAll
-    static void beforeAll() {
+    @BeforeEach
+    void setUp() {
         games.deleteAllGames();
     }
 

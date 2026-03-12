@@ -10,8 +10,8 @@ import static org.junit.jupiter.api.Assertions.*;
 class SQLUserTests {
     static UserDAO users = new SQLUserDAO();
 
-    @BeforeAll
-    static void beforeAll() throws DataAccessException {
+    @BeforeEach
+    void setUp() throws DataAccessException {
         users.deleteAllUsers();
     }
 
