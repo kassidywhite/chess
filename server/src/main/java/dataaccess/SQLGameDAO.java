@@ -16,10 +16,10 @@ public class SQLGameDAO implements GameDAO {
     public SQLGameDAO() {
         try {
             DatabaseManager.createDatabase();
-            Connection conn = DatabaseManager.getConnection();
-            try (conn){
+            Connection connect = DatabaseManager.getConnection();
+            try (connect){
                 for (String statement : createStatements) {
-                    executeStatement(conn, statement);
+                    executeStatement(connect, statement);
                 }
             }
         } catch (DataAccessException | SQLException e) {

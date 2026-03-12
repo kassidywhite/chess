@@ -10,7 +10,15 @@ import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.*;
 
 class SQLGameTests {
-    static GameDAO games = new SQLGameDAO();
+    static GameDAO games;
+
+    static {
+        try {
+            games = new SQLGameDAO();
+        } catch (DataAccessException e) {
+            throw new RuntimeException(e);
+        }
+    }
 
     @BeforeEach
     void setUp() {
