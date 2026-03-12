@@ -27,8 +27,8 @@ public class SQLUserDAO implements UserDAO {
     }
 
     private void executeStatement(Connection conn, String statement) throws SQLException {
-        try(var preparedStatement = conn.prepareStatement(statement)) {
-            preparedStatement.executeUpdate();
+        try(var ps = conn.prepareStatement(statement)) {
+            ps.executeUpdate();
         }
     }
 

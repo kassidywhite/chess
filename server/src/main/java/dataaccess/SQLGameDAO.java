@@ -27,8 +27,8 @@ public class SQLGameDAO implements GameDAO {
         }
     }
 
-    private void executeStatement(Connection conn, String statement) throws SQLException {
-        try(var preparedStatement = conn.prepareStatement(statement)) {
+    private void executeStatement(Connection conn, String st) throws SQLException {
+        try(var preparedStatement = conn.prepareStatement(st)) {
             preparedStatement.executeUpdate();
         }
     }
