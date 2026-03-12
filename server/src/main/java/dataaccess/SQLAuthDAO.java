@@ -20,13 +20,17 @@ public class SQLAuthDAO implements AuthDAO {
             Connection conn = DatabaseManager.getConnection();
             try (conn){
                 for (String statement : createStatements) {
-                    try(var preparedStatement = conn.prepareStatement(statement)) {
-                        preparedStatement.executeUpdate();
-                    }
+                    executeStatement(conn, statement);
                 }
             }
         } catch (DataAccessException | SQLException e) {
             throw new RuntimeException(e);
+        }
+    }
+
+    private void executeStatement(Connection conn, String statement) throws SQLException {
+        try(var preparedStatement = conn.prepareStatement(statement)) {
+            preparedStatement.executeUpdate();
         }
     }
 

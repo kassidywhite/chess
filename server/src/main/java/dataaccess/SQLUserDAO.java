@@ -18,13 +18,17 @@ public class SQLUserDAO implements UserDAO {
             Connection conn = DatabaseManager.getConnection();
             try (conn){
                 for (String statement : statements) {
-                    try(var preparedStatement = conn.prepareStatement(statement)) {
-                        preparedStatement.executeUpdate();
-                    }
+                    executeStatement(conn, statement);
                 }
             }
         } catch (DataAccessException | SQLException e) {
             throw new RuntimeException(e);
+        }
+    }
+
+    private void executeStatement(Connection conn, String statement) throws SQLException {
+        try(var preparedStatement = conn.prepareStatement(statement)) {
+            preparedStatement.executeUpdate();
         }
     }
 
