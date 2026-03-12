@@ -83,15 +83,29 @@ public class SQLGameDAO implements GameDAO {
 
     @Override
     public GameData getGameByName(String gameName) throws DataAccessException {
-        try (Connection conn = DatabaseManager.getConnection()){
+        try (Connection conn = DatabaseManager.getConnection()) {
             var statement = "SELECT gameName, gameID, blackUsername, whiteUsername, game FROM games WHERE gameName = ?";
+            try (PreparedStatement ps = conn.prepareStatement(statement)) {
+                ps.setString(1, gameName);
+                try (ResultSet rs = ps.executeQuery()) {
+                    if (!rs.next()) {
+                        return null;
+                    }
+                    var gameID = rs.getInt("gameID");
+                    var whiteUser = rs.getString("whiteUsername");
+                    var blackUser = rs.getString("blackUsername");
+                    var name = rs.getString("gameName");
+                    var gameAsString = rs.getString("game");
+                    ChessGame game = new Gson().fromJson(gameAsString, ChessGame.class);
+                    return new GameData(gameID, whiteUser, blackUser, name, game);
+                }
+            }
         } catch (SQLException e) {
-            throw new DataAccessException("Internal Service Error");
+            throw new RuntimeException(e);
         }
-        return null;
     }
 
-    @Override
+        @Override
     public GameData getGameByID(int id) throws DataAccessException {
         try (Connection conn = DatabaseManager.getConnection()){
             var statement = "SELECT gameName, gameID, blackUsername, whiteUsername, game FROM games WHERE gameID = ?";
