@@ -16,7 +16,7 @@ public class SQLUserDAO implements UserDAO {
         try {
             DatabaseManager.createDatabase();
             try (Connection conn = DatabaseManager.getConnection()){
-                for (String statement : createStatements) {
+                for (String statement : statements) {
                     try(var preparedStatement = conn.prepareStatement(statement)) {
                         preparedStatement.executeUpdate();
                     }
@@ -27,7 +27,7 @@ public class SQLUserDAO implements UserDAO {
         }
     }
 
-    private final String[] createStatements = {
+    private final String[] statements = {
             """
             CREATE TABLE IF NOT EXISTS users (
                 `username` varchar(256) NOT NULL,

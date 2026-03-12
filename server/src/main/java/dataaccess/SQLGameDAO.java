@@ -18,8 +18,8 @@ public class SQLGameDAO implements GameDAO {
             DatabaseManager.createDatabase();
             try (Connection conn = DatabaseManager.getConnection()){
                 for (String statement : createStatements) {
-                    try(var preparedStatement = conn.prepareStatement(statement)) {
-                        preparedStatement.executeUpdate();
+                    try(var ps = conn.prepareStatement(statement)) {
+                        ps.executeUpdate();
                     }
                 }
             }
