@@ -87,15 +87,14 @@ public class SQLUserDAO implements UserDAO {
                         return null;
                     }
                     String name = rs.getString("username");
-                    if(name.equals(username)){
-                        return new UserData(rs.getString("username"), rs.getString("password"), rs.getString("email"));
-                    }
+                    return new UserData(rs.getString("username"),
+                            rs.getString("password"),
+                            rs.getString("email"));
                 }
             }
         } catch (SQLException e) {
             throw new DataAccessException("Internal Service Error");
         }
-        return null;
     }
 
     @Override

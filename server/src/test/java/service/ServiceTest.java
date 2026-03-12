@@ -10,6 +10,7 @@ import model.request.LoginRequest;
 import model.request.NewGameRequest;
 import model.request.RegisterRequest;
 import org.eclipse.jetty.server.Authentication;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import service.exceptions.BadRequestException;
