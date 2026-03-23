@@ -111,7 +111,7 @@ public class Server {
     public void clear(Context ctx) {
         try {
             String authToken = ctx.header("Authorization");
-            DeleteResult deleteResult = service.deleteAll(authToken);
+            DeleteResult deleteResult = service.deleteAll();
             ctx.result(serializer.toJson(deleteResult));
             ctx.status(200);
         } catch (ServiceException e) {

@@ -194,7 +194,7 @@ class ServiceTest {
             service.createGame(new NewGameRequest("i luv chess"), service.authAccess.getAuthByUser("Jenny"));
             service.createGame(new NewGameRequest("queens gambit"), service.authAccess.getAuthByUser("Jenny"));
             service.createGame(new NewGameRequest("todays challenge"), service.authAccess.getAuthByUser("Jenny"));
-            service.deleteAll(service.authAccess.getAuthByUser("Jenny"));
+            service.deleteAll();
         } catch (Exception ex) {
             fail();
         }

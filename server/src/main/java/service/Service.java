@@ -161,7 +161,7 @@ public class Service {
         }
     }
 
-    public DeleteResult deleteAll(String token) throws ServiceException {
+    public DeleteResult deleteAll() throws ServiceException {
         // check if authToken is valid
         try {
             userAccess.deleteAllUsers();

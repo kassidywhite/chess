@@ -20,7 +20,7 @@ import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 
 public class ServerFacade {
-
+    private final HttpClient client = HttpClient.newHttpClient();
     private final String serverUrl;
 
     public ServerFacade(String serverUrl) {
@@ -28,80 +28,59 @@ public class ServerFacade {
     }
 
     public RegisterResult register(RegisterRequest request) throws Exception {
-        var path = "/user";
-        return this.makeRequest("POST", path, request, RegisterResult.class);
+        var req = buildRequest("POST", "/user", request);
+        var response = sendRequest(req);
+        return handleResponse(response, RegisterResult.class);
     }
 
     public LoginResult login(LoginRequest request) throws Exception {
-        var path = "/session";
-        return this.makeRequest("POST", path, request, LoginResult.class);
+        var req = buildRequest("POST", "/session", request);
+        var response = sendRequest(req);
+        return handleResponse(response, LoginResult.class);
     }
 
-    public JoinGameResult register(JoinGameRequest request) throws Exception {
-        var path = "/session";
-        return this.makeRequest("PUT", path, request, JoinGameResult.class);
+    private HttpRequest buildRequest(String method, String path, Object body) {
+        var request = HttpRequest.newBuilder()
+                .uri(URI.create(serverUrl + path))
+                .method(method, makeRequestBody(body));
+        if (body != null) {
+            request.setHeader("Content-Type", "application/json");
+        }
+        return request.build();
     }
 
-//    public LogoutResult logout(LogoutResult request) throws Exception {
-//        var path = "/session";
-//        return this.makeRequest("DELETE", path, request, LogoutResult.class);
-//    }
-
-    public NewGameResult createGame(NewGameRequest request) throws Exception {
-        var path = "/game";
-        return this.makeRequest("POST", path, request, NewGameResult.class);
+    private HttpRequest.BodyPublisher makeRequestBody(Object request) {
+        if (request != null) {
+            return HttpRequest.BodyPublishers.ofString(new Gson().toJson(request));
+        } else {
+            return HttpRequest.BodyPublishers.noBody();
+        }
     }
 
-//    public ListGamesResult listGames() {
-//
-//    }
-
-
-
-    private <T> T makeRequest(String method, String path, Object request, Class<T> responseClass) throws Exception {
+    private HttpResponse<String> sendRequest(HttpRequest request) throws Exception {
         try {
-            URL url = (new URI(serverUrl + path)).toURL();
-            HttpURLConnection http = (HttpURLConnection) url.openConnection();
-            http.setRequestMethod(method);
-            http.setDoOutput(true);
-
-            writeBody(request, http);
-            http.connect();
-            throwIfNotSuccessful(http);
-            return readBody(http, responseClass);
+            return client.send(request, HttpResponse.BodyHandlers.ofString());
         } catch (Exception e) {
-            throw new ResponseException(500, e.getMessage());
+            throw new Exception(e.getMessage());
         }
     }
 
-    private static void writeBody(Object request, HttpURLConnection http) throws IOException {
-        if(request != null) {
-            http.addRequestProperty("Content-Type", "application/json");
-            String reqData = new Gson().toJson(request);
-            try (OutputStream reqBody = http.getOutputStream()) {
-                reqBody.write(reqData.getBytes());
+    private <T> T handleResponse(HttpResponse<String> response, Class<T> responseClass) throws Exception {
+        var status = response.statusCode();
+        if (!isSuccessful(status)){
+            var body = response.body();
+            if (body != null) {
+                throw new Exception(body);
             }
-        }
-    }
 
-    private void throwIfNotSuccessful(HttpURLConnection http) throws IOException, ResponseException {
-        var status = http.getResponseCode();
-        if (!isSuccessful(status)) {
-            throw new ResponseException(status, "failure: " + status);
+            throw new Exception("other failure: " + status);
         }
-    }
 
-    private static <T> T readBody(HttpURLConnection http, Class<T> responseClass) throws IOException {
-        T response = null;
-        if (http.getContentLength() < 0) {
-            try (InputStream respBody = http.getInputStream()){
-                InputStreamReader reader = new InputStreamReader(respBody);
-                if (responseClass != null) {
-                    response = new Gson().fromJson(reader, responseClass);
-                }
-            }
+        if (responseClass != null) {
+            return new Gson().fromJson(response.body(), responseClass);
         }
-        return response;
+
+        return null;
     }
 
     private boolean isSuccessful(int status) {return status / 100 == 2;}
