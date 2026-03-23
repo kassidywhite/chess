@@ -4,10 +4,9 @@ import com.google.gson.Gson;
 import exception.ResponseException;
 import model.request.JoinGameRequest;
 import model.request.LoginRequest;
+import model.request.NewGameRequest;
 import model.request.RegisterRequest;
-import model.result.JoinGameResult;
-import model.result.LoginResult;
-import model.result.RegisterResult;
+import model.result.*;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -33,9 +32,31 @@ public class ServerFacade {
         return this.makeRequest("POST", path, request, RegisterResult.class);
     }
 
-//    public LoginResult login(LoginRequest request) {...}
+    public LoginResult login(LoginRequest request) throws Exception {
+        var path = "/session";
+        return this.makeRequest("POST", path, request, LoginResult.class);
+    }
+
+    public JoinGameResult register(JoinGameRequest request) throws Exception {
+        var path = "/session";
+        return this.makeRequest("PUT", path, request, JoinGameResult.class);
+    }
+
+//    public LogoutResult logout(LogoutResult request) throws Exception {
+//        var path = "/session";
+//        return this.makeRequest("DELETE", path, request, LogoutResult.class);
+//    }
+
+    public NewGameResult createGame(NewGameRequest request) throws Exception {
+        var path = "/game";
+        return this.makeRequest("POST", path, request, NewGameResult.class);
+    }
+
+//    public ListGamesResult listGames() {
 //
-//    public JoinGameResult register(JoinGameRequest request) {...}
+//    }
+
+
 
     private <T> T makeRequest(String method, String path, Object request, Class<T> responseClass) throws Exception {
         try {
