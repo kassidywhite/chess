@@ -12,9 +12,9 @@ public class ResponseException extends Exception {
         ClientError
     }
 
-    final private Code code;
+    final private int code;
 
-    public ResponseException(Code code, String message){
+    public ResponseException(int code, String message){
         super(message);
         this.code = code;
     }
@@ -27,10 +27,10 @@ public class ResponseException extends Exception {
         var map = new Gson().fromJson(json, HashMap.class);
         var status = Code.valueOf(map.get("status").toString());
         String message = map.get("message").toString();
-        return new ResponseException(status, message);
+        return new ResponseException(status.ordinal(), message);
     }
 
-    public Code code() {return code;}
+    public int code() {return code;}
 
     public static Code fromHttpStatusCode(int httpStatusCode) {
         return switch (httpStatusCode) {
@@ -42,8 +42,9 @@ public class ResponseException extends Exception {
 
     public int toHttpStatusCode() {
         return switch (code) {
-            case ServerError -> 500;
-            case ClientError -> 400;
+            case Code.ClientError -> 400;
+            case Code.ServerError -> 500;
+            default -> throw new IllegalStateException("Unexpected value: " + code);
         };
     }
 }
