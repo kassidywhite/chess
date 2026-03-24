@@ -4,15 +4,17 @@ import server.ServerFacade;
 
 import java.util.Arrays;
 
+import static client.State.*;
+
 public class Postlogin {
-    private State state;
     private final ServerFacade server;
     private final String serverUrl;
+    private Prelogin preHandler;
 
-    public Postlogin(String serverUrl, ServerFacade server, State state) {
+    public Postlogin(String serverUrl, ServerFacade server, Prelogin preHandler) {
         this.server = server;
-        this.state = state;
         this.serverUrl = serverUrl;
+        this.preHandler = preHandler;
     }
 
     public String eval(String input) {
@@ -26,12 +28,18 @@ public class Postlogin {
 //                case "join" -> joinGame(params);
 //                case "observe" -> observe(params);
 //                case "logout" -> logout(params);
+                case "clear" -> clear();
                 case "quit" -> "quit";
                 default -> help();
             };
         } catch (Exception e) {
             return e.getMessage();
         }
+    }
+
+    public String clear() throws Exception{
+        preHandler.state = SIGNEDOUT;
+        return preHandler.clear();
     }
 
     public String help() {

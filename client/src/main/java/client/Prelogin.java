@@ -15,12 +15,12 @@ import static ui.EscapeSequences.*;
 
 public class Prelogin {
     private final ServerFacade server;
-    private State state = SIGNEDOUT;
+    public State state = SIGNEDOUT;
     private Postlogin postHandler;
 
     public Prelogin(String serverUrl) {
         server = new ServerFacade(serverUrl);
-        postHandler = new Postlogin(serverUrl, server, state);
+        postHandler = new Postlogin(serverUrl, server, this);
     }
 
     public void run() {
@@ -36,11 +36,10 @@ public class Prelogin {
                 if(!line.equals("quit")){
                     if(this.state == SIGNEDOUT){
                         result = eval(line);
-                        System.out.println(SET_TEXT_COLOR_PINK + result + SET_TEXT_COLOR_WHITE);
                     } else {
                         result = postHandler.eval(line);
-                        System.out.println(SET_TEXT_COLOR_PINK + result + SET_TEXT_COLOR_WHITE);
                     }
+                    System.out.println(SET_TEXT_COLOR_PINK + result + SET_TEXT_COLOR_WHITE);
                 } else {
                     result = eval(line);
                     System.out.println(SET_TEXT_COLOR_BLUE + "Quitting server... Thanks for playing!");
@@ -61,6 +60,7 @@ public class Prelogin {
             return switch (cmd) {
                 case "register" -> register(params);
                 case "login" -> login(params);
+                case "clear" -> clear();
                 case "quit" -> "quit";
                 default -> help();
             };
@@ -81,6 +81,11 @@ public class Prelogin {
 
     public String login(String... params) throws Exception {
         return null;
+    }
+
+    public String clear() throws Exception {
+        DeleteResult deleteResult = server.clearAll();
+        return "Successfully cleared server";
     }
 
     private void printPrompt() {
