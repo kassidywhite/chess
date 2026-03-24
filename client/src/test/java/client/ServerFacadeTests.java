@@ -4,10 +4,7 @@ import model.AuthData;
 import model.request.LoginRequest;
 import model.request.NewGameRequest;
 import model.request.RegisterRequest;
-import model.result.ListGamesResult;
-import model.result.LoginResult;
-import model.result.NewGameResult;
-import model.result.RegisterResult;
+import model.result.*;
 import org.junit.jupiter.api.*;
 import server.Server;
 import server.ServerFacade;
@@ -91,7 +88,22 @@ public class ServerFacadeTests {
         });
     }
 
-    // doesn't work
+    @Test
+    void logoutTestNegative() throws Exception {
+        RegisterRequest regReqPenelope = new RegisterRequest("penelope", "yoyo123", "penelope@gmail.com");
+        RegisterResult resultPenelope = serverFacade.register(regReqPenelope);
+        RegisterRequest regReqDan = new RegisterRequest("daniel", "yoyoyo", "daniel@gmail.com");
+        RegisterResult resultDan = serverFacade.register(regReqDan);
+        LoginRequest logReq = new LoginRequest("penelope", "yoyo123");
+        LoginResult logRes = serverFacade.login(logReq);
+        String token = service.authAccess.getAuthByUser("penelope");
+        LogoutResult logoutResult = serverFacade.logout(token);
+        LoginRequest logReqDan = new LoginRequest("daniel", "yoyoyo");
+        assertThrows(Exception.class, () -> {
+            serverFacade.logout(token);
+        });
+    }
+
     @Test
     void createGameTestPositive() throws Exception {
         RegisterRequest regReq = new RegisterRequest("yoyo", "yoyo123", "yoyo@gmail.com");
@@ -99,15 +111,53 @@ public class ServerFacadeTests {
         LoginRequest logReq = new LoginRequest("yoyo", "yoyo123");
         LoginResult logRes = serverFacade.login(logReq);
         NewGameRequest gameReq = new NewGameRequest("yoyo's game");
-        NewGameResult gameResult = serverFacade.createGame(gameReq);
-
         String token = service.authAccess.getAuthByUser("yoyo");
+        NewGameResult gameResult = serverFacade.createGame(gameReq, token);
         ListGamesResult listCheck = service.listGames(token);
         assertEquals(1, listCheck.games().size());
     }
 
     @Test
-    void listGamesTestPositive() throws Exception {
+    void createGameTestNegative() throws Exception {
+        RegisterRequest regReq = new RegisterRequest("matt", "matt", "matt@gmail.com");
+        RegisterResult result = serverFacade.register(regReq);
+        LoginRequest logReq = new LoginRequest("matt", "matt");
+        LoginResult logRes = serverFacade.login(logReq);
+        String token = "1234567890-jklmnopqrs";
+        NewGameRequest gameReq = new NewGameRequest("matt's game");
+        assertThrows(Exception.class, () -> {
+            serverFacade.createGame(gameReq, token);
+        });
+    }
 
+    @Test
+    void listGamesTestPositive() throws Exception {
+        String token = createGamesWithTest();
+        ListGamesResult listRes = serverFacade.listGames(token);
+        assertEquals(3, listRes.games().size());
+    }
+
+    @Test
+    void listGamesTestNegative() throws Exception {
+        String token = createGamesWithTest();
+        String badToken = "1234567890-jklmnopqrs";
+        assertThrows(Exception.class, () -> {
+            serverFacade.listGames(badToken);
+        });
+    }
+
+    String createGamesWithTest() throws Exception {
+        RegisterRequest regReq = new RegisterRequest("test", "test", "test@gmail.com");
+        RegisterResult result = serverFacade.register(regReq);
+        LoginRequest logReq = new LoginRequest("test", "test");
+        LoginResult logRes = serverFacade.login(logReq);
+        String token = service.authAccess.getAuthByUser("test");
+        NewGameRequest gameReq1 = new NewGameRequest("test game");
+        NewGameResult gameResult1 = serverFacade.createGame(gameReq1, token);
+        NewGameRequest gameReq2 = new NewGameRequest("lets play chesssss");
+        NewGameResult gameResult2 = serverFacade.createGame(gameReq2, token);
+        NewGameRequest gameReq3 = new NewGameRequest("rahhhhhhh");
+        NewGameResult gameResult3 = serverFacade.createGame(gameReq3, token);
+        return token;
     }
 }

@@ -45,8 +45,8 @@ public class ServerFacade {
         return handleResponse(response, LogoutResult.class);
     }
 
-    public NewGameResult createGame(NewGameRequest request) throws Exception {
-        var req = buildRequest("POST", "/game", request, null);
+    public NewGameResult createGame(NewGameRequest request, String token) throws Exception {
+        var req = buildRequest("POST", "/game", request, token);
         var response = sendRequest(req);
         return handleResponse(response, NewGameResult.class);
     }
