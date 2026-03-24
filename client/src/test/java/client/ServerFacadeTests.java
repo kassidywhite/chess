@@ -80,8 +80,6 @@ public class ServerFacadeTests {
     void logoutTestPositive() throws Exception {
         RegisterRequest regReq = new RegisterRequest("lexi", "yoyo123", "lexi@gmail.com");
         RegisterResult result = serverFacade.register(regReq);
-        LoginRequest logReq = new LoginRequest("lexi", "yoyo123");
-        LoginResult logRes = serverFacade.login(logReq);
         String token = service.authAccess.getAuthByUser("lexi");
         assertDoesNotThrow(() -> {
             serverFacade.logout(token);
@@ -94,8 +92,6 @@ public class ServerFacadeTests {
         RegisterResult resultPenelope = serverFacade.register(regReqPenelope);
         RegisterRequest regReqDan = new RegisterRequest("daniel", "yoyoyo", "daniel@gmail.com");
         RegisterResult resultDan = serverFacade.register(regReqDan);
-        LoginRequest logReq = new LoginRequest("penelope", "yoyo123");
-        LoginResult logRes = serverFacade.login(logReq);
         String token = service.authAccess.getAuthByUser("penelope");
         LogoutResult logoutResult = serverFacade.logout(token);
         LoginRequest logReqDan = new LoginRequest("daniel", "yoyoyo");
@@ -108,8 +104,6 @@ public class ServerFacadeTests {
     void createGameTestPositive() throws Exception {
         RegisterRequest regReq = new RegisterRequest("yoyo", "yoyo123", "yoyo@gmail.com");
         RegisterResult result = serverFacade.register(regReq);
-        LoginRequest logReq = new LoginRequest("yoyo", "yoyo123");
-        LoginResult logRes = serverFacade.login(logReq);
         NewGameRequest gameReq = new NewGameRequest("yoyo's game");
         String token = service.authAccess.getAuthByUser("yoyo");
         NewGameResult gameResult = serverFacade.createGame(gameReq, token);
@@ -121,8 +115,6 @@ public class ServerFacadeTests {
     void createGameTestNegative() throws Exception {
         RegisterRequest regReq = new RegisterRequest("matt", "matt", "matt@gmail.com");
         RegisterResult result = serverFacade.register(regReq);
-        LoginRequest logReq = new LoginRequest("matt", "matt");
-        LoginResult logRes = serverFacade.login(logReq);
         String token = "1234567890-jklmnopqrs";
         NewGameRequest gameReq = new NewGameRequest("matt's game");
         assertThrows(Exception.class, () -> {
@@ -149,8 +141,6 @@ public class ServerFacadeTests {
     String createGamesWithTest() throws Exception {
         RegisterRequest regReq = new RegisterRequest("test", "test", "test@gmail.com");
         RegisterResult result = serverFacade.register(regReq);
-        LoginRequest logReq = new LoginRequest("test", "test");
-        LoginResult logRes = serverFacade.login(logReq);
         String token = service.authAccess.getAuthByUser("test");
         NewGameRequest gameReq1 = new NewGameRequest("test game");
         NewGameResult gameResult1 = serverFacade.createGame(gameReq1, token);
