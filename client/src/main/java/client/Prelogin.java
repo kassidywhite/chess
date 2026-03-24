@@ -6,18 +6,22 @@ import java.util.Scanner;
 import com.google.gson.Gson;
 import model.*;
 import exception.ResponseException;
+import model.request.*;
+import model.result.*;
 import server.ServerFacade;
 
 import static ui.EscapeSequences.*;
 
 public class Prelogin {
+    private final ServerFacade server;
+    private State state = State.SIGNEDOUT;
 
     public Prelogin(String serverUrl) {
-        // create client here
+        server = new ServerFacade(serverUrl);
     }
 
     public void run() {
-        System.out.println("👑 Welcome to 240 Chess. Type Help to get started. 👑");
+        System.out.println(SET_TEXT_COLOR_WHITE + "👑✨ Welcome to 240 Chess. Type Help to get started. ✨👑");
 
         Scanner scanner = new Scanner(System.in);
         var result = "";
@@ -26,13 +30,19 @@ public class Prelogin {
             String line = scanner.nextLine();
 
             try {
-                result = eval(line);
-                System.out.println("something");
+                if(!line.equals("quit")){
+                    result = eval(line);
+                    System.out.println(SET_TEXT_COLOR_PINK + result + SET_TEXT_COLOR_WHITE);
+                } else {
+                    result = eval(line);
+                    System.out.println(SET_TEXT_COLOR_BLUE + "Quitting server... Thanks for playing!");
+                }
             } catch (Throwable e) {
                 var msg = e.toString();
                 System.out.print(msg);
             }
         }
+        System.out.println();
     }
 
     public String eval(String input) {
@@ -52,6 +62,11 @@ public class Prelogin {
     }
 
     public String register(String... params) throws Exception {
+        if (params.length >= 1){
+            state = State.SIGNEDIN;
+            RegisterResult registerResult = server.register(new RegisterRequest(params[0], params[1], params[2]));
+
+        }
         return null;
     }
 
@@ -60,11 +75,17 @@ public class Prelogin {
     }
 
     private void printPrompt() {
-        System.out.print("\n" + ERASE_LINE + ">>>");
+        System.out.print("\n" + ERASE_LINE + ">>> ");
     }
 
     public String help() {
-        return null;
+        return """
+                Try typing:
+                    register <USERNAME> <PASSWORD> <EMAIL> - to create an account
+                    login <USERNAME> <PASSWORD> - to play chess
+                    quit - playing chess
+                    help - with possible commands
+                """;
     }
 }
 
