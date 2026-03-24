@@ -28,23 +28,44 @@ public class ServerFacade {
     }
 
     public RegisterResult register(RegisterRequest request) throws Exception {
-        var req = buildRequest("POST", "/user", request);
+        var req = buildRequest("POST", "/user", request, null);
         var response = sendRequest(req);
         return handleResponse(response, RegisterResult.class);
     }
 
     public LoginResult login(LoginRequest request) throws Exception {
-        var req = buildRequest("POST", "/session", request);
+        var req = buildRequest("POST", "/session", request, null);
         var response = sendRequest(req);
         return handleResponse(response, LoginResult.class);
     }
 
-    private HttpRequest buildRequest(String method, String path, Object body) {
+    public LogoutResult logout(String token) throws Exception {
+        var req = buildRequest("DELETE", "/session", null, token);
+        var response = sendRequest(req);
+        return handleResponse(response, LogoutResult.class);
+    }
+
+    public NewGameResult createGame(NewGameRequest request) throws Exception {
+        var req = buildRequest("POST", "/game", request, null);
+        var response = sendRequest(req);
+        return handleResponse(response, NewGameResult.class);
+    }
+
+    public ListGamesResult listGames(String token) throws Exception{
+        var req = buildRequest("GET", "/game", null, token);
+        var response = sendRequest(req);
+        return handleResponse(response, ListGamesResult.class);
+    }
+
+    private HttpRequest buildRequest(String method, String path, Object body, String auth) {
         var request = HttpRequest.newBuilder()
                 .uri(URI.create(serverUrl + path))
                 .method(method, makeRequestBody(body));
         if (body != null) {
             request.setHeader("Content-Type", "application/json");
+        }
+        if(auth != null){
+            request.header("Authorization", auth);
         }
         return request.build();
     }
