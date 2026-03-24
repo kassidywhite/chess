@@ -10,9 +10,9 @@ import server.ServerFacade;
 
 import static ui.EscapeSequences.*;
 
-public class Repl {
+public class Prelogin {
 
-    public Repl(String serverUrl) {
+    public Prelogin(String serverUrl) {
         // create client here
     }
 
@@ -28,21 +28,43 @@ public class Repl {
             try {
                 result = eval(line);
                 System.out.println("something");
+            } catch (Throwable e) {
+                var msg = e.toString();
+                System.out.print(msg);
             }
         }
     }
 
-    public String eval(String input){
+    public String eval(String input) {
         try {
             String[] tokens = input.toLowerCase().split(" ");
             String cmd = (tokens.length > 0) ? tokens[0] : "help";
             String[] params = Arrays.copyOfRange(tokens, 1, tokens.length);
             return switch (cmd) {
-                case "signin" -> signIn(params);
-            }
+                case "register" -> register(params);
+                case "login" -> login(params);
+                case "quit" -> "quit";
+                default -> help();
+            };
+        } catch (Exception e) {
+            return e.getMessage();
+        }
+    }
+
+    public String register(String... params) throws Exception {
+        return null;
+    }
+
+    public String login(String... params) throws Exception {
+        return null;
     }
 
     private void printPrompt() {
         System.out.print("\n" + ERASE_LINE + ">>>");
     }
+
+    public String help() {
+        return null;
+    }
 }
+

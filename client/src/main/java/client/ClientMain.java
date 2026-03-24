@@ -9,8 +9,10 @@ public class ClientMain {
             serverUrl = args[0];
         }
 
-        new Repl(serverUrl).run();
-        var piece = new ChessPiece(ChessGame.TeamColor.WHITE, ChessPiece.PieceType.PAWN);
-        System.out.println("♕ 240 Chess Client: " + piece);
+        try {
+            new Prelogin(serverUrl).run();
+        } catch (Throwable ex) {
+            System.out.printf("Unable to start server: %s%n", ex.getMessage());
+        }
     }
 }
