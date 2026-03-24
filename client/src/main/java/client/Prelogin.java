@@ -10,14 +10,17 @@ import model.request.*;
 import model.result.*;
 import server.ServerFacade;
 
+import static client.State.*;
 import static ui.EscapeSequences.*;
 
 public class Prelogin {
     private final ServerFacade server;
-    private State state = State.SIGNEDOUT;
+    private State state = SIGNEDOUT;
+    private Postlogin postHandler;
 
     public Prelogin(String serverUrl) {
         server = new ServerFacade(serverUrl);
+        postHandler = new Postlogin(serverUrl, server, state);
     }
 
     public void run() {
@@ -31,8 +34,13 @@ public class Prelogin {
 
             try {
                 if(!line.equals("quit")){
-                    result = eval(line);
-                    System.out.println(SET_TEXT_COLOR_PINK + result + SET_TEXT_COLOR_WHITE);
+                    if(this.state == SIGNEDOUT){
+                        result = eval(line);
+                        System.out.println(SET_TEXT_COLOR_PINK + result + SET_TEXT_COLOR_WHITE);
+                    } else {
+                        result = postHandler.eval(line);
+                        System.out.println(SET_TEXT_COLOR_PINK + result + SET_TEXT_COLOR_WHITE);
+                    }
                 } else {
                     result = eval(line);
                     System.out.println(SET_TEXT_COLOR_BLUE + "Quitting server... Thanks for playing!");
@@ -62,12 +70,13 @@ public class Prelogin {
     }
 
     public String register(String... params) throws Exception {
-        if (params.length >= 1){
+        if (params.length == 3){
             state = State.SIGNEDIN;
             RegisterResult registerResult = server.register(new RegisterRequest(params[0], params[1], params[2]));
-
+            return SET_TEXT_COLOR_YELLOW + "Successfully registered " + registerResult.username();
+        } else {
+            return "Enter valid registration info -> register <USERNAME <PASSWORD> <EMAIL>";
         }
-        return null;
     }
 
     public String login(String... params) throws Exception {

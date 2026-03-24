@@ -82,7 +82,7 @@ public class ServerFacade {
         try {
             return client.send(request, HttpResponse.BodyHandlers.ofString());
         } catch (Exception e) {
-            throw new Exception(e.getMessage());
+            throw new Exception("Failed to send request to server");
         }
     }
 
@@ -94,7 +94,7 @@ public class ServerFacade {
                 throw new Exception(body);
             }
 
-            throw new Exception("other failure: " + status);
+            throw new Exception("Other failure: " + status);
         }
 
         if (responseClass != null) {
