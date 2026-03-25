@@ -8,12 +8,9 @@ import model.result.*;
 import server.ServerFacade;
 import service.exceptions.AlreadyTakenException;
 import service.exceptions.BadRequestException;
-import service.exceptions.ServiceException;
 import service.exceptions.UnauthorizedException;
-import ui.ChessBoardRender;
 
 import java.util.Arrays;
-import java.util.List;
 
 import static client.State.*;
 import static ui.EscapeSequences.*;
@@ -86,7 +83,7 @@ public class Postlogin {
             } else {
                 return "Enter valid join request -> \"join\" <ID> [WHITE|BLACK]";
             }
-        } catch (UnauthorizedException | BadRequestException | AlreadyTakenException | DataAccessException e) {
+        } catch (Exception e) {
             return preHandler.clientExceptionHandler(e);
         }
 
