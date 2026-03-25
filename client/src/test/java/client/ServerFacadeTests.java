@@ -1,6 +1,7 @@
 package client;
 
 import model.AuthData;
+import model.request.JoinGameRequest;
 import model.request.LoginRequest;
 import model.request.NewGameRequest;
 import model.request.RegisterRequest;
@@ -135,6 +136,28 @@ public class ServerFacadeTests {
         String badToken = "1234567890-jklmnopqrs";
         assertThrows(Exception.class, () -> {
             serverFacade.listGames(badToken);
+        });
+    }
+
+    @Test
+    void JoinGameTestPositive() throws Exception {
+        RegisterRequest regReq = new RegisterRequest("blah", "blah", "blah@gmail.com");
+        RegisterResult result = serverFacade.register(regReq);
+        String token = service.authAccess.getAuthByUser("blah");
+        NewGameRequest gameReq = new NewGameRequest("blah_game");
+        NewGameResult gameRes = serverFacade.createGame(gameReq, token);
+        JoinGameRequest request = new JoinGameRequest("WHITE", 1);
+        assertDoesNotThrow(() -> {
+            serverFacade.joinGame(request, token);
+        });
+    }
+
+    @Test
+    void JoinGameTestNegative() throws Exception {
+        String token = createGamesWithTest();
+        JoinGameRequest request = new JoinGameRequest(null, 2);
+        assertThrows(Exception.class, () -> {
+            serverFacade.joinGame(request, token);
         });
     }
 

@@ -2,10 +2,8 @@ package client;
 
 import dataaccess.DataAccessException;
 import model.GameData;
-import model.request.NewGameRequest;
-import model.result.ListGamesResult;
-import model.result.LogoutResult;
-import model.result.NewGameResult;
+import model.request.*;
+import model.result.*;
 import server.ServerFacade;
 import service.exceptions.*;
 
@@ -70,6 +68,10 @@ public class Postlogin {
             return preHandler.clientExceptionHandler(e);
         }
     }
+
+//    public String joinGame(String... Params) throws Exception {
+//        JoinGameResult joinGameResult = server.
+//    }
 
     public String listGames() throws Exception {
         try {

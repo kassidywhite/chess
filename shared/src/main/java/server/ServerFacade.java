@@ -57,6 +57,12 @@ public class ServerFacade {
         return handleResponse(response, ListGamesResult.class);
     }
 
+    public JoinGameResult joinGame(JoinGameRequest request, String token) throws Exception {
+        var req = buildRequest("PUT", "/game", request, token);
+        var response = sendRequest(req);
+        return handleResponse(response, JoinGameResult.class);
+    }
+
     public DeleteResult clearAll() throws Exception{
         var req = buildRequest("DELETE", "/db", null, null);
         var response = sendRequest(req);
