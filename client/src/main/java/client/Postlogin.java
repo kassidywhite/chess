@@ -1,12 +1,15 @@
 package client;
 
 import dataaccess.DataAccessException;
+import model.GameData;
 import model.request.NewGameRequest;
+import model.result.ListGamesResult;
 import model.result.LogoutResult;
 import model.result.NewGameResult;
 import server.ServerFacade;
 import service.exceptions.*;
 
+import java.awt.*;
 import java.util.Arrays;
 
 import static client.State.*;
@@ -30,7 +33,7 @@ public class Postlogin {
             String[] params = Arrays.copyOfRange(tokens, 1, tokens.length);
             return switch (cmd) {
                 case "create" -> createGame(params);
-//                case "list" -> listGames(params);
+                case "list" -> listGames();
 //                case "join" -> joinGame(params);
 //                case "observe" -> observe(params);
                 case "logout" -> logout();
@@ -64,6 +67,28 @@ public class Postlogin {
                 return "Enter valid game creation info -> \"create\" <GAMENAME>";
             }
         } catch (Exception e){
+            return preHandler.clientExceptionHandler(e);
+        }
+    }
+
+    public String listGames() throws Exception {
+        try {
+            String token = preHandler.currentUser.authToken();
+            ListGamesResult listGamesResult = server.listGames(token);
+            int i = 1;
+            String resultString = "";
+            for(GameData game : listGamesResult.games()){
+                resultString += i + ". Game name: " +  game.gameName() +
+                        "       White: " + game.whiteUsername() +
+                        "       Black: " + game.blackUsername() + "\n";
+                i += 1;
+            }
+            if(!resultString.isEmpty()){
+                return resultString;
+            } else {
+                return "No games created yet";
+            }
+        } catch (Exception e) {
             return preHandler.clientExceptionHandler(e);
         }
     }
