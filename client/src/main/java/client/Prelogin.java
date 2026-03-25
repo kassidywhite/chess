@@ -5,7 +5,7 @@ import java.util.Scanner;
 import model.*;
 import model.request.*;
 import model.result.*;
-import serverFacade.ServerFacade;
+import serverfacade.ServerFacade;
 
 import static client.State.*;
 import static ui.EscapeSequences.*;

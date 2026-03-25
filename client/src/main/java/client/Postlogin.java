@@ -4,7 +4,7 @@ import chess.ChessBoard;
 import model.GameData;
 import model.request.*;
 import model.result.*;
-import serverFacade.ServerFacade;
+import serverfacade.ServerFacade;
 
 import java.util.Arrays;
 

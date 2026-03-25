@@ -7,7 +7,7 @@ import model.request.RegisterRequest;
 import model.result.*;
 import org.junit.jupiter.api.*;
 import server.Server;
-import serverFacade.ServerFacade;
+import serverfacade.ServerFacade;
 import service.Service;
 import service.exceptions.ServiceException;
 
