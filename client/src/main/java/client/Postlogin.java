@@ -73,7 +73,7 @@ public class Postlogin {
 
     public String joinGame(String... params) throws Exception {
         try {
-            if(params.length == 2){
+            if(params.length == 2 && params[0].getClass()==){
                 String token = preHandler.currentUser.authToken();
                 JoinGameRequest request = new JoinGameRequest(params[1].toUpperCase(), Integer.parseInt(params[0]));
                 JoinGameResult joinGameResult = server.joinGame(request, token);
@@ -83,6 +83,8 @@ public class Postlogin {
             } else {
                 return "Enter valid join request -> \"join\" <ID> [WHITE|BLACK]";
             }
+        } catch (NumberFormatException e) {
+            return "Enter valid join request -> \"join\" <ID> [WHITE|BLACK]";
         } catch (Exception e) {
             return preHandler.clientExceptionHandler(e);
         }
