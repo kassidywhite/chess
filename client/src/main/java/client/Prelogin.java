@@ -119,10 +119,10 @@ public class Prelogin {
     public String help() {
         return """
                 Options:
-                    register <USERNAME> <PASSWORD> <EMAIL> - to create an account
-                    login <USERNAME> <PASSWORD> - to play chess
-                    quit - playing chess
-                    help - with possible commands
+                    "register" <USERNAME> <PASSWORD> <EMAIL> - to create an account
+                    "login" <USERNAME> <PASSWORD> - to play chess
+                    "quit" - playing chess
+                    "help" - with possible commands
                 """;
     }
 

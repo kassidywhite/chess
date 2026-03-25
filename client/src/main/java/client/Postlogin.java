@@ -1,7 +1,9 @@
 package client;
 
 import dataaccess.DataAccessException;
+import model.request.NewGameRequest;
 import model.result.LogoutResult;
+import model.result.NewGameResult;
 import server.ServerFacade;
 import service.exceptions.*;
 
@@ -27,7 +29,7 @@ public class Postlogin {
             String cmd = (tokens.length > 0) ? tokens[0] : "help";
             String[] params = Arrays.copyOfRange(tokens, 1, tokens.length);
             return switch (cmd) {
-//                case "create" -> createGame(params);
+                case "create" -> createGame(params);
 //                case "list" -> listGames(params);
 //                case "join" -> joinGame(params);
 //                case "observe" -> observe(params);
@@ -52,9 +54,19 @@ public class Postlogin {
         }
     }
 
-//    public String createGame() throws Exception {
-//
-//    }
+    public String createGame(String... params) throws Exception {
+        try {
+            if(params.length == 1){
+                String token = preHandler.currentUser.authToken();
+                NewGameResult createGameResult = server.createGame(new NewGameRequest(params[0]), token);
+                return SET_TEXT_COLOR_YELLOW + "Successfully created game: " + params[0];
+            } else {
+                return "Enter valid game creation info -> \"create\" <GAMENAME>";
+            }
+        } catch (Exception e){
+            return preHandler.clientExceptionHandler(e);
+        }
+    }
 
     public String clear() throws Exception{
         preHandler.state = SIGNEDOUT;
@@ -64,13 +76,13 @@ public class Postlogin {
     public String help() {
         return """
                 Options:
-                    create <NAME> - a game
-                    list - games
-                    join <ID> [WHITE|BLACK] - a game
-                    observe <ID> - a game
-                    logout - when you are done
-                    quit - playing chess
-                    help - with possible commands
+                    "create" <NAME> - a game
+                    "list" - games
+                    "join" <ID> [WHITE|BLACK] - a game
+                    "observe" <ID> - a game
+                    "logout" - when you are done
+                    "quit" - playing chess
+                    "help" - with possible commands
                 """;
     }
 }
