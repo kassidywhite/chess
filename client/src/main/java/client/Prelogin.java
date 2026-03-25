@@ -10,10 +10,6 @@ import exception.ResponseException;
 import model.request.*;
 import model.result.*;
 import server.ServerFacade;
-import service.exceptions.AlreadyTakenException;
-import service.exceptions.BadRequestException;
-import service.exceptions.ServiceException;
-import service.exceptions.UnauthorizedException;
 
 import static client.State.*;
 import static ui.EscapeSequences.*;

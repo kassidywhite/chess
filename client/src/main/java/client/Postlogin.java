@@ -1,14 +1,10 @@
 package client;
 
 import chess.ChessBoard;
-import dataaccess.DataAccessException;
 import model.GameData;
 import model.request.*;
 import model.result.*;
 import server.ServerFacade;
-import service.exceptions.AlreadyTakenException;
-import service.exceptions.BadRequestException;
-import service.exceptions.UnauthorizedException;
 
 import java.util.Arrays;
 
@@ -18,7 +14,7 @@ import static ui.EscapeSequences.*;
 public class Postlogin {
     private final ServerFacade server;
     private final String serverUrl;
-    private Prelogin preHandler;
+    private final Prelogin preHandler;
 
     public Postlogin(String serverUrl, ServerFacade server, Prelogin preHandler) {
         this.server = server;
@@ -73,7 +69,7 @@ public class Postlogin {
 
     public String joinGame(String... params) throws Exception {
         try {
-            if(params.length == 2 && params[0].getClass()==){
+            if(params.length == 2 && Integer.parseInt(params[0]) % 1 == 0){
                 String token = preHandler.currentUser.authToken();
                 JoinGameRequest request = new JoinGameRequest(params[1].toUpperCase(), Integer.parseInt(params[0]));
                 JoinGameResult joinGameResult = server.joinGame(request, token);
