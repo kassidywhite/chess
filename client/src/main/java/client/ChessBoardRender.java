@@ -4,13 +4,9 @@ import chess.ChessBoard;
 import chess.ChessGame;
 import chess.*;
 
-import java.util.Random;
-
 import static ui.EscapeSequences.*;
 
 public class ChessBoardRender {
-
-    private static Random rand = new Random();
 
     public static void render(ChessBoard board, String playerView) {
         // board rendered from white player perspective

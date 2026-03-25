@@ -139,7 +139,7 @@ public class ServerFacadeTests {
     }
 
     @Test
-    void JoinGameTestPositive() throws Exception {
+    void joinGameTestPositive() throws Exception {
         RegisterRequest regReq = new RegisterRequest("blah", "blah", "blah@gmail.com");
         RegisterResult result = serverFacade.register(regReq);
         String token = service.authAccess.getAuthByUser("blah");
@@ -152,7 +152,7 @@ public class ServerFacadeTests {
     }
 
     @Test
-    void JoinGameTestNegative() throws Exception {
+    void joinGameTestNegative() throws Exception {
         String token = createGamesWithTest();
         JoinGameRequest request = new JoinGameRequest(null, 2);
         assertThrows(Exception.class, () -> {
