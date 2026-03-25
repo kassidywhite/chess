@@ -69,7 +69,7 @@ public class Postlogin {
 
     public String joinGame(String... params) throws Exception {
         try {
-            if(params.length == 2 && Integer.parseInt(params[0]) % 1 == 0){
+            if(params.length == 2){
                 String token = preHandler.currentUser.authToken();
                 JoinGameRequest request = new JoinGameRequest(params[1].toUpperCase(), Integer.parseInt(params[0]));
                 JoinGameResult joinGameResult = server.joinGame(request, token);
@@ -90,8 +90,15 @@ public class Postlogin {
     public String observe(String... params) throws Exception {
         try {
             if (params.length == 1){
-                printChessBoard("white");
-                return "";
+                String token = preHandler.currentUser.authToken();
+                ListGamesResult listGamesResult = server.listGames(token);
+                for (GameData game : listGamesResult.games()) {
+                    if(game.gameID() == Integer.parseInt(params[0])) {
+                        printChessBoard("white");
+                        return "";
+                    }
+                }
+                return "Enter valid observe request -> \"observe\" <ID>";
             } else {
                 return "Enter valid observe request -> \"observe\" <ID>";
             }
@@ -110,13 +117,11 @@ public class Postlogin {
         try {
             String token = preHandler.currentUser.authToken();
             ListGamesResult listGamesResult = server.listGames(token);
-            int i = 1;
             String resultString = "";
             for(GameData game : listGamesResult.games()){
-                resultString += i + ". Game name: " +  game.gameName() +
+                resultString += game.gameID() + ". Game name: " +  game.gameName() +
                         "       White: " + game.whiteUsername() +
                         "       Black: " + game.blackUsername() + "\n";
-                i += 1;
             }
             if(!resultString.isEmpty()){
                 return resultString;
