@@ -1,6 +1,5 @@
 package client;
 
-import model.AuthData;
 import model.request.JoinGameRequest;
 import model.request.LoginRequest;
 import model.request.NewGameRequest;
@@ -8,7 +7,7 @@ import model.request.RegisterRequest;
 import model.result.*;
 import org.junit.jupiter.api.*;
 import server.Server;
-import server.ServerFacade;
+import serverFacade.ServerFacade;
 import service.Service;
 import service.exceptions.ServiceException;
 
