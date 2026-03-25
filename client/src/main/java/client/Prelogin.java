@@ -127,26 +127,15 @@ public class Prelogin {
     }
 
     public String clientExceptionHandler(Exception e){
-        switch(e) {
-            case UnauthorizedException ex -> {
-                return ex.getMessage();
-            }
-            case BadRequestException ex -> {
-                return ex.getMessage();
-            }
-            case AlreadyTakenException ex-> {
-                return ex.getMessage();
-            }
-            case DataAccessException ex -> {
-                return ex.getMessage();
-            }
-            case ServiceException ex -> {
-                return ex.getMessage();
-            }
-            default -> {
-                return e.getMessage().toString();
-            }
+        String msg = e.getMessage();
+
+        if (msg != null && msg.contains("\"message\"")) {
+            int start = msg.indexOf(":\"") + 2;
+            int end = msg.lastIndexOf("\"");
+            return msg.substring(start, end);
         }
+
+        return msg;
     }
 }
 

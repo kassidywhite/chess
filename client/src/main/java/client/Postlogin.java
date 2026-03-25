@@ -1,10 +1,15 @@
 package client;
 
 import chess.ChessBoard;
+import dataaccess.DataAccessException;
 import model.GameData;
 import model.request.*;
 import model.result.*;
 import server.ServerFacade;
+import service.exceptions.AlreadyTakenException;
+import service.exceptions.BadRequestException;
+import service.exceptions.ServiceException;
+import service.exceptions.UnauthorizedException;
 import ui.ChessBoardRender;
 
 import java.util.Arrays;
@@ -33,7 +38,7 @@ public class Postlogin {
                 case "create" -> createGame(params);
                 case "list" -> listGames();
                 case "join" -> joinGame(params);
-//                case "observe" -> observe(params);
+                case "observe" -> observe(params);
                 case "logout" -> logout();
                 case "clear" -> clear();
                 case "quit" -> "quit";
@@ -76,17 +81,34 @@ public class Postlogin {
                 JoinGameRequest request = new JoinGameRequest(params[1].toUpperCase(), Integer.parseInt(params[0]));
                 JoinGameResult joinGameResult = server.joinGame(request, token);
                 ListGamesResult listGamesResult = server.listGames(token);
-                ChessBoard board = new ChessBoard();
-                board.resetBoard();
-                ChessBoardRender.render(board, params[1].toLowerCase());
+                printChessBoard(params[1].toLowerCase());
                 return SET_TEXT_COLOR_YELLOW + "Successfully joined game";
             } else {
                 return "Enter valid join request -> \"join\" <ID> [WHITE|BLACK]";
             }
-        } catch (Exception e) {
+        } catch (UnauthorizedException | BadRequestException | AlreadyTakenException | DataAccessException e) {
             return preHandler.clientExceptionHandler(e);
         }
 
+    }
+
+    public String observe(String... params) throws Exception {
+        try {
+            if (params.length == 1){
+                printChessBoard("white");
+                return "";
+            } else {
+                return "Enter valid observe request -> \"observe\" <ID>";
+            }
+        } catch (Exception e) {
+            return preHandler.clientExceptionHandler(e);
+        }
+    }
+
+    public void printChessBoard(String color) {
+        ChessBoard board = new ChessBoard();
+        board.resetBoard();
+        ChessBoardRender.render(board, color);
     }
 
     public String listGames() throws Exception {
