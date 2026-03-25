@@ -4,11 +4,16 @@ import java.util.Arrays;
 import java.util.Scanner;
 
 import com.google.gson.Gson;
+import dataaccess.DataAccessException;
 import model.*;
 import exception.ResponseException;
 import model.request.*;
 import model.result.*;
 import server.ServerFacade;
+import service.exceptions.AlreadyTakenException;
+import service.exceptions.BadRequestException;
+import service.exceptions.ServiceException;
+import service.exceptions.UnauthorizedException;
 
 import static client.State.*;
 import static ui.EscapeSequences.*;
@@ -17,6 +22,7 @@ public class Prelogin {
     private final ServerFacade server;
     public State state = SIGNEDOUT;
     private Postlogin postHandler;
+    public AuthData currentUser;
 
     public Prelogin(String serverUrl) {
         server = new ServerFacade(serverUrl);
@@ -36,6 +42,8 @@ public class Prelogin {
                 if(!line.equals("quit")){
                     if(this.state == SIGNEDOUT){
                         result = eval(line);
+                    } else if (line.equals("login")){
+                        result = "";
                     } else {
                         result = postHandler.eval(line);
                     }
@@ -65,22 +73,34 @@ public class Prelogin {
                 default -> help();
             };
         } catch (Exception e) {
-            return e.getMessage();
+            return clientExceptionHandler(e);
         }
     }
 
     public String register(String... params) throws Exception {
         if (params.length == 3){
-            state = State.SIGNEDIN;
             RegisterResult registerResult = server.register(new RegisterRequest(params[0], params[1], params[2]));
+            currentUser = new AuthData(registerResult.authToken(), registerResult.username());
+            state = State.SIGNEDIN;
             return SET_TEXT_COLOR_YELLOW + "Successfully registered " + registerResult.username();
         } else {
-            return "Enter valid registration info -> register <USERNAME <PASSWORD> <EMAIL>";
+            return "Enter valid registration info -> register <USERNAME> <PASSWORD> <EMAIL>";
         }
     }
 
     public String login(String... params) throws Exception {
-        return null;
+        if (params.length == 2){
+            try {
+                LoginResult loginResult = server.login(new LoginRequest(params[0], params[1]));
+                currentUser = new AuthData(loginResult.authToken(), loginResult.username());
+                state = SIGNEDIN;
+                return SET_TEXT_COLOR_YELLOW + "Successfully logged in as: " + loginResult.username();
+            } catch (Exception e) {
+                return clientExceptionHandler(e);
+            }
+        } else {
+            return "Enter valid login info -> login <USERNAME> <PASSWORD>";
+        }
     }
 
     public String clear() throws Exception {
@@ -89,17 +109,44 @@ public class Prelogin {
     }
 
     private void printPrompt() {
-        System.out.print("\n" + ERASE_LINE + ">>> ");
+        if(state == SIGNEDOUT){
+            System.out.print("\n" + ERASE_LINE + "[LOGGED_OUT] >>> ");
+        } else {
+            System.out.print("\n" + ERASE_LINE + "[LOGGED_IN] >>> ");
+        }
     }
 
     public String help() {
         return """
-                Try typing:
+                Options:
                     register <USERNAME> <PASSWORD> <EMAIL> - to create an account
                     login <USERNAME> <PASSWORD> - to play chess
                     quit - playing chess
                     help - with possible commands
                 """;
+    }
+
+    public String clientExceptionHandler(Exception e){
+        switch(e) {
+            case UnauthorizedException ex -> {
+                return ex.getMessage();
+            }
+            case BadRequestException ex -> {
+                return ex.getMessage();
+            }
+            case AlreadyTakenException ex-> {
+                return ex.getMessage();
+            }
+            case DataAccessException ex -> {
+                return ex.getMessage();
+            }
+            case ServiceException ex -> {
+                return ex.getMessage();
+            }
+            default -> {
+                return "Oops! Something went wrong";
+            }
+        }
     }
 }
 
