@@ -1,14 +1,14 @@
 package client;
 
-import dataaccess.DataAccessException;
+import chess.ChessBoard;
 import model.GameData;
 import model.request.*;
 import model.result.*;
 import server.ServerFacade;
-import service.exceptions.*;
+import ui.ChessBoardRender;
 
-import java.awt.*;
 import java.util.Arrays;
+import java.util.List;
 
 import static client.State.*;
 import static ui.EscapeSequences.*;
@@ -32,7 +32,7 @@ public class Postlogin {
             return switch (cmd) {
                 case "create" -> createGame(params);
                 case "list" -> listGames();
-//                case "join" -> joinGame(params);
+                case "join" -> joinGame(params);
 //                case "observe" -> observe(params);
                 case "logout" -> logout();
                 case "clear" -> clear();
@@ -69,9 +69,25 @@ public class Postlogin {
         }
     }
 
-//    public String joinGame(String... Params) throws Exception {
-//        JoinGameResult joinGameResult = server.
-//    }
+    public String joinGame(String... params) throws Exception {
+        try {
+            if(params.length == 2){
+                String token = preHandler.currentUser.authToken();
+                JoinGameRequest request = new JoinGameRequest(params[1].toUpperCase(), Integer.parseInt(params[0]));
+                JoinGameResult joinGameResult = server.joinGame(request, token);
+                ListGamesResult listGamesResult = server.listGames(token);
+                ChessBoard board = new ChessBoard();
+                board.resetBoard();
+                ChessBoardRender.render(board, params[1].toLowerCase());
+                return SET_TEXT_COLOR_YELLOW + "Successfully joined game";
+            } else {
+                return "Enter valid join request -> \"join\" <ID> [WHITE|BLACK]";
+            }
+        } catch (Exception e) {
+            return preHandler.clientExceptionHandler(e);
+        }
+
+    }
 
     public String listGames() throws Exception {
         try {

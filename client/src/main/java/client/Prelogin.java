@@ -144,7 +144,7 @@ public class Prelogin {
                 return ex.getMessage();
             }
             default -> {
-                return "Oops! Something went wrong";
+                return e.getMessage().toString();
             }
         }
     }
