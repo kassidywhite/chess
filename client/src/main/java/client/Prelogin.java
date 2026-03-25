@@ -2,11 +2,7 @@ package client;
 
 import java.util.Arrays;
 import java.util.Scanner;
-
-import com.google.gson.Gson;
-import dataaccess.DataAccessException;
 import model.*;
-import exception.ResponseException;
 import model.request.*;
 import model.result.*;
 import server.ServerFacade;
