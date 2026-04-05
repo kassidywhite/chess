@@ -12,7 +12,6 @@ import java.util.Set;
 
 public class WebSocketFacade extends Endpoint {
 
-
     public WebSocketFacade(@NotNull HandlerType method, @NotNull String path, @NotNull Set<? extends EndpointMetadata> metadata, @NotNull Handler handler) {
         super(method, path, metadata, handler);
     }
