@@ -2,6 +2,8 @@ package client;
 
 import java.util.Arrays;
 import java.util.Scanner;
+
+import com.sun.nio.sctp.NotificationHandler;
 import model.*;
 import model.request.*;
 import model.result.*;
@@ -10,7 +12,7 @@ import serverfacade.ServerFacade;
 import static client.State.*;
 import static ui.EscapeSequences.*;
 
-public class Prelogin {
+public class Prelogin implements NotificationHandler {
     private final ServerFacade server;
     public State state = SIGNEDOUT;
     private Postlogin postHandler;
