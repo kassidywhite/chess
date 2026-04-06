@@ -3,6 +3,7 @@ package client;
 import java.util.Arrays;
 import java.util.Scanner;
 
+import client.websocket.WebSocketFacade;
 import com.sun.nio.sctp.HandlerResult;
 import client.websocket.NotificationHandler;
 import com.sun.nio.sctp.Notification;
@@ -18,29 +19,15 @@ import websocket.messages.ServerMessage;
 import static client.State.*;
 import static ui.EscapeSequences.*;
 
-public class Prelogin implements NotificationHandler {
+public class Prelogin {
     private final ServerFacade server;
     public State state = SIGNEDOUT;
     private Postlogin postHandler;
     public AuthData currentUser;
 
-    public Prelogin(String serverUrl) {
+    public Prelogin(String serverUrl) throws Exception {
         server = new ServerFacade(serverUrl);
         postHandler = new Postlogin(serverUrl, server, this);
-    }
-
-    @Override
-    public void notify(ServerMessage notification) {
-        switch(notification) {
-            case NotificationMessage msg ->
-                System.out.println(SET_TEXT_COLOR_BLUE + msg.getMessage());
-            case ErrorMessage msg ->
-                    System.out.println(SET_TEXT_COLOR_BLUE + msg.getMessage());
-            case LoadGameMessage msg ->
-                    System.out.println(SET_TEXT_COLOR_BLUE + msg.getMessage());
-            default ->
-                    throw new IllegalStateException("Unexpected value: " + notification);
-        }
     }
 
     public void run() {

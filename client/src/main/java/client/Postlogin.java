@@ -1,25 +1,47 @@
 package client;
 
 import chess.ChessBoard;
+import client.websocket.WebSocketFacade;
 import model.GameData;
 import model.request.*;
 import model.result.*;
 import serverfacade.ServerFacade;
+import client.websocket.NotificationHandler;
+import websocket.messages.ErrorMessage;
+import websocket.messages.LoadGameMessage;
+import websocket.messages.NotificationMessage;
+import websocket.messages.ServerMessage;
 
 import java.util.Arrays;
 
 import static client.State.*;
 import static ui.EscapeSequences.*;
 
-public class Postlogin {
+public class Postlogin implements NotificationHandler {
     private final ServerFacade server;
     private final String serverUrl;
     private final Prelogin preHandler;
+    private final WebSocketFacade ws;
 
-    public Postlogin(String serverUrl, ServerFacade server, Prelogin preHandler) {
+    public Postlogin(String serverUrl, ServerFacade server, Prelogin preHandler) throws Exception {
         this.server = server;
         this.serverUrl = serverUrl;
         this.preHandler = preHandler;
+        ws = new WebSocketFacade(serverUrl, this);
+    }
+
+    @Override
+    public void notify(ServerMessage notification) {
+        switch(notification) {
+            case NotificationMessage msg ->
+                    System.out.println(SET_TEXT_COLOR_BLUE + msg.getMessage());
+            case ErrorMessage msg ->
+                    System.out.println(SET_TEXT_COLOR_BLUE + msg.getMessage());
+            case LoadGameMessage msg ->
+                    System.out.println(SET_TEXT_COLOR_BLUE + msg.getMessage());
+            default ->
+                    throw new IllegalStateException("Unexpected value: " + notification);
+        }
     }
 
     public String eval(String input) {
