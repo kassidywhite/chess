@@ -3,11 +3,17 @@ package client;
 import java.util.Arrays;
 import java.util.Scanner;
 
-import com.sun.nio.sctp.NotificationHandler;
+import com.sun.nio.sctp.HandlerResult;
+import client.websocket.NotificationHandler;
+import com.sun.nio.sctp.Notification;
 import model.*;
 import model.request.*;
 import model.result.*;
 import serverfacade.ServerFacade;
+import websocket.messages.ErrorMessage;
+import websocket.messages.LoadGameMessage;
+import websocket.messages.NotificationMessage;
+import websocket.messages.ServerMessage;
 
 import static client.State.*;
 import static ui.EscapeSequences.*;
@@ -21,6 +27,20 @@ public class Prelogin implements NotificationHandler {
     public Prelogin(String serverUrl) {
         server = new ServerFacade(serverUrl);
         postHandler = new Postlogin(serverUrl, server, this);
+    }
+
+    @Override
+    public void notify(ServerMessage notification) {
+        switch(notification) {
+            case NotificationMessage msg ->
+                System.out.println(SET_TEXT_COLOR_BLUE + msg.getMessage());
+            case ErrorMessage msg ->
+                    System.out.println(SET_TEXT_COLOR_BLUE + msg.getMessage());
+            case LoadGameMessage msg ->
+                    System.out.println(SET_TEXT_COLOR_BLUE + msg.getMessage());
+            default ->
+                    throw new IllegalStateException("Unexpected value: " + notification);
+        }
     }
 
     public void run() {
@@ -75,7 +95,7 @@ public class Prelogin implements NotificationHandler {
         if (params.length == 3){
             RegisterResult registerResult = server.register(new RegisterRequest(params[0], params[1], params[2]));
             currentUser = new AuthData(registerResult.authToken(), registerResult.username());
-            state = State.SIGNEDIN;
+            state = SIGNEDIN;
             return SET_TEXT_COLOR_YELLOW + "Successfully registered " + registerResult.username();
         } else {
             return "Enter valid registration info -> register <USERNAME> <PASSWORD> <EMAIL>";
