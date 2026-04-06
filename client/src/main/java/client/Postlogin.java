@@ -22,12 +22,15 @@ public class Postlogin implements NotificationHandler {
     private final String serverUrl;
     private final Prelogin preHandler;
     private final WebSocketFacade ws;
+    public State state = SIGNEDIN;
+    private InGame inGameHandler;
 
     public Postlogin(String serverUrl, ServerFacade server, Prelogin preHandler) throws Exception {
         this.server = server;
         this.serverUrl = serverUrl;
         this.preHandler = preHandler;
         ws = new WebSocketFacade(serverUrl, this);
+        inGameHandler = new InGame(serverUrl, server, preHandler, ws);
     }
 
     @Override
@@ -46,19 +49,23 @@ public class Postlogin implements NotificationHandler {
 
     public String eval(String input) {
         try {
-            String[] tokens = input.toLowerCase().split(" ");
-            String cmd = (tokens.length > 0) ? tokens[0] : "help";
-            String[] params = Arrays.copyOfRange(tokens, 1, tokens.length);
-            return switch (cmd) {
-                case "create" -> createGame(params);
-                case "list" -> listGames();
-                case "join" -> joinGame(params);
-                case "observe" -> observe(params);
-                case "logout" -> logout();
-                case "clear" -> clear();
-                case "quit" -> "quit";
-                default -> help();
-            };
+            if(this.state == INGAME){
+                return inGameHandler.eval(input);
+            } else {
+                String[] tokens = input.toLowerCase().split(" ");
+                String cmd = (tokens.length > 0) ? tokens[0] : "help";
+                String[] params = Arrays.copyOfRange(tokens, 1, tokens.length);
+                return switch (cmd) {
+                    case "create" -> createGame(params);
+                    case "list" -> listGames();
+                    case "join" -> joinGame(params);
+                    case "observe" -> observe(params);
+                    case "logout" -> logout();
+                    case "clear" -> clear();
+                    case "quit" -> "quit";
+                    default -> help();
+                };
+            }
         } catch (Exception e) {
             return preHandler.clientExceptionHandler(e);
         }

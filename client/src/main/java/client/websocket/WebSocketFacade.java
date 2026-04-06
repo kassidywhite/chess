@@ -22,6 +22,8 @@ public class WebSocketFacade extends Endpoint {
             this.notificationHandler = notificationHandler;
 
             WebSocketContainer container = ContainerProvider.getWebSocketContainer();
+            this.session = container.connectToServer(this, socketURI);
+
             this.session.addMessageHandler(new MessageHandler.Whole<String>() {
                     @Override
                     public void onMessage(String message) {
@@ -30,7 +32,7 @@ public class WebSocketFacade extends Endpoint {
                 }
             });
 
-        } catch (DeploymentException | IOException | URISyntaxException ex) {
+        } catch (URISyntaxException ex) {
             throw new Exception("Oops something went wrong!");
         }
     }
