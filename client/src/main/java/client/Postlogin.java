@@ -99,11 +99,13 @@ public class Postlogin implements NotificationHandler {
     public String joinGame(String... params) throws Exception {
         try {
             if(params.length == 2){
+                state = INGAME;
                 String token = preHandler.currentUser.authToken();
                 JoinGameRequest request = new JoinGameRequest(params[1].toUpperCase(), Integer.parseInt(params[0]));
                 JoinGameResult joinGameResult = server.joinGame(request, token);
                 ListGamesResult listGamesResult = server.listGames(token);
                 printChessBoard(params[1].toLowerCase());
+                ws.enterGame(token, Integer.parseInt(params[0]));
                 return SET_TEXT_COLOR_YELLOW + "Successfully joined game";
             } else {
                 return "Enter valid join request -> \"join\" <ID> [WHITE|BLACK]";
@@ -119,6 +121,7 @@ public class Postlogin implements NotificationHandler {
     public String observe(String... params) throws Exception {
         try {
             if (params.length == 1){
+                state = INGAME;
                 String token = preHandler.currentUser.authToken();
                 ListGamesResult listGamesResult = server.listGames(token);
                 for (GameData game : listGamesResult.games()) {

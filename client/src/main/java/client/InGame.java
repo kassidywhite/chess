@@ -13,6 +13,7 @@ public class InGame implements NotificationHandler {
     private final String serverUrl;
     private final Prelogin preHandler;
     private final WebSocketFacade ws;
+    public State state = State.INGAME;
 
     public InGame(String serverUrl, ServerFacade server, Prelogin preHandler, WebSocketFacade ws) throws Exception {
         this.server = server;
@@ -33,7 +34,7 @@ public class InGame implements NotificationHandler {
             String[] params = Arrays.copyOfRange(tokens, 1, tokens.length);
             return switch (cmd) {
 //                case "redraw" -> redraw();
-//                case "leave" -> leave();
+                case "leave" -> leave();
 //                case "makemove" -> makeMove(params);
 //                case "resign" -> resign();
 //                case "highlight" -> highlightLegalMoves(params);
@@ -42,6 +43,11 @@ public class InGame implements NotificationHandler {
         } catch (Exception e) {
             return preHandler.clientExceptionHandler(e);
         }
+    }
+
+    public String leave() {
+        state = State.SIGNEDIN;
+        return "";
     }
 
     public String help() {
