@@ -1,6 +1,8 @@
-package websocket.commands;
+package websocket.messages;
 
-public class ConnectMessage extends UserGameCommand{
+import websocket.commands.UserGameCommand;
+
+public class ConnectMessage extends UserGameCommand {
     public ConnectMessage(CommandType commandType, String authToken, Integer gameID) {
         super(commandType, authToken, gameID);
     }

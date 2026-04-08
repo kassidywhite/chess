@@ -1,14 +1,19 @@
 package server;
 
+import chess.ChessGame;
+import dataaccess.AuthDAO;
 import dataaccess.DataAccessException;
+import dataaccess.GameDAO;
 import io.javalin.*;
 import io.javalin.http.Context;
 import com.google.gson.Gson;
+import model.GameData;
 import model.request.JoinGameRequest;
 import model.request.LoginRequest;
 import model.request.NewGameRequest;
 import model.request.RegisterRequest;
 import model.result.*;
+import server.websocket.WebSocketHandler;
 import service.Service;
 import service.exceptions.AlreadyTakenException;
 import service.exceptions.BadRequestException;
@@ -21,7 +26,8 @@ public class Server {
 
     private final Javalin javalin;
     private final Service service = new Service();
-    private final Gson serializer = new Gson();
+    private static final Gson serializer = new Gson();
+    private final WebSocketHandler webSocketHandler;
 
     public Server() {
         javalin = Javalin.create(config -> config.staticFiles.add("web"));
@@ -33,8 +39,13 @@ public class Server {
         javalin.put("/game", this::joinGame);
         javalin.delete("/db", this::clear);
 
-        // Register your endpoints and exception handlers here.
+        webSocketHandler = new WebSocketHandler(this);
 
+        javalin.ws("/ws", ws -> {
+            ws.onConnect(webSocketHandler);
+            ws.onMessage(webSocketHandler);
+            ws.onClose(webSocketHandler);
+        });
     }
 
     public int run(int desiredPort) {
@@ -44,6 +55,16 @@ public class Server {
 
     public void stop() {
         javalin.stop();
+    }
+
+    public GameData getGame(String token, int gameId) throws ServiceException {
+        ListGamesResult games = service.listGames(token);
+        for (GameData game : games.games()){
+            if (game.gameID() == gameId){
+                return game;
+            }
+        }
+        return null;
     }
 
     private void register(Context ctx) {
@@ -120,7 +141,15 @@ public class Server {
 
     }
 
-    private void serviceExceptionHandler(Context ctx, ServiceException e){
+    public boolean confirmAuth(String user) throws DataAccessException {
+        return service.authAccess.getAuthByUser(user) != null;
+    }
+
+    public String getUserByAuth(String token) throws DataAccessException {
+        return service.authAccess.getUserByAuth(token);
+    }
+
+    public static void serviceExceptionHandler(Context ctx, ServiceException e){
         switch (e) {
             case BadRequestException ex -> {
                 ctx.contentType("application/json");

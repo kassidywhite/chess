@@ -1,6 +1,9 @@
 package serverfacade;
 
+import chess.ChessBoard;
+import chess.ChessGame;
 import com.google.gson.Gson;
+import model.GameData;
 import model.request.JoinGameRequest;
 import model.request.LoginRequest;
 import model.request.NewGameRequest;

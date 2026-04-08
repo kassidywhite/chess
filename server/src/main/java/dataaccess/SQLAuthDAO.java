@@ -81,7 +81,6 @@ public class SQLAuthDAO implements AuthDAO {
         return null;
     }
 
-    @Override
     public String getUserByAuth(String token) throws DataAccessException{
         try (Connection conn = DatabaseManager.getConnection()){
             var statement = "SELECT authToken, username FROM tokens WHERE authToken = ?";
