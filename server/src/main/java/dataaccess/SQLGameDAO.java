@@ -186,6 +186,17 @@ public class SQLGameDAO implements GameDAO {
     }
 
     public void updateGame(GameData gameData) throws DataAccessException {
+        var deleteStmt = "DELETE FROM games WHERE gameID = ?";
+        try(Connection conn = DatabaseManager.getConnection()){
+            try (PreparedStatement ps = conn.prepareStatement(deleteStmt)){
+                ps.setInt(1, gameData.gameID());
+                ps.executeUpdate();
+            }
+        } catch (SQLException | DataAccessException e) {
+            throw new DataAccessException("Internal Service Error");
+        }
+
+
         var statement = "INSERT INTO games (gameID, whiteUsername, blackUsername, gameName, game) VALUES (?, ?, ?, ?, ?)";
         try (Connection conn = DatabaseManager.getConnection()){
             try(PreparedStatement ps = conn.prepareStatement(statement)){

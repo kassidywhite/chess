@@ -44,7 +44,7 @@ public class ChessGame {
         Collection<ChessMove> possibilities = ChessPiece.pieceMoves(board, startPosition);
         for(ChessMove poss: possibilities){
             boardCopy = board.clone();
-            movePiece(poss);
+            movePiece(boardCopy, poss);
             if(!isInCheck(board.getPiece(startPosition).getTeamColor())){
                 moves.add(new ChessMove(poss.getStartPosition(), poss.getEndPosition(), poss.getPromotionPiece()));
             }
@@ -53,12 +53,12 @@ public class ChessGame {
         return moves;
     }
 
-    public void movePiece(ChessMove move) {
-        ChessPiece currPiece = board.getPiece(move.getStartPosition());
+    public void movePiece(ChessBoard boardToUse, ChessMove move) {
+        ChessPiece currPiece = boardToUse.getPiece(move.getStartPosition());
         ChessPosition thisPos = new ChessPosition(move.getEndPosition().getRow(), move.getEndPosition().getColumn());
         ChessPiece addThis = new ChessPiece(currPiece.getTeamColor(), currPiece.getPieceType());
-        boardCopy.addPiece(move.getStartPosition(), null);
-        boardCopy.addPiece(thisPos, addThis);
+        boardToUse.addPiece(move.getStartPosition(), null);
+        boardToUse.addPiece(thisPos, addThis);
     }
 
     public void makeMove(ChessMove move) throws InvalidMoveException {
@@ -82,6 +82,8 @@ public class ChessGame {
             }
             board.addPiece(move.getStartPosition(), null);
             board.addPiece(thisPos, addThis);
+
+            boardCopy = board.clone();
         } else {
             throw new InvalidMoveException();
         }
@@ -93,6 +95,7 @@ public class ChessGame {
     }
 
     public boolean isInCheck(TeamColor teamColor) {
+        boardCopy = board.clone();
         Collection<ChessMove> opponentMoves = new ArrayList<>();
         for(int r = 1; r <= 8; r++){
             for(int c = 1; c <= 8; c++){
@@ -102,7 +105,7 @@ public class ChessGame {
                 }
                 for(ChessMove move: opponentMoves){
                     ChessPiece target = boardCopy.getPiece(move.getEndPosition());
-                    if(target != null && target.getTeamColor() == teamColor && target.getPieceType() == ChessPiece.PieceType.KING){
+                    if(target != null && target.getTeamColor() != teamColor && target.getPieceType() == ChessPiece.PieceType.KING){
                         return true;
                     }
                 }

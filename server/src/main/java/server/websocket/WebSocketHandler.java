@@ -99,13 +99,12 @@ public class WebSocketHandler implements WsConnectHandler, WsMessageHandler, WsC
             } else if (game.getTeamTurn() != moveThis.getTeamColor()) { // check if it's the users turn
                 var errorMessage = new ErrorMessage(ServerMessage.ServerMessageType.ERROR, "Unauthorized to move piece");
                 connections.rootMessage(session, errorMessage);
-            } else if (game.isInCheckmate(moveThis.getTeamColor()) | game.isInStalemate(moveThis.getTeamColor())){
+            } else if (possibilities.isEmpty()){
                 var loadMessage = new LoadGameMessage(ServerMessage.ServerMessageType.LOAD_GAME, null, game);
                 connections.rootMessage(session, loadMessage);
                 var notification = new NotificationMessage(ServerMessage.ServerMessageType.NOTIFICATION, "Game over");
                 connections.rootMessage(session, notification);
-
-            } else if(possibilities.isEmpty() | !possibilities.contains(move)){ // check if the move is valid
+            } else if(!possibilities.contains(move)){ // check if the move is valid
                 var errorMessage = new ErrorMessage(ServerMessage.ServerMessageType.ERROR, "Invalid move");
                 connections.rootMessage(session, errorMessage);
             } else {
@@ -117,13 +116,7 @@ public class WebSocketHandler implements WsConnectHandler, WsMessageHandler, WsC
                 var msg = username + " moved " + moveThis.getPieceType().toString();
                 var notification = new NotificationMessage(ServerMessage.ServerMessageType.NOTIFICATION, msg);
                 connections.broadcast(session, notification, command.getGameID());
-
-                GameData newGameData = new GameData(gameData.gameID(),
-                        gameData.whiteUsername(),
-                        gameData.blackUsername(),
-                        gameData.gameName(),
-                        game);
-                server.updateGame(newGameData);
+                updateGame(gameData, game);
             }
         }
     }
@@ -140,8 +133,42 @@ public class WebSocketHandler implements WsConnectHandler, WsMessageHandler, WsC
         }
     }
 
-    private void resign(Session session, String username, UserGameCommand command){
+    private void resign(Session session, String username, UserGameCommand command) throws DataAccessException, IOException {
+        GameData gameData = server.getGame(command.getGameID());
+        ChessGame game = gameData.game();
 
+        boolean whiteUserCheck = gameData.whiteUsername().equals(username);
+        boolean blackUserCheck = gameData.blackUsername().equals(username);
+
+        if (whiteUserCheck | blackUserCheck){ // check if valid user
+            if (!game.gameOver){ // check if game is not over
+                game.gameOver = true;
+                var msg = String.format("%s has resigned. The game is over.", username);
+                var notification = new NotificationMessage(ServerMessage.ServerMessageType.NOTIFICATION, msg);
+                connections.broadcast(session, notification, command.getGameID());
+                var rootNot = new NotificationMessage(ServerMessage.ServerMessageType.NOTIFICATION, "Game over.");
+                connections.rootMessage(session, rootNot);
+                updateGame(gameData, game);
+            } else {
+                var msg = "Game already finished.";
+                var errorNot = new ErrorMessage(ServerMessage.ServerMessageType.ERROR, msg);
+                connections.rootMessage(session, errorNot);
+            }
+        } else {
+            var errnot = new ErrorMessage(ServerMessage.ServerMessageType.ERROR, "Unauthorized");
+            connections.rootMessage(session, errnot);
+        }
+    }
+
+    private void updateGame(GameData gameData, ChessGame newGame) throws DataAccessException {
+        GameData newGD = new GameData(
+                gameData.gameID(),
+                gameData.whiteUsername(),
+                gameData.blackUsername(),
+                gameData.gameName(),
+                newGame
+        );
+        server.updateGame(newGD);
     }
 
     private String getUsername(String authToken) throws DataAccessException {
