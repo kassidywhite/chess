@@ -1,6 +1,7 @@
 package client;
 
 import chess.ChessBoard;
+import chess.ChessGame;
 import client.websocket.WebSocketFacade;
 import model.GameData;
 import model.request.*;
@@ -24,13 +25,14 @@ public class Postlogin implements NotificationHandler {
     private final WebSocketFacade ws;
     public State state = SIGNEDIN;
     private InGame inGameHandler;
+    public GameData activeGame = null;
 
     public Postlogin(String serverUrl, ServerFacade server, Prelogin preHandler) throws Exception {
         this.server = server;
         this.serverUrl = serverUrl;
         this.preHandler = preHandler;
         ws = new WebSocketFacade(serverUrl, this);
-        inGameHandler = new InGame(serverUrl, server, preHandler, ws);
+        inGameHandler = new InGame(serverUrl, server, preHandler, this, ws);
     }
 
     @Override
@@ -105,6 +107,7 @@ public class Postlogin implements NotificationHandler {
                 JoinGameResult joinGameResult = server.joinGame(request, token);
                 ListGamesResult listGamesResult = server.listGames(token);
                 printChessBoard(params[1].toLowerCase());
+                activeGame = listGamesResult.getGame(Integer.parseInt(params[0]));
                 ws.enterGame(token, Integer.parseInt(params[0]));
                 return SET_TEXT_COLOR_YELLOW + "Successfully joined game";
             } else {
@@ -126,6 +129,7 @@ public class Postlogin implements NotificationHandler {
                 ListGamesResult listGamesResult = server.listGames(token);
                 for (GameData game : listGamesResult.games()) {
                     if(game.gameID() == Integer.parseInt(params[0])) {
+                        activeGame = listGamesResult.getGame(game.gameID());
                         printChessBoard("white");
                         return "";
                     }

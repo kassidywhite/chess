@@ -1,5 +1,6 @@
 package client;
 
+import chess.ChessGame;
 import client.websocket.NotificationHandler;
 import client.websocket.WebSocketFacade;
 import serverfacade.ServerFacade;
@@ -16,11 +17,13 @@ public class InGame implements NotificationHandler {
     private final Prelogin preHandler;
     private final WebSocketFacade ws;
     public State state = State.INGAME;
+    Postlogin postHandler;
 
-    public InGame(String serverUrl, ServerFacade server, Prelogin preHandler, WebSocketFacade ws) throws Exception {
+    public InGame(String serverUrl, ServerFacade server, Prelogin preHandler, Postlogin postHandler, WebSocketFacade ws) {
         this.server = server;
         this.serverUrl = serverUrl;
         this.preHandler = preHandler;
+        this.postHandler = postHandler;
         this.ws = ws;
     }
 
@@ -41,7 +44,7 @@ public class InGame implements NotificationHandler {
             String cmd = (tokens.length > 0) ? tokens[0] : "help";
             String[] params = Arrays.copyOfRange(tokens, 1, tokens.length);
             return switch (cmd) {
-//                case "redraw" -> redraw();
+                case "redraw" -> redraw();
                 case "leave" -> leave();
 //                case "makemove" -> makeMove(params);
 //                case "resign" -> resign();
@@ -53,9 +56,24 @@ public class InGame implements NotificationHandler {
         }
     }
 
-    public String leave() {
-        state = State.SIGNEDIN;
+    public String redraw() {
+        String username = preHandler.currentUser.username();
+        boolean isBlack = postHandler.activeGame.blackUsername() != null &&
+                postHandler.activeGame.blackUsername().equals(username);
+        if(isBlack) {
+            ChessBoardRender.render(postHandler.activeGame.game().getBoard(), "black");
+        } else {
+            ChessBoardRender.render(postHandler.activeGame.game().getBoard(), "white");
+        }
         return "";
+    }
+
+    public String leave() {
+        String token = preHandler.currentUser.authToken();
+        //ws.leaveGame(token, gameID);
+        state = State.SIGNEDIN;
+        // ws.leaveGame();
+        return "leave";
     }
 
     public String help() {
