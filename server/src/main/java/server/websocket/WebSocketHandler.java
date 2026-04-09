@@ -61,6 +61,8 @@ public class WebSocketHandler implements WsConnectHandler, WsMessageHandler, WsC
     }
 
     private void connect(Session session, String username, UserGameCommand command) throws IOException, ServiceException, DataAccessException {
+        GameData gameData = server.getGame(command.getGameID());
+
         if (!server.confirmAuth(username)) { // check if user registered
             var errorMessage = new ErrorMessage(ServerMessage.ServerMessageType.ERROR, "Didn't register");
             connections.rootMessage(session, errorMessage);
@@ -72,6 +74,9 @@ public class WebSocketHandler implements WsConnectHandler, WsMessageHandler, WsC
             ChessGame game = server.getGame(command.getGameID()).game();
             var notification = new LoadGameMessage(ServerMessage.ServerMessageType.LOAD_GAME, null, game);
             connections.rootMessage(session, notification);
+
+            // update database with correct info
+
             var message = String.format("%s has entered the game", username);
             var othersNotification = new NotificationMessage(ServerMessage.ServerMessageType.NOTIFICATION, message);
             connections.broadcast(session, othersNotification, command.getGameID());
@@ -99,12 +104,7 @@ public class WebSocketHandler implements WsConnectHandler, WsMessageHandler, WsC
             } else if (game.getTeamTurn() != moveThis.getTeamColor()) { // check if it's the users turn
                 var errorMessage = new ErrorMessage(ServerMessage.ServerMessageType.ERROR, "Unauthorized to move piece");
                 connections.rootMessage(session, errorMessage);
-            } else if (possibilities.isEmpty()){
-                var loadMessage = new LoadGameMessage(ServerMessage.ServerMessageType.LOAD_GAME, null, game);
-                connections.rootMessage(session, loadMessage);
-                var notification = new NotificationMessage(ServerMessage.ServerMessageType.NOTIFICATION, "Game over");
-                connections.rootMessage(session, notification);
-            } else if(!possibilities.contains(move)){ // check if the move is valid
+            } else if(possibilities.isEmpty() | !possibilities.contains(move)){ // check if the move is valid
                 var errorMessage = new ErrorMessage(ServerMessage.ServerMessageType.ERROR, "Invalid move");
                 connections.rootMessage(session, errorMessage);
             } else {
@@ -122,10 +122,34 @@ public class WebSocketHandler implements WsConnectHandler, WsMessageHandler, WsC
     }
 
     private void leaveGame(Session session, String username, UserGameCommand command) throws IOException, DataAccessException {
+        GameData gameData = server.getGame(command.getGameID());
+        boolean whiteUserCheck = gameData.whiteUsername().equals(username);
+        boolean blackUserCheck = gameData.blackUsername().equals(username);
+
         if(server.getGame(command.getGameID()) == null){
             var errorMessage = new ErrorMessage(ServerMessage.ServerMessageType.ERROR, "Invalid GameID");
             connections.rootMessage(session, errorMessage);
         } else {
+            GameData newGD;
+            if(gameData.whiteUsername() == username) {
+                newGD = new GameData(
+                        command.getGameID(),
+                        null,
+                        gameData.blackUsername(),
+                        gameData.gameName(),
+                        gameData.game()
+                );
+                updateGame(newGD, newGD.game());
+            } else {
+                newGD = new GameData(
+                        command.getGameID(),
+                        gameData.whiteUsername(),
+                        gameData.blackUsername(),
+                        null,
+                        gameData.game()
+                );
+                updateGame(newGD, newGD.game());
+            }
             connections.removeSession(command.getGameID(), session);
             var message = String.format("%s has left the game", username);
             var othersNotification = new NotificationMessage(ServerMessage.ServerMessageType.NOTIFICATION, message);
