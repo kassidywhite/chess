@@ -23,6 +23,10 @@ public class ConnectionManager {
         });
     }
 
+    public boolean connectionExists(int gameId) {
+        return connections.get(gameId) != null;
+    }
+
     public void remove(int gameId){
         connections.remove(gameId);
     }

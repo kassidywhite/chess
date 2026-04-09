@@ -25,7 +25,7 @@ public class Service {
 
     final UserDAO userAccess = new SQLUserDAO();
     public final AuthDAO authAccess = new SQLAuthDAO();
-    final GameDAO gameAccess = new SQLGameDAO();
+    public final GameDAO gameAccess = new SQLGameDAO();
 
     public Service(){}
 
@@ -151,6 +151,10 @@ public class Service {
         } catch (DataAccessException e) {
             throw new ServiceException("Internal Service Error");
         }
+    }
+
+    public void updateGame(GameData gameData) throws DataAccessException {
+        gameAccess.updateGame(gameData);
     }
 
     public void addUser(UserData data) throws ServiceException {

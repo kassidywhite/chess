@@ -57,14 +57,12 @@ public class Server {
         javalin.stop();
     }
 
-    public GameData getGame(String token, int gameId) throws ServiceException {
-        ListGamesResult games = service.listGames(token);
-        for (GameData game : games.games()){
-            if (game.gameID() == gameId){
-                return game;
-            }
-        }
-        return null;
+    public GameData getGame(int gameId) throws DataAccessException {
+        return service.gameAccess.getGameByID(gameId);
+    }
+
+    public void updateGame(GameData gameData) throws DataAccessException {
+        service.updateGame(gameData);
     }
 
     private void register(Context ctx) {

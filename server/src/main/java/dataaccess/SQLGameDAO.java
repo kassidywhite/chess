@@ -184,4 +184,22 @@ public class SQLGameDAO implements GameDAO {
             throw new RuntimeException(e);
         }
     }
+
+    public void updateGame(GameData gameData) throws DataAccessException {
+        var statement = "INSERT INTO games (gameID, whiteUsername, blackUsername, gameName, game) VALUES (?, ?, ?, ?, ?)";
+        try (Connection conn = DatabaseManager.getConnection()){
+            try(PreparedStatement ps = conn.prepareStatement(statement)){
+                String gameJson = new Gson().toJson(gameData.game());
+                ps.setInt(1, gameData.gameID());
+                ps.setString(2, gameData.whiteUsername());
+                ps.setString(3, gameData.blackUsername());
+                ps.setString(4, gameData.gameName());
+                ps.setString(5, gameJson);
+
+                ps.executeUpdate();
+            }
+        } catch (SQLException | DataAccessException e) {
+            throw new DataAccessException("Internal Service Error");
+        }
+    }
 }

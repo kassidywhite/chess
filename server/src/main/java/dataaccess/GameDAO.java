@@ -1,5 +1,6 @@
 package dataaccess;
 
+import chess.ChessGame;
 import model.GameData;
 
 import java.util.List;
@@ -15,5 +16,7 @@ public interface GameDAO {
 
     void deleteGame(String gameName) throws DataAccessException;
     void deleteAllGames();
+
+    void updateGame(GameData gameData) throws DataAccessException;
 }
 

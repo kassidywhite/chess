@@ -60,4 +60,9 @@ public class MemoryGameDAO implements GameDAO {
     public void deleteAllGames() {
         games.clear();
     }
+
+    @Override
+    public void updateGame(GameData gameData) throws DataAccessException {
+
+    }
 }

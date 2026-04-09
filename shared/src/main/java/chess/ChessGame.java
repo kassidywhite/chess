@@ -14,6 +14,7 @@ public class ChessGame {
     TeamColor teamTurn;
     ChessBoard board;
     ChessBoard boardCopy;
+    public boolean gameOver = false;
 
     public ChessGame() {
         teamTurn = TeamColor.WHITE;
@@ -122,6 +123,7 @@ public class ChessGame {
                 return false;
             }
         }
+        gameOver = true;
         return true;
     }
 
@@ -151,6 +153,7 @@ public class ChessGame {
                 return false;
             }
         }
+        gameOver = true;
         return true;
     }
 
