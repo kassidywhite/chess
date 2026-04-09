@@ -3,6 +3,8 @@ package client;
 import client.websocket.NotificationHandler;
 import client.websocket.WebSocketFacade;
 import serverfacade.ServerFacade;
+import websocket.messages.ErrorMessage;
+import websocket.messages.LoadGameMessage;
 import websocket.messages.NotificationMessage;
 import websocket.messages.ServerMessage;
 
@@ -24,7 +26,13 @@ public class InGame implements NotificationHandler {
 
     @Override
     public void notify(ServerMessage notification) {
-
+        switch (notification) {
+            case LoadGameMessage msg -> System.out.println(msg.getMessage());
+            case NotificationMessage msg -> System.out.println(msg.getMessage());
+            case ErrorMessage msg -> System.out.println(msg.getMessage());
+            default ->
+                System.out.println("oops something went wrong");
+        }
     }
 
     public String eval(String input) {

@@ -104,11 +104,25 @@ public class WebSocketHandler implements WsConnectHandler, WsMessageHandler, WsC
             } else if (game.getTeamTurn() != moveThis.getTeamColor()) { // check if it's the users turn
                 var errorMessage = new ErrorMessage(ServerMessage.ServerMessageType.ERROR, "Unauthorized to move piece");
                 connections.rootMessage(session, errorMessage);
-            } else if(possibilities.isEmpty() | !possibilities.contains(move)){ // check if the move is valid
+            } else if (game.gameOver){
+                var errorMessage = new ErrorMessage(ServerMessage.ServerMessageType.ERROR, "Game is over");
+                connections.rootMessage(session, errorMessage);
+            }
+            else if(possibilities.isEmpty() | !possibilities.contains(move)){ // check if the move is valid
                 var errorMessage = new ErrorMessage(ServerMessage.ServerMessageType.ERROR, "Invalid move");
                 connections.rootMessage(session, errorMessage);
             } else {
                 game.makeMove(move);
+                game.isInCheckmate(game.getTeamTurn());
+                GameData newGD = new GameData(
+                        gameData.gameID(),
+                        gameData.whiteUsername(),
+                        gameData.blackUsername(),
+                        gameData.gameName(),
+                        game
+                );
+                updateGame(newGD, game);
+
                 var loadMessage = new LoadGameMessage(ServerMessage.ServerMessageType.LOAD_GAME, null, game);
                 connections.rootMessage(session, loadMessage);
                 connections.broadcast(session, loadMessage, command.getGameID());
@@ -116,45 +130,53 @@ public class WebSocketHandler implements WsConnectHandler, WsMessageHandler, WsC
                 var msg = username + " moved " + moveThis.getPieceType().toString();
                 var notification = new NotificationMessage(ServerMessage.ServerMessageType.NOTIFICATION, msg);
                 connections.broadcast(session, notification, command.getGameID());
-                updateGame(gameData, game);
+
+                if (game.gameOver){
+                    var not = new NotificationMessage(ServerMessage.ServerMessageType.NOTIFICATION, "in checkmate or stalemate");
+                    connections.broadcast(session, not, command.getGameID());
+                    connections.rootMessage(session, not);
+                }
             }
         }
     }
 
     private void leaveGame(Session session, String username, UserGameCommand command) throws IOException, DataAccessException {
         GameData gameData = server.getGame(command.getGameID());
-        boolean whiteUserCheck = gameData.whiteUsername().equals(username);
-        boolean blackUserCheck = gameData.blackUsername().equals(username);
+        boolean whiteUserCheck = gameData.whiteUsername() != null && gameData.whiteUsername().equals(username);
+        boolean blackUserCheck = gameData.blackUsername() != null && gameData.blackUsername().equals(username);
 
-        if(server.getGame(command.getGameID()) == null){
-            var errorMessage = new ErrorMessage(ServerMessage.ServerMessageType.ERROR, "Invalid GameID");
-            connections.rootMessage(session, errorMessage);
-        } else {
-            GameData newGD;
-            if(gameData.whiteUsername() == username) {
-                newGD = new GameData(
-                        command.getGameID(),
-                        null,
-                        gameData.blackUsername(),
-                        gameData.gameName(),
-                        gameData.game()
-                );
-                updateGame(newGD, newGD.game());
-            } else {
-                newGD = new GameData(
-                        command.getGameID(),
-                        gameData.whiteUsername(),
-                        gameData.blackUsername(),
-                        null,
-                        gameData.game()
-                );
-                updateGame(newGD, newGD.game());
+        if(server.getGame(command.getGameID()) != null) {
+            if (whiteUserCheck | blackUserCheck) {
+                GameData newGD;
+                if (whiteUserCheck) {
+                    newGD = new GameData(
+                            command.getGameID(),
+                            null,
+                            gameData.blackUsername(),
+                            gameData.gameName(),
+                            gameData.game()
+                    );
+                    updateGame(newGD, newGD.game());
+                } else {
+                    newGD = new GameData(
+                            command.getGameID(),
+                            gameData.whiteUsername(),
+                            null,
+                            gameData.gameName(),
+                            gameData.game()
+                    );
+                    updateGame(newGD, newGD.game());
+                }
             }
             connections.removeSession(command.getGameID(), session);
             var message = String.format("%s has left the game", username);
             var othersNotification = new NotificationMessage(ServerMessage.ServerMessageType.NOTIFICATION, message);
             connections.broadcast(session, othersNotification, command.getGameID());
-        }
+        } else {
+                var errorMessage = new ErrorMessage(ServerMessage.ServerMessageType.ERROR, "Invalid GameID");
+                connections.rootMessage(session, errorMessage);
+            }
+
     }
 
     private void resign(Session session, String username, UserGameCommand command) throws DataAccessException, IOException {

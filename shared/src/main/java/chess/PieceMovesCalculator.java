@@ -313,53 +313,53 @@ public class PieceMovesCalculator {
         return isPiece;
     }
 
-    public int[] getClosestStraightPiece(String direction){
-        int[] closePiece = new int[2];
+    public int[] getClosestStraightPiece(String direction) {
+        int[] closest_piece = new int[2];
 
-        // check bottom
-        int r = currRow;
-        int c = currCol;
-        if(direction.equals("down")){
-            r -= 1;
-            while(c <= 8 && c >= 1 && r <= 8 && r >= 1){
-                if(board.getPiece(new ChessPosition(r, c)) != null){
-                    closePiece[0] = r;
-                    closePiece[1] = c;
-                    break;
+        //check down
+        if (direction.equals("down")) {
+            for (int r = currRow - 1; r >= 1; r--) {
+                ChessPosition testing = new ChessPosition(r, currCol);
+                if (board.getPiece(testing) != null) {
+                    closest_piece[0] = r;
+                    closest_piece[1] = currCol;
+                    return closest_piece;
                 }
-                r -= 1;
-            }
-        } else if(direction.equals("up")){
-            r += 1;
-            while(c <= 8 && c >= 1 && r <= 8 && r >= 1){
-                if(board.getPiece(new ChessPosition(r, c)) != null){
-                    closePiece[0] = r;
-                    closePiece[1] = c;
-                    break;
-                }
-                r += 1;
-            }
-        } else if(direction.equals("left")){
-            c -= 1;
-            while(c <= 8 && c >= 1 && r <= 8 && r >= 1){
-                if(board.getPiece(new ChessPosition(r, c)) != null){
-                    closePiece[0] = r;
-                    closePiece[1] = c;
-                    break;
-                }
-                c -= 1;
-            }
-        } else if(direction.equals("right")){
-            c += 1;
-            while(c <= 8 && c >= 1 && r <= 8 && r >= 1){
-                if(board.getPiece(new ChessPosition(r, c)) != null){
-                    closePiece[0] = r;
-                    closePiece[1] = c;
-                    break;
-                }
-                c += 1;
             }
         }
-        return closePiece;
+        //check up
+        if (direction.equals("up")) {
+            for (int r = currRow + 1; r <= 8; r++) {
+                ChessPosition testing = new ChessPosition(r, currCol);
+                if (board.getPiece(testing) != null) {
+                    closest_piece[0] = r;
+                    closest_piece[1] = currCol;
+                    return closest_piece;
+                }
+            }
+        }
+        //check left
+        if (direction.equals("left")) {
+            for (int c = currCol - 1; c >= 1; c--) {
+                ChessPosition testing = new ChessPosition(currRow, c);
+                if (board.getPiece(testing) != null) {
+                    closest_piece[0] = currRow;
+                    closest_piece[1] = c;
+                    return closest_piece;
+                }
+            }
+        }
+        //check right
+        if (direction.equals("right")) {
+            for (int c = currCol + 1; c <= 8; c++) {
+                ChessPosition testing = new ChessPosition(currRow, c);
+                if (board.getPiece(testing) != null) {
+                    closest_piece[0] = currRow;
+                    closest_piece[1] = c;
+                    return closest_piece;
+                }
+            }
+        }
+        return closest_piece;
     }
 }
