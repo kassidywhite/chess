@@ -1,6 +1,5 @@
 package client;
 
-import chess.ChessGame;
 import client.websocket.NotificationHandler;
 import client.websocket.WebSocketFacade;
 import model.GameData;

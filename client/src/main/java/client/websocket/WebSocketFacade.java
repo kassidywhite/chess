@@ -2,7 +2,7 @@ package client.websocket;
 
 import com.google.gson.Gson;
 import jakarta.websocket.*;
-import org.eclipse.jetty.util.IO;
+
 import websocket.commands.UserGameCommand;
 import websocket.messages.ErrorMessage;
 import websocket.messages.LoadGameMessage;
@@ -12,7 +12,6 @@ import websocket.messages.ServerMessage;
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.util.Scanner;
 
 public class WebSocketFacade extends Endpoint {
 
