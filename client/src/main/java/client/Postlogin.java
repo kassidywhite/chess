@@ -2,6 +2,7 @@ package client;
 
 import chess.ChessBoard;
 import chess.ChessGame;
+import chess.ChessMove;
 import client.websocket.WebSocketFacade;
 import model.GameData;
 import model.request.*;
@@ -39,9 +40,9 @@ public class Postlogin implements NotificationHandler {
     public void notify(ServerMessage notification) {
         switch (notification) {
             case NotificationMessage msg ->
-                    System.out.print(SET_TEXT_COLOR_BLUE + msg.getMessage());
+                    System.out.println(SET_TEXT_COLOR_BLUE + msg.getMessage());
             case ErrorMessage msg ->
-                    System.out.print(SET_TEXT_COLOR_BLUE + msg.getMessage());
+                    System.out.println(SET_TEXT_COLOR_BLUE + msg.getMessage());
             case LoadGameMessage msg ->
                     System.out.print("");
             default ->
@@ -97,16 +98,16 @@ public class Postlogin implements NotificationHandler {
     public String joinGame(String... params) throws Exception {
         try {
             if(params.length == 2){
-                preHandler.state = INGAME;
-                state = INGAME;
-                inGameHandler.state = INGAME;
                 String token = preHandler.currentUser.authToken();
                 JoinGameRequest request = new JoinGameRequest(params[1].toUpperCase(), Integer.parseInt(params[0]));
                 JoinGameResult joinGameResult = server.joinGame(request, token);
                 ListGamesResult listGamesResult = server.listGames(token);
-                printChessBoard(params[1].toLowerCase());
                 activeGame = listGamesResult.getGame(Integer.parseInt(params[0]));
+                printChessBoard(params[1].toLowerCase());
                 ws.enterGame(token, Integer.parseInt(params[0]));
+                preHandler.state = INGAME;
+                state = INGAME;
+                inGameHandler.state = INGAME;
                 return SET_TEXT_COLOR_YELLOW + "Successfully joined game";
             } else {
                 return "Enter valid join request -> \"join\" <ID> [WHITE|BLACK]";
@@ -122,15 +123,15 @@ public class Postlogin implements NotificationHandler {
     public String observe(String... params) throws Exception {
         try {
             if (params.length == 1){
-                preHandler.state = INGAME;
-                state = INGAME;
-                inGameHandler.state = INGAME;
                 String token = preHandler.currentUser.authToken();
                 ListGamesResult listGamesResult = server.listGames(token);
                 for (GameData game : listGamesResult.games()) {
                     if(game.gameID() == Integer.parseInt(params[0])) {
                         activeGame = listGamesResult.getGame(game.gameID());
                         printChessBoard("white");
+                        preHandler.state = INGAME;
+                        state = INGAME;
+                        inGameHandler.state = INGAME;
                         return "";
                     }
                 }
@@ -144,9 +145,7 @@ public class Postlogin implements NotificationHandler {
     }
 
     public void printChessBoard(String color) {
-        ChessBoard board = new ChessBoard();
-        board.resetBoard();
-        ChessBoardRender.render(board, color);
+        ChessBoardRender.render(activeGame.game().getBoard(), color);
     }
 
     public String listGames() throws Exception {

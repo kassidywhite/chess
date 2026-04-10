@@ -1,5 +1,8 @@
 package client;
 
+import chess.ChessGame;
+import chess.ChessMove;
+import chess.ChessPosition;
 import client.websocket.NotificationHandler;
 import client.websocket.WebSocketFacade;
 import model.GameData;
@@ -9,9 +12,13 @@ import websocket.messages.LoadGameMessage;
 import websocket.messages.NotificationMessage;
 import websocket.messages.ServerMessage;
 
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
+import java.util.Map;
 
 import static ui.EscapeSequences.ERASE_LINE;
+import static ui.EscapeSequences.*;
 
 public class InGame implements NotificationHandler {
     private final ServerFacade server;
@@ -33,12 +40,11 @@ public class InGame implements NotificationHandler {
     public void notify(ServerMessage notification) {
         switch (notification) {
             case LoadGameMessage msg -> System.out.print(msg.getMessage());
-            case NotificationMessage msg -> System.out.print(msg.getMessage());
-            case ErrorMessage msg -> System.out.print(msg.getMessage());
+            case NotificationMessage msg -> System.out.println(msg.getMessage());
+            case ErrorMessage msg -> System.out.println(msg.getMessage());
             default ->
                 System.out.println("oops something went wrong");
         }
-        System.out.print("\n" + ERASE_LINE + "[LOGGED_IN] >>> ");
     }
 
     public String eval(String input) {
@@ -49,7 +55,7 @@ public class InGame implements NotificationHandler {
             return switch (cmd) {
                 case "redraw" -> redraw();
                 case "leave" -> leave();
-                case "makemove" -> makeMove(params);
+                case "make-move" -> makeMove(params);
 //                case "resign" -> resign();
 //                case "highlight" -> highlightLegalMoves(params);
                 default -> help();
@@ -81,14 +87,80 @@ public class InGame implements NotificationHandler {
         try {
             ws.leaveGame(token, activeGame.gameID());
         } catch (Exception e) {
-            throw new RuntimeException(e);
+            preHandler.clientExceptionHandler(e);
         }
         return "";
     }
 
     public String makeMove(String... params) {
+        String token = preHandler.currentUser.authToken();
+        String username = preHandler.currentUser.username();
+        boolean isBlack = postHandler.activeGame.blackUsername() != null &&
+                postHandler.activeGame.blackUsername().equals(username);
 
+
+        if(params.length == 2){
+            List<String> splitParams = new ArrayList<>();
+            splitParams.add(String.valueOf(params[0].charAt(0)));
+            splitParams.add(String.valueOf(params[0].charAt(1)));
+            splitParams.add(String.valueOf(params[1].charAt(0)));
+            splitParams.add(String.valueOf(params[1].charAt(1)));
+
+            if(findCorrespondingLetter(splitParams.get(0), isBlack) != 0 && findCorrespondingLetter(splitParams.get(2), isBlack) != 0 ){
+                ChessPosition startPos = new ChessPosition(Integer.parseInt(splitParams.get(1)), findCorrespondingLetter(splitParams.get(0), isBlack));
+                ChessPosition endPos = new ChessPosition(Integer.parseInt(splitParams.get(3)), findCorrespondingLetter(splitParams.get(2), isBlack));
+                GameData activeGame = postHandler.activeGame;
+
+                // check if it's a promotion piece
+                ChessMove move = new ChessMove(startPos, endPos, null);
+                try {
+                    ws.makeMove(token, activeGame.gameID(), move);
+                    postHandler.activeGame = server.listGames(token).getGame(activeGame.gameID());
+                } catch (Exception e) {
+                    preHandler.clientExceptionHandler(e);
+                }
+            }
+        } else {
+            return "Enter valid move request (row, col of piece to row, col of position) -> make-move <row><column> <row><column>";
+        }
         return "";
+    }
+
+    private int findCorrespondingLetter(String letter, boolean isBlack){
+        if(isBlack){
+            Map<String, Integer> letterVals = Map.of(
+                    "h", 1,
+                    "g", 2,
+                    "f", 3,
+                    "e", 4,
+                    "d", 5,
+                    "c", 6,
+                    "b", 7,
+                    "a", 8
+            );
+            try{
+                return letterVals.get(letter);
+            } catch (Exception ex) {
+                System.out.println(SET_TEXT_COLOR_PINK + "Please enter correct position format (ex: e2 e3");
+            }
+        } else {
+            Map<String, Integer> letterVals = Map.of(
+                    "h", 8,
+                    "g", 7,
+                    "f", 6,
+                    "e", 5,
+                    "d", 4,
+                    "c", 3,
+                    "b", 2,
+                    "a", 1
+            );
+            try{
+                return letterVals.get(letter);
+            } catch (Exception ex) {
+                System.out.println(SET_TEXT_COLOR_PINK + "Please enter correct position format (ex: e2 e3");
+            }
+        }
+        return 0;
     }
 
     public String help() {
@@ -96,7 +168,7 @@ public class InGame implements NotificationHandler {
                 You are currently playing/observing a game, please do one of the following:
                     "redraw" - view the board
                     "leave" - leave game or stop observing
-                    "make move" <piece> <square> - to make move
+                    "make-move" <column><row> <column><row> - to make move of a piece at col, row to position col, row
                     "resign" - to forfeit the game
                     "highlight" <piece square> - to highlight legal moves for a certain piece
                 """;

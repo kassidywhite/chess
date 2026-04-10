@@ -119,6 +119,8 @@ public class Prelogin {
     private void printPrompt() {
         if(state == SIGNEDOUT){
             System.out.print("\n" + ERASE_LINE + "[LOGGED_OUT] >>> ");
+        } else if (state == INGAME){
+            System.out.print("\n");
         } else {
             System.out.print("\n" + ERASE_LINE + "[LOGGED_IN] >>> ");
         }
