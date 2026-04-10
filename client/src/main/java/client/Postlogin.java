@@ -28,6 +28,7 @@ public class Postlogin implements NotificationHandler {
     public InGame inGameHandler;
     public GameData activeGame = null;
     private final WebSocketFacade ws;
+    String activeUserColor = null;
 
     public Postlogin(String serverUrl, ServerFacade server, Prelogin preHandler) throws Exception {
         this.server = server;
@@ -106,6 +107,7 @@ public class Postlogin implements NotificationHandler {
                 activeGame = listGamesResult.getGame(Integer.parseInt(params[0]));
                 printChessBoard(params[1].toLowerCase());
                 ws.enterGame(token, Integer.parseInt(params[0]));
+                activeUserColor = params[1].toLowerCase();
                 preHandler.state = INGAME;
                 state = INGAME;
                 inGameHandler.state = INGAME;

@@ -75,8 +75,6 @@ public class WebSocketHandler implements WsConnectHandler, WsMessageHandler, WsC
             var notification = new LoadGameMessage(ServerMessage.ServerMessageType.LOAD_GAME, null, game);
             connections.rootMessage(session, notification);
 
-            // update database with correct info
-
             var message = String.format("%s has entered the game", username);
             var othersNotification = new NotificationMessage(ServerMessage.ServerMessageType.NOTIFICATION, message);
             connections.broadcast(session, othersNotification, command.getGameID());
@@ -102,13 +100,12 @@ public class WebSocketHandler implements WsConnectHandler, WsMessageHandler, WsC
                 var errorMessage = new ErrorMessage(ServerMessage.ServerMessageType.ERROR, "Unauthorized to move piece");
                 connections.rootMessage(session, errorMessage);
             } else if (game.getTeamTurn() != moveThis.getTeamColor()) { // check if it's the users turn
-                var errorMessage = new ErrorMessage(ServerMessage.ServerMessageType.ERROR, "Unauthorized to move piece");
+                var errorMessage = new ErrorMessage(ServerMessage.ServerMessageType.ERROR, "Other player hasn't joined/moved yet!");
                 connections.rootMessage(session, errorMessage);
             } else if (game.gameOver){
                 var errorMessage = new ErrorMessage(ServerMessage.ServerMessageType.ERROR, "Game is over");
                 connections.rootMessage(session, errorMessage);
-            }
-            else if(possibilities.isEmpty() | !possibilities.contains(move)){ // check if the move is valid
+            } else if(possibilities.isEmpty() | !possibilities.contains(move)){ // check if the move is valid
                 var errorMessage = new ErrorMessage(ServerMessage.ServerMessageType.ERROR, "Invalid move");
                 connections.rootMessage(session, errorMessage);
             } else {
@@ -192,7 +189,7 @@ public class WebSocketHandler implements WsConnectHandler, WsMessageHandler, WsC
                 var msg = String.format("%s has resigned. The game is over.", username);
                 var notification = new NotificationMessage(ServerMessage.ServerMessageType.NOTIFICATION, msg);
                 connections.broadcast(session, notification, command.getGameID());
-                var rootNot = new NotificationMessage(ServerMessage.ServerMessageType.NOTIFICATION, "Game over.");
+                var rootNot = new NotificationMessage(ServerMessage.ServerMessageType.NOTIFICATION, "Game over.\n");
                 connections.rootMessage(session, rootNot);
                 updateGame(gameData, game);
             } else {

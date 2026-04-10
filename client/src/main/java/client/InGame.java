@@ -32,7 +32,6 @@ public class InGame implements NotificationHandler {
 
     @Override
     public void notify(ServerMessage notification) {
-        String teamColor = getTeamColor();
         switch (notification) {
             case LoadGameMessage msg -> loadGameNotification(msg);
             case NotificationMessage msg -> System.out.println(msg.getMessage());
@@ -73,8 +72,7 @@ public class InGame implements NotificationHandler {
     }
 
     public String redraw() {
-        String teamColor = getTeamColor();
-        if(teamColor == "black") {
+        if(postHandler.activeUserColor.equals("black")) {
             ChessBoardRender.render(postHandler.activeGame.game().getBoard(), Collections.EMPTY_LIST, "black");
         } else {
             ChessBoardRender.render(postHandler.activeGame.game().getBoard(), Collections.EMPTY_LIST, "white");
@@ -88,7 +86,6 @@ public class InGame implements NotificationHandler {
         state = State.SIGNEDIN;
         preHandler.state = State.SIGNEDIN;
         postHandler.state = State.SIGNEDIN;
-
         try {
             ws.leaveGame(token, activeGame.gameID());
         } catch (Exception e) {
@@ -99,29 +96,34 @@ public class InGame implements NotificationHandler {
 
     public String makeMove(String... params) {
         String token = preHandler.currentUser.authToken();
-        // check for index out of bounds
         if(params.length == 2){
             List<String> splitParams = new ArrayList<>();
             splitParams.add(String.valueOf(params[0].charAt(0)));
             splitParams.add(String.valueOf(params[0].charAt(1)));
             splitParams.add(String.valueOf(params[1].charAt(0)));
             splitParams.add(String.valueOf(params[1].charAt(1)));
-
-            if(findCorrespondingLetter(splitParams.get(0), getTeamColor()) != 0 && findCorrespondingLetter(splitParams.get(2), getTeamColor()) != 0 ){
-                ChessPosition startPos = new ChessPosition(Integer.parseInt(splitParams.get(1)), findCorrespondingLetter(splitParams.get(0), getTeamColor()));
-                ChessPosition endPos = new ChessPosition(Integer.parseInt(splitParams.get(3)), findCorrespondingLetter(splitParams.get(2), getTeamColor()));
+            int row1 = Integer.parseInt(splitParams.get(1));
+            int row2 = Integer.parseInt(splitParams.get(3));
+            int col1 = findCorrespondingLetter(splitParams.get(0));
+            int col2 = findCorrespondingLetter(splitParams.get(2));
+            if(row1 > 0 && row2 > 0 && row1 < 9 && row2 < 9 && col1 > 0 && col2 > 0 && col1 < 9 && col2 < 9){
+                ChessPosition startPos = new ChessPosition(row1, col1);
+                ChessPosition endPos = new ChessPosition(row2, col2);
                 GameData activeGame = postHandler.activeGame;
 
                 // check if it's a promotion piece
+                ChessPiece promotionPiece = postHandler.activeGame.game().getBoard().getPiece(endPos);
                 ChessMove move = new ChessMove(startPos, endPos, null);
                 try {
                     ws.makeMove(token, activeGame.gameID(), move);
                 } catch (Exception e) {
                     preHandler.clientExceptionHandler(e);
                 }
+            } else {
+                return "Please enter a valid start/end position";
             }
         } else {
-            return "Enter valid move request (row, col of piece to row, col of position) -> make-move <row><column> <row><column>";
+            return "Please enter a valid start/end position";
         }
         return "";
     }
@@ -141,18 +143,17 @@ public class InGame implements NotificationHandler {
     }
 
     public String highlight(String... params) {
-        String teamColor = getTeamColor();
         if(params.length == 1){
             List<String> splitParams = new ArrayList<>();
             splitParams.add(String.valueOf(params[0].charAt(0)));
             splitParams.add(String.valueOf(params[0].charAt(1)));
             try{
-                ChessPosition position = new ChessPosition(Integer.parseInt(splitParams.get(1)), findCorrespondingLetter(splitParams.get(0), teamColor));
+                ChessPosition position = new ChessPosition(Integer.parseInt(splitParams.get(1)), findCorrespondingLetter(splitParams.get(0)));
                 ChessPiece piece = postHandler.activeGame.game().getBoard().getPiece(position);
                 if(piece != null){
                     Collection<ChessPosition> possibilities = calculatePossibilities(piece, position);
                     possibilities.add(position);
-                    ChessBoardRender.render(postHandler.activeGame.game().getBoard(), possibilities, teamColor);
+                    ChessBoardRender.render(postHandler.activeGame.game().getBoard(), possibilities, postHandler.activeUserColor);
                 } else {
                     return "Please enter a valid position";
                 }
@@ -165,51 +166,21 @@ public class InGame implements NotificationHandler {
         return "";
     }
 
-    private String getTeamColor() {
-        boolean isBlack = postHandler.activeGame.blackUsername() != null &&
-                postHandler.activeGame.blackUsername().equals(preHandler.currentUser.username());
-        String teamColor;
-        if(isBlack) {
-            teamColor = "black";
-        } else {
-            teamColor = "white";
-        }
-        return teamColor;
-    }
-
-    private int findCorrespondingLetter(String letter, String color){
-        if(color == "black"){
-            Map<String, Integer> letterVals = Map.of(
-                    "h", 1,
-                    "g", 2,
-                    "f", 3,
-                    "e", 4,
-                    "d", 5,
-                    "c", 6,
-                    "b", 7,
-                    "a", 8
-            );
-            try{
-                return letterVals.get(letter);
-            } catch (Exception ex) {
-                System.out.println(SET_TEXT_COLOR_PINK + "Please enter correct position format (ex: e2 e3");
-            }
-        } else {
-            Map<String, Integer> letterVals = Map.of(
-                    "h", 8,
-                    "g", 7,
-                    "f", 6,
-                    "e", 5,
-                    "d", 4,
-                    "c", 3,
-                    "b", 2,
-                    "a", 1
-            );
-            try{
-                return letterVals.get(letter);
-            } catch (Exception ex) {
-                System.out.println(SET_TEXT_COLOR_PINK + "Please enter correct position format (ex: e2 e3");
-            }
+    private int findCorrespondingLetter(String letter){
+        Map<String, Integer> letterVals = Map.of(
+                "h", 8,
+                "g", 7,
+                "f", 6,
+                "e", 5,
+                "d", 4,
+                "c", 3,
+                "b", 2,
+                "a", 1
+        );
+        try{
+            return letterVals.get(letter);
+        } catch (Exception ex) {
+            System.out.println(SET_TEXT_COLOR_PINK + "Please enter correct position format (ex: e2 e3");
         }
         return 0;
     }

@@ -55,7 +55,7 @@ public class Prelogin {
                     } else {
                         result = postHandler.eval(line);
                     }
-                    System.out.print(SET_TEXT_COLOR_PINK + result + SET_TEXT_COLOR_WHITE);
+                    System.out.println(SET_TEXT_COLOR_PINK + result + SET_TEXT_COLOR_WHITE);
                 } else {
                     result = eval(line);
                     System.out.println(SET_TEXT_COLOR_BLUE + "Quitting server... Thanks for playing!");
