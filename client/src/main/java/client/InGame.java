@@ -1,23 +1,18 @@
 package client;
 
-import chess.ChessGame;
 import chess.ChessMove;
 import chess.ChessPosition;
 import client.websocket.NotificationHandler;
 import client.websocket.WebSocketFacade;
 import model.GameData;
 import serverfacade.ServerFacade;
-import websocket.messages.ErrorMessage;
-import websocket.messages.LoadGameMessage;
-import websocket.messages.NotificationMessage;
-import websocket.messages.ServerMessage;
+import websocket.messages.*;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
-import static ui.EscapeSequences.ERASE_LINE;
 import static ui.EscapeSequences.*;
 
 public class InGame implements NotificationHandler {
@@ -38,13 +33,26 @@ public class InGame implements NotificationHandler {
 
     @Override
     public void notify(ServerMessage notification) {
+        String teamColor = getTeamColor();
         switch (notification) {
-            case LoadGameMessage msg -> System.out.print(msg.getMessage());
+            case LoadGameMessage msg -> loadGameNotification(msg);
             case NotificationMessage msg -> System.out.println(msg.getMessage());
             case ErrorMessage msg -> System.out.println(msg.getMessage());
             default ->
                 System.out.println("oops something went wrong");
         }
+    }
+
+    public void loadGameNotification(LoadGameMessage msg) {
+        GameData activeG = postHandler.activeGame;
+        GameData newGD = new GameData(
+                activeG.gameID(),
+                activeG.whiteUsername(),
+                activeG.blackUsername(),
+                activeG.gameName(),
+                msg.getGame()
+        );
+        postHandler.activeGame = newGD;
     }
 
     public String eval(String input) {
@@ -56,7 +64,7 @@ public class InGame implements NotificationHandler {
                 case "redraw" -> redraw();
                 case "leave" -> leave();
                 case "make-move" -> makeMove(params);
-//                case "resign" -> resign();
+                case "resign" -> resign();
 //                case "highlight" -> highlightLegalMoves(params);
                 default -> help();
             };
@@ -93,11 +101,11 @@ public class InGame implements NotificationHandler {
     }
 
     public String makeMove(String... params) {
+        // check for index out of bounds
         String token = preHandler.currentUser.authToken();
         String username = preHandler.currentUser.username();
         boolean isBlack = postHandler.activeGame.blackUsername() != null &&
                 postHandler.activeGame.blackUsername().equals(username);
-
 
         if(params.length == 2){
             List<String> splitParams = new ArrayList<>();
@@ -115,7 +123,6 @@ public class InGame implements NotificationHandler {
                 ChessMove move = new ChessMove(startPos, endPos, null);
                 try {
                     ws.makeMove(token, activeGame.gameID(), move);
-                    postHandler.activeGame = server.listGames(token).getGame(activeGame.gameID());
                 } catch (Exception e) {
                     preHandler.clientExceptionHandler(e);
                 }
@@ -124,6 +131,32 @@ public class InGame implements NotificationHandler {
             return "Enter valid move request (row, col of piece to row, col of position) -> make-move <row><column> <row><column>";
         }
         return "";
+    }
+
+    public String resign() {
+        String token = preHandler.currentUser.authToken();
+        try {
+            ws.resign(token, postHandler.activeGame.gameID());
+            postHandler.activeGame = null;
+            state = State.SIGNEDIN;
+            preHandler.state = State.SIGNEDIN;
+            postHandler.state = State.SIGNEDIN;
+        } catch (Exception e) {
+            preHandler.clientExceptionHandler(e);
+        }
+        return "";
+    }
+
+    private String getTeamColor() {
+        boolean isBlack = postHandler.activeGame.blackUsername() != null &&
+                postHandler.activeGame.blackUsername().equals(preHandler.currentUser.username());
+        String teamColor;
+        if(isBlack) {
+            teamColor = "black";
+        } else {
+            teamColor = "white";
+        }
+        return teamColor;
     }
 
     private int findCorrespondingLetter(String letter, boolean isBlack){

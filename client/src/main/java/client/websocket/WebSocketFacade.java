@@ -4,12 +4,10 @@ import chess.ChessMove;
 import com.google.gson.Gson;
 import jakarta.websocket.*;
 
+import org.eclipse.jetty.server.Authentication;
 import websocket.commands.MakeMoveCommand;
 import websocket.commands.UserGameCommand;
-import websocket.messages.ErrorMessage;
-import websocket.messages.LoadGameMessage;
-import websocket.messages.NotificationMessage;
-import websocket.messages.ServerMessage;
+import websocket.messages.*;
 
 import java.io.IOException;
 import java.net.URI;
@@ -70,8 +68,18 @@ public class WebSocketFacade extends Endpoint {
         try {
             var action = new MakeMoveCommand(UserGameCommand.CommandType.MAKE_MOVE, authToken, gameId, move);
             this.session.getBasicRemote().sendText(new Gson().toJson(action));
+            //notificationHandler.notify(action);
         } catch (IOException e) {
             throw new Exception("Failed to make move");
+        }
+    }
+
+    public void resign(String authToken, int gameId) throws Exception {
+        try {
+            var action = new UserGameCommand(UserGameCommand.CommandType.RESIGN, authToken, gameId);
+            this.session.getBasicRemote().sendText(new Gson().toJson(action));
+        } catch (IOException e) {
+            throw new Exception("Failed to resign");
         }
     }
 
@@ -79,6 +87,7 @@ public class WebSocketFacade extends Endpoint {
         try {
             var action = new UserGameCommand(UserGameCommand.CommandType.LEAVE, authToken, gameId);
             this.session.getBasicRemote().sendText(new Gson().toJson(action));
+            //notificationHandler.notify(action);
         } catch (IOException e) {
             throw new Exception("Failed to make leave action");
         }

@@ -40,11 +40,11 @@ public class Postlogin implements NotificationHandler {
     public void notify(ServerMessage notification) {
         switch (notification) {
             case NotificationMessage msg ->
-                    System.out.println(SET_TEXT_COLOR_BLUE + msg.getMessage());
+                    inGameHandler.notify(notification);
             case ErrorMessage msg ->
-                    System.out.println(SET_TEXT_COLOR_BLUE + msg.getMessage());
+                    inGameHandler.notify(notification);
             case LoadGameMessage msg ->
-                    System.out.print("");
+                    inGameHandler.notify(notification);
             default ->
                     throw new IllegalStateException("Unexpected value: " + notification);
         }
