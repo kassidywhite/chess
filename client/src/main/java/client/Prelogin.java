@@ -23,11 +23,13 @@ public class Prelogin {
     private final ServerFacade server;
     public State state = SIGNEDOUT;
     private Postlogin postHandler;
+    private InGame inGameHandler;
     public AuthData currentUser;
 
     public Prelogin(String serverUrl) throws Exception {
         server = new ServerFacade(serverUrl);
         postHandler = new Postlogin(serverUrl, server, this);
+        inGameHandler = postHandler.inGameHandler;
     }
 
     public void run() {
@@ -36,13 +38,18 @@ public class Prelogin {
         Scanner scanner = new Scanner(System.in);
         var result = "";
         while (!result.equals("quit")) {
+            String line = "";
             printPrompt();
-            String line = scanner.nextLine();
+            if (scanner.hasNext()){
+                line = scanner.nextLine();
+            }
 
             try {
                 if(!line.equals("quit")){
                     if(this.state == SIGNEDOUT){
                         result = eval(line);
+                    } else if (this.state == INGAME){
+                        result = inGameHandler.eval(line);
                     } else if (line.equals("login")){
                         result = "";
                     } else {

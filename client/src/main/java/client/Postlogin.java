@@ -22,10 +22,10 @@ public class Postlogin implements NotificationHandler {
     private final ServerFacade server;
     private final String serverUrl;
     private final Prelogin preHandler;
-    private final WebSocketFacade ws;
     public State state = SIGNEDIN;
-    private InGame inGameHandler;
+    public InGame inGameHandler;
     public GameData activeGame = null;
+    private final WebSocketFacade ws;
 
     public Postlogin(String serverUrl, ServerFacade server, Prelogin preHandler) throws Exception {
         this.server = server;
@@ -37,13 +37,13 @@ public class Postlogin implements NotificationHandler {
 
     @Override
     public void notify(ServerMessage notification) {
-        switch(notification) {
+        switch (notification) {
             case NotificationMessage msg ->
-                    System.out.println(SET_TEXT_COLOR_BLUE + msg.getMessage());
+                    System.out.print(SET_TEXT_COLOR_BLUE + msg.getMessage());
             case ErrorMessage msg ->
-                    System.out.println(SET_TEXT_COLOR_BLUE + msg.getMessage());
+                    System.out.print(SET_TEXT_COLOR_BLUE + msg.getMessage());
             case LoadGameMessage msg ->
-                    System.out.println(SET_TEXT_COLOR_BLUE + msg.getMessage());
+                    System.out.print("");
             default ->
                     throw new IllegalStateException("Unexpected value: " + notification);
         }
@@ -51,23 +51,19 @@ public class Postlogin implements NotificationHandler {
 
     public String eval(String input) {
         try {
-            if(this.state == INGAME){
-                return inGameHandler.eval(input);
-            } else {
-                String[] tokens = input.toLowerCase().split(" ");
-                String cmd = (tokens.length > 0) ? tokens[0] : "help";
-                String[] params = Arrays.copyOfRange(tokens, 1, tokens.length);
-                return switch (cmd) {
-                    case "create" -> createGame(params);
-                    case "list" -> listGames();
-                    case "join" -> joinGame(params);
-                    case "observe" -> observe(params);
-                    case "logout" -> logout();
-                    case "clear" -> clear();
-                    case "quit" -> "quit";
-                    default -> help();
-                };
-            }
+            String[] tokens = input.toLowerCase().split(" ");
+            String cmd = (tokens.length > 0) ? tokens[0] : "help";
+            String[] params = Arrays.copyOfRange(tokens, 1, tokens.length);
+            return switch (cmd) {
+                case "create" -> createGame(params);
+                case "list" -> listGames();
+                case "join" -> joinGame(params);
+                case "observe" -> observe(params);
+                case "logout" -> logout();
+                case "clear" -> clear();
+                case "quit" -> "quit";
+                default -> help();
+            };
         } catch (Exception e) {
             return preHandler.clientExceptionHandler(e);
         }
@@ -101,7 +97,9 @@ public class Postlogin implements NotificationHandler {
     public String joinGame(String... params) throws Exception {
         try {
             if(params.length == 2){
+                preHandler.state = INGAME;
                 state = INGAME;
+                inGameHandler.state = INGAME;
                 String token = preHandler.currentUser.authToken();
                 JoinGameRequest request = new JoinGameRequest(params[1].toUpperCase(), Integer.parseInt(params[0]));
                 JoinGameResult joinGameResult = server.joinGame(request, token);
@@ -124,7 +122,9 @@ public class Postlogin implements NotificationHandler {
     public String observe(String... params) throws Exception {
         try {
             if (params.length == 1){
+                preHandler.state = INGAME;
                 state = INGAME;
+                inGameHandler.state = INGAME;
                 String token = preHandler.currentUser.authToken();
                 ListGamesResult listGamesResult = server.listGames(token);
                 for (GameData game : listGamesResult.games()) {

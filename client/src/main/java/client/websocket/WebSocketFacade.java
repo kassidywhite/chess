@@ -2,13 +2,18 @@ package client.websocket;
 
 import com.google.gson.Gson;
 import jakarta.websocket.*;
+import org.eclipse.jetty.util.IO;
 import server.Server;
 import websocket.commands.UserGameCommand;
+import websocket.messages.ErrorMessage;
+import websocket.messages.LoadGameMessage;
+import websocket.messages.NotificationMessage;
 import websocket.messages.ServerMessage;
 
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.util.Scanner;
 
 public class WebSocketFacade extends Endpoint {
 
@@ -28,6 +33,17 @@ public class WebSocketFacade extends Endpoint {
                     @Override
                     public void onMessage(String message) {
                         ServerMessage notification = new Gson().fromJson(message, ServerMessage.class);
+                        if(notification.getServerMessageType() == ServerMessage.ServerMessageType.LOAD_GAME){
+                            LoadGameMessage realNotification = new Gson().fromJson(message, LoadGameMessage.class);
+                            notificationHandler.notify(realNotification);
+                        } else if (notification.getServerMessageType() == ServerMessage.ServerMessageType.ERROR){
+                            ErrorMessage realNotification = new Gson().fromJson(message, ErrorMessage.class);
+                            notificationHandler.notify(realNotification);
+                        } else {
+                            NotificationMessage realNotification = new Gson().fromJson(message, NotificationMessage.class);
+                            notificationHandler.notify(realNotification);
+                        }
+
                         notificationHandler.notify(notification);
                 }
             });
@@ -47,6 +63,15 @@ public class WebSocketFacade extends Endpoint {
             this.session.getBasicRemote().sendText(new Gson().toJson(action));
         } catch (IOException e) {
             throw new Exception("Failed to make connect action");
+        }
+    }
+
+    public void makeMove(String authToken, int gameId) throws Exception {
+        try {
+            var action = new UserGameCommand(UserGameCommand.CommandType.MAKE_MOVE, authToken, gameId);
+            this.session.getBasicRemote().sendText(new Gson().toJson(action));
+        } catch (IOException e) {
+            throw new Exception("Failed to make move");
         }
     }
 
