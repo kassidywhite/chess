@@ -3,7 +3,6 @@ package client.websocket;
 import com.google.gson.Gson;
 import jakarta.websocket.*;
 import org.eclipse.jetty.util.IO;
-import server.Server;
 import websocket.commands.UserGameCommand;
 import websocket.messages.ErrorMessage;
 import websocket.messages.LoadGameMessage;
