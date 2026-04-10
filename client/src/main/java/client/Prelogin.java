@@ -25,6 +25,7 @@ public class Prelogin {
     private Postlogin postHandler;
     private InGame inGameHandler;
     public AuthData currentUser;
+    public Scanner scanner;
 
     public Prelogin(String serverUrl) throws Exception {
         server = new ServerFacade(serverUrl);
@@ -35,7 +36,7 @@ public class Prelogin {
     public void run() {
         System.out.println(SET_TEXT_COLOR_WHITE + "👑✨ Welcome to 240 Chess. Type Help to get started. ✨👑");
 
-        Scanner scanner = new Scanner(System.in);
+        this.scanner = new Scanner(System.in);
         var result = "";
         while (!result.equals("quit")) {
             String line = "";

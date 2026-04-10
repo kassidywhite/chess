@@ -112,8 +112,22 @@ public class InGame implements NotificationHandler {
                 GameData activeGame = postHandler.activeGame;
 
                 // check if it's a promotion piece
-                ChessPiece promotionPiece = postHandler.activeGame.game().getBoard().getPiece(endPos);
-                ChessMove move = new ChessMove(startPos, endPos, null);
+                ChessPiece thisPiece = postHandler.activeGame.game().getBoard().getPiece(startPos);
+                String color = postHandler.activeUserColor;
+                ChessPiece.PieceType promotion = null;
+
+                if(endPos.getRow() == 8 && color.equals("white") && thisPiece.getPieceType() == ChessPiece.PieceType.PAWN){
+                    while(promotion == null){
+                        promotion = handlePromotion();
+                    }
+                }
+                if(endPos.getRow() == 1 && color.equals("black") && thisPiece.getPieceType() == ChessPiece.PieceType.PAWN){
+                    while(promotion == null){
+                        promotion = handlePromotion();
+                    }
+                }
+
+                ChessMove move = new ChessMove(startPos, endPos, promotion);
                 try {
                     ws.makeMove(token, activeGame.gameID(), move);
                 } catch (Exception e) {
@@ -164,6 +178,33 @@ public class InGame implements NotificationHandler {
             return "Please enter a valid position";
         }
         return "";
+    }
+
+    public ChessPiece.PieceType handlePromotion() {
+        System.out.println("Please specify what type of promotion piece you would like:");
+        System.out.println("- queen, bishop, knight, rook");
+
+        String line = "";
+        if(preHandler.scanner.hasNext()){
+            line = preHandler.scanner.nextLine();
+        }
+        try {
+            String[] tokens = line.toLowerCase().split(" ");
+            String cmd = (tokens.length > 0) ? tokens[0] : "help";
+            if(cmd.equals("queen")){
+                return ChessPiece.PieceType.QUEEN;
+            } else if(cmd.equals("rook")){
+                return ChessPiece.PieceType.ROOK;
+            } else if (cmd.equals("bishop")){
+                return ChessPiece.PieceType.BISHOP;
+            } else if (cmd.equals("knight")){
+                return ChessPiece.PieceType.KNIGHT;
+            } else {
+                return null;
+            }
+        } catch (Exception e) {
+            return null;
+        }
     }
 
     private int findCorrespondingLetter(String letter){
