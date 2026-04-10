@@ -4,12 +4,13 @@ import chess.ChessBoard;
 import chess.ChessGame;
 import chess.*;
 
+import java.util.Collection;
+
 import static ui.EscapeSequences.*;
 
 public class ChessBoardRender {
 
-    public static void render(ChessBoard board, String playerView) {
-        // board rendered from white player perspective
+    public static void render(ChessBoard board, Collection<ChessPosition> possibilities, String playerView) {
         String header = playerView.equals("white") ? "    a  b  c  d  e  f  g  h    " :
                 "    h  g  f  e  d  c  b  a    ";
         printHeader(header);
@@ -29,15 +30,31 @@ public class ChessBoardRender {
                 }
                 if (r % 2 == 0){
                     if (c % 2 == 0){
-                        System.out.print(SET_BG_COLOR_BLACK + pieceColor + piece);
+                        if(possibilities.contains(position)){
+                            System.out.print(SET_BG_COLOR_DARK_GREEN + pieceColor + piece);
+                        } else {
+                            System.out.print(SET_BG_COLOR_BLACK + pieceColor + piece);
+                        }
                     } else {
-                        System.out.print(SET_BG_COLOR_WHITE + pieceColor + piece);
+                        if(possibilities.contains(position)){
+                            System.out.print(SET_BG_COLOR_GREEN + pieceColor + piece);
+                        } else {
+                            System.out.print(SET_BG_COLOR_WHITE + pieceColor + piece);
+                        }
                     }
                 } else {
                     if (c % 2 == 0){
-                        System.out.print(SET_BG_COLOR_WHITE + pieceColor + piece);
+                        if(possibilities.contains(position)){
+                            System.out.print(SET_BG_COLOR_GREEN + pieceColor + piece);
+                        } else {
+                            System.out.print(SET_BG_COLOR_WHITE + pieceColor + piece);
+                        }
                     } else {
-                        System.out.print(SET_BG_COLOR_BLACK + pieceColor + piece);
+                        if(possibilities.contains(position)){
+                            System.out.print(SET_BG_COLOR_DARK_GREEN + pieceColor + piece);
+                        } else {
+                            System.out.print(SET_BG_COLOR_BLACK + pieceColor + piece);
+                        }
                     }
                 }
                 c = playerView.equals("white") ? c + 1 : c - 1;

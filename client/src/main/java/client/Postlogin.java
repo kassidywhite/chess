@@ -15,6 +15,7 @@ import websocket.messages.NotificationMessage;
 import websocket.messages.ServerMessage;
 
 import java.util.Arrays;
+import java.util.Collections;
 
 import static client.State.*;
 import static ui.EscapeSequences.*;
@@ -145,7 +146,7 @@ public class Postlogin implements NotificationHandler {
     }
 
     public void printChessBoard(String color) {
-        ChessBoardRender.render(activeGame.game().getBoard(), color);
+        ChessBoardRender.render(activeGame.game().getBoard(), Collections.EMPTY_LIST, color);
     }
 
     public String listGames() throws Exception {

@@ -1,17 +1,16 @@
 package client;
 
 import chess.ChessMove;
+import chess.ChessPiece;
 import chess.ChessPosition;
+import chess.PieceMovesCalculator;
 import client.websocket.NotificationHandler;
 import client.websocket.WebSocketFacade;
 import model.GameData;
 import serverfacade.ServerFacade;
 import websocket.messages.*;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 import static ui.EscapeSequences.*;
 
@@ -65,7 +64,7 @@ public class InGame implements NotificationHandler {
                 case "leave" -> leave();
                 case "make-move" -> makeMove(params);
                 case "resign" -> resign();
-//                case "highlight" -> highlightLegalMoves(params);
+                case "highlight" -> highlight(params);
                 default -> help();
             };
         } catch (Exception e) {
@@ -74,13 +73,11 @@ public class InGame implements NotificationHandler {
     }
 
     public String redraw() {
-        String username = preHandler.currentUser.username();
-        boolean isBlack = postHandler.activeGame.blackUsername() != null &&
-                postHandler.activeGame.blackUsername().equals(username);
-        if(isBlack) {
-            ChessBoardRender.render(postHandler.activeGame.game().getBoard(), "black");
+        String teamColor = getTeamColor();
+        if(teamColor == "black") {
+            ChessBoardRender.render(postHandler.activeGame.game().getBoard(), Collections.EMPTY_LIST, "black");
         } else {
-            ChessBoardRender.render(postHandler.activeGame.game().getBoard(), "white");
+            ChessBoardRender.render(postHandler.activeGame.game().getBoard(), Collections.EMPTY_LIST, "white");
         }
         return "";
     }
@@ -101,12 +98,8 @@ public class InGame implements NotificationHandler {
     }
 
     public String makeMove(String... params) {
-        // check for index out of bounds
         String token = preHandler.currentUser.authToken();
-        String username = preHandler.currentUser.username();
-        boolean isBlack = postHandler.activeGame.blackUsername() != null &&
-                postHandler.activeGame.blackUsername().equals(username);
-
+        // check for index out of bounds
         if(params.length == 2){
             List<String> splitParams = new ArrayList<>();
             splitParams.add(String.valueOf(params[0].charAt(0)));
@@ -114,9 +107,9 @@ public class InGame implements NotificationHandler {
             splitParams.add(String.valueOf(params[1].charAt(0)));
             splitParams.add(String.valueOf(params[1].charAt(1)));
 
-            if(findCorrespondingLetter(splitParams.get(0), isBlack) != 0 && findCorrespondingLetter(splitParams.get(2), isBlack) != 0 ){
-                ChessPosition startPos = new ChessPosition(Integer.parseInt(splitParams.get(1)), findCorrespondingLetter(splitParams.get(0), isBlack));
-                ChessPosition endPos = new ChessPosition(Integer.parseInt(splitParams.get(3)), findCorrespondingLetter(splitParams.get(2), isBlack));
+            if(findCorrespondingLetter(splitParams.get(0), getTeamColor()) != 0 && findCorrespondingLetter(splitParams.get(2), getTeamColor()) != 0 ){
+                ChessPosition startPos = new ChessPosition(Integer.parseInt(splitParams.get(1)), findCorrespondingLetter(splitParams.get(0), getTeamColor()));
+                ChessPosition endPos = new ChessPosition(Integer.parseInt(splitParams.get(3)), findCorrespondingLetter(splitParams.get(2), getTeamColor()));
                 GameData activeGame = postHandler.activeGame;
 
                 // check if it's a promotion piece
@@ -147,6 +140,31 @@ public class InGame implements NotificationHandler {
         return "";
     }
 
+    public String highlight(String... params) {
+        String teamColor = getTeamColor();
+        if(params.length == 1){
+            List<String> splitParams = new ArrayList<>();
+            splitParams.add(String.valueOf(params[0].charAt(0)));
+            splitParams.add(String.valueOf(params[0].charAt(1)));
+            try{
+                ChessPosition position = new ChessPosition(Integer.parseInt(splitParams.get(1)), findCorrespondingLetter(splitParams.get(0), teamColor));
+                ChessPiece piece = postHandler.activeGame.game().getBoard().getPiece(position);
+                if(piece != null){
+                    Collection<ChessPosition> possibilities = calculatePossibilities(piece, position);
+                    possibilities.add(position);
+                    ChessBoardRender.render(postHandler.activeGame.game().getBoard(), possibilities, teamColor);
+                } else {
+                    return "Please enter a valid position";
+                }
+            } catch (Exception e){
+                return "Please enter a valid position";
+            }
+        } else {
+            return "Please enter a valid position";
+        }
+        return "";
+    }
+
     private String getTeamColor() {
         boolean isBlack = postHandler.activeGame.blackUsername() != null &&
                 postHandler.activeGame.blackUsername().equals(preHandler.currentUser.username());
@@ -159,8 +177,8 @@ public class InGame implements NotificationHandler {
         return teamColor;
     }
 
-    private int findCorrespondingLetter(String letter, boolean isBlack){
-        if(isBlack){
+    private int findCorrespondingLetter(String letter, String color){
+        if(color == "black"){
             Map<String, Integer> letterVals = Map.of(
                     "h", 1,
                     "g", 2,
@@ -205,5 +223,29 @@ public class InGame implements NotificationHandler {
                     "resign" - to forfeit the game
                     "highlight" <piece square> - to highlight legal moves for a certain piece
                 """;
+    }
+
+    public Collection<ChessPosition> calculatePossibilities(ChessPiece piece, ChessPosition position) {
+        PieceMovesCalculator calculator = new PieceMovesCalculator(postHandler.activeGame.game().getBoard(), position);
+        Collection<ChessMove> possibilities;
+        if(piece.getPieceType() == ChessPiece.PieceType.KING){
+            possibilities = calculator.kingMovesCalculator();
+        } else if (piece.getPieceType() == ChessPiece.PieceType.QUEEN){
+            possibilities = calculator.queenMovesCalculator();
+        } else if (piece.getPieceType() == ChessPiece.PieceType.BISHOP){
+            possibilities = calculator.bishopMovesCalculator();
+        } else if (piece.getPieceType() == ChessPiece.PieceType.KNIGHT){
+            possibilities = calculator.knightMovesCalculator();
+        } else if (piece.getPieceType() == ChessPiece.PieceType.ROOK){
+            possibilities = calculator.rookMovesCalculator();
+        } else {
+            possibilities = calculator.pawnMovesCalculator();
+        }
+
+        Collection<ChessPosition> positions = new ArrayList<>();
+        for(ChessMove possibility : possibilities){
+            positions.add(possibility.getEndPosition());
+        }
+        return positions;
     }
 }
