@@ -28,33 +28,17 @@ public class ChessBoardRender {
                     pieceColor = (board.getPiece(position).getTeamColor() == ChessGame.TeamColor.WHITE ?
                             SET_TEXT_COLOR_RED : SET_TEXT_COLOR_BLUE);
                 }
-                if (r % 2 == 0){
-                    if (c % 2 == 0){
-                        if(possibilities.contains(position)){
-                            System.out.print(SET_BG_COLOR_DARK_GREEN + pieceColor + piece);
-                        } else {
-                            System.out.print(SET_BG_COLOR_BLACK + pieceColor + piece);
-                        }
+                if(!isLightSquare(r, c)){
+                    if (possibilities.contains(position)){
+                        System.out.print(SET_BG_COLOR_DARK_GREEN + pieceColor + piece);
                     } else {
-                        if(possibilities.contains(position)){
-                            System.out.print(SET_BG_COLOR_GREEN + pieceColor + piece);
-                        } else {
-                            System.out.print(SET_BG_COLOR_WHITE + pieceColor + piece);
-                        }
+                        System.out.print(SET_BG_COLOR_BLACK + pieceColor + piece);
                     }
                 } else {
-                    if (c % 2 == 0){
-                        if(possibilities.contains(position)){
-                            System.out.print(SET_BG_COLOR_GREEN + pieceColor + piece);
-                        } else {
-                            System.out.print(SET_BG_COLOR_WHITE + pieceColor + piece);
-                        }
+                    if(possibilities.contains(position)){
+                        System.out.print(SET_BG_COLOR_GREEN + pieceColor + piece);
                     } else {
-                        if(possibilities.contains(position)){
-                            System.out.print(SET_BG_COLOR_DARK_GREEN + pieceColor + piece);
-                        } else {
-                            System.out.print(SET_BG_COLOR_BLACK + pieceColor + piece);
-                        }
+                        System.out.print(SET_BG_COLOR_WHITE + pieceColor + piece);
                     }
                 }
                 c = playerView.equals("white") ? c + 1 : c - 1;
@@ -66,6 +50,10 @@ public class ChessBoardRender {
             r = playerView.equals("white") ? r - 1 : r + 1;
         }
         printHeader(header);
+    }
+
+    private static boolean isLightSquare(int r, int c) {
+        return (r + c) % 2 != 0;
     }
 
     public static void printHeader(String header) {
