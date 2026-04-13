@@ -105,49 +105,39 @@ public class InGame implements NotificationHandler {
         if(postHandler.activeGame.game().gameOver) {
             return "Game has finished";
         }
-        if(params.length == 2){
-            try {
-                List<String> splitParams = new ArrayList<>();
-                splitParams.add(String.valueOf(params[0].charAt(0)));
-                splitParams.add(String.valueOf(params[0].charAt(1)));
-                splitParams.add(String.valueOf(params[1].charAt(0)));
-                splitParams.add(String.valueOf(params[1].charAt(1)));
-                int row1 = Integer.parseInt(splitParams.get(1));
-                int row2 = Integer.parseInt(splitParams.get(3));
-                int col1 = findCorrespondingLetter(splitParams.get(0));
-                int col2 = findCorrespondingLetter(splitParams.get(2));
-                if(row1 > 0 && row2 > 0 && row1 < 9 && row2 < 9 && col1 > 0 && col2 > 0 && col1 < 9 && col2 < 9){
-                    ChessPosition startPos = new ChessPosition(row1, col1);
-                    ChessPosition endPos = new ChessPosition(row2, col2);
-                    GameData activeGame = postHandler.activeGame;
+        if(params.length != 2){
+            return "Please enter a valid start/end position";
+        }
 
-                    ChessPiece thisPiece = postHandler.activeGame.game().getBoard().getPiece(startPos);
-                    String color = postHandler.activeUserColor;
-                    ChessPiece.PieceType promotion = null;
+        try {
+            List<String> splitParams = new ArrayList<>();
+            splitParams.add(String.valueOf(params[0].charAt(0)));
+            splitParams.add(String.valueOf(params[0].charAt(1)));
+            splitParams.add(String.valueOf(params[1].charAt(0)));
+            splitParams.add(String.valueOf(params[1].charAt(1)));
+            int row1 = Integer.parseInt(splitParams.get(1));
+            int row2 = Integer.parseInt(splitParams.get(3));
+            int col1 = findCorrespondingLetter(splitParams.get(0));
+            int col2 = findCorrespondingLetter(splitParams.get(2));
+            if(row1 > 0 && row2 > 0 && row1 < 9 && row2 < 9 && col1 > 0 && col2 > 0 && col1 < 9 && col2 < 9){
+                ChessPosition startPos = new ChessPosition(row1, col1);
+                ChessPosition endPos = new ChessPosition(row2, col2);
+                GameData activeGame = postHandler.activeGame;
 
-                    if(endPos.getRow() == 8 && color.equals("white") && thisPiece.getPieceType() == ChessPiece.PieceType.PAWN){
-                        while(promotion == null){
-                            promotion = handlePromotion();
-                        }
-                    }
-                    if(endPos.getRow() == 1 && color.equals("black") && thisPiece.getPieceType() == ChessPiece.PieceType.PAWN){
-                        while(promotion == null){
-                            promotion = handlePromotion();
-                        }
-                    }
-                    ChessMove move = new ChessMove(startPos, endPos, promotion);
-                    try {
-                        ws.makeMove(token, activeGame.gameID(), move);
-                    } catch (Exception e) {
-                        preHandler.clientExceptionHandler(e);
-                    }
-                } else {
-                    return "Please enter a valid start/end position";
+                ChessPiece thisPiece = postHandler.activeGame.game().getBoard().getPiece(startPos);
+                String color = postHandler.activeUserColor;
+                ChessPiece.PieceType promotion = getPromotion(thisPiece, endPos, color);
+
+                ChessMove move = new ChessMove(startPos, endPos, promotion);
+                try {
+                    ws.makeMove(token, activeGame.gameID(), move);
+                } catch (Exception e) {
+                    preHandler.clientExceptionHandler(e);
                 }
-            } catch (Exception e){
-                    return "Please enter a valid start/end position";
+            } else {
+                return "Please enter a valid start/end position";
             }
-        } else {
+        } catch (Exception e){
             return "Please enter a valid start/end position";
         }
         return "";
@@ -241,6 +231,24 @@ public class InGame implements NotificationHandler {
         } catch (Exception e) {
             return null;
         }
+    }
+
+    private ChessPiece.PieceType getPromotion(ChessPiece piece, ChessPosition endPos, String color){
+        if (piece.getPieceType() != ChessPiece.PieceType.PAWN){
+            return null;
+        }
+
+        boolean isPromotionRow =
+                (color.equals("white") && endPos.getRow() == 8) ||
+                        (color.equals(("black")) && endPos.getRow() == 1);
+
+        ChessPiece.PieceType promotion = null;
+        if(!isPromotionRow){
+            while(promotion == null) {
+                promotion = handlePromotion();
+            }
+        }
+        return promotion;
     }
 
     private int findCorrespondingLetter(String letter){
