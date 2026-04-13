@@ -4,7 +4,6 @@ import chess.ChessMove;
 import com.google.gson.Gson;
 import jakarta.websocket.*;
 
-import org.eclipse.jetty.server.Authentication;
 import websocket.commands.MakeMoveCommand;
 import websocket.commands.UserGameCommand;
 import websocket.messages.*;
