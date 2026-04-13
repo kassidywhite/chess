@@ -1,9 +1,6 @@
 package server;
 
-import chess.ChessGame;
-import dataaccess.AuthDAO;
 import dataaccess.DataAccessException;
-import dataaccess.GameDAO;
 import io.javalin.*;
 import io.javalin.http.Context;
 import com.google.gson.Gson;
@@ -26,7 +23,7 @@ public class Server {
 
     private final Javalin javalin;
     private final Service service = new Service();
-    private static final Gson serializer = new Gson();
+    private static final Gson SERIALIZER = new Gson();
     private final WebSocketHandler webSocketHandler;
 
     public Server() {
@@ -67,9 +64,9 @@ public class Server {
 
     private void register(Context ctx) {
         try{
-            RegisterRequest registerRequest = serializer.fromJson(ctx.body(), RegisterRequest.class);
+            RegisterRequest registerRequest = SERIALIZER.fromJson(ctx.body(), RegisterRequest.class);
             RegisterResult registerResult = service.register(registerRequest);
-            ctx.result(serializer.toJson(registerResult));
+            ctx.result(SERIALIZER.toJson(registerResult));
         } catch (ServiceException e) {
             serviceExceptionHandler(ctx, e);
         }
@@ -77,9 +74,9 @@ public class Server {
 
     private void login(Context ctx) {
         try{
-            LoginRequest loginRequest = serializer.fromJson(ctx.body(), LoginRequest.class);
+            LoginRequest loginRequest = SERIALIZER.fromJson(ctx.body(), LoginRequest.class);
             LoginResult loginResult = service.login(loginRequest);
-            ctx.result(serializer.toJson(loginResult));
+            ctx.result(SERIALIZER.toJson(loginResult));
         } catch (ServiceException e){
             serviceExceptionHandler(ctx, e);
         }
@@ -89,7 +86,7 @@ public class Server {
         try{
             String authToken = ctx.header("Authorization");
             LogoutResult logoutResult = service.logout(authToken);
-            ctx.result(serializer.toJson(logoutResult));
+            ctx.result(SERIALIZER.toJson(logoutResult));
         } catch (ServiceException e){
             serviceExceptionHandler(ctx, e);
         }
@@ -98,9 +95,9 @@ public class Server {
     private void createGame(Context ctx){
         try {
             String authToken = ctx.header("Authorization");
-            NewGameRequest gameRequest = serializer.fromJson(ctx.body(), NewGameRequest.class);
+            NewGameRequest gameRequest = SERIALIZER.fromJson(ctx.body(), NewGameRequest.class);
             NewGameResult gameResult = service.createGame(gameRequest, authToken);
-            ctx.result(serializer.toJson(gameResult));
+            ctx.result(SERIALIZER.toJson(gameResult));
         } catch (ServiceException e) {
             serviceExceptionHandler(ctx, e);
         }
@@ -110,7 +107,7 @@ public class Server {
         try{
             String authToken = ctx.header("Authorization");
             ListGamesResult listGamesResult = service.listGames(authToken);
-            ctx.result(serializer.toJson(listGamesResult));
+            ctx.result(SERIALIZER.toJson(listGamesResult));
         } catch (ServiceException e) {
             serviceExceptionHandler(ctx, e);
         }
@@ -119,9 +116,9 @@ public class Server {
     private void joinGame(Context ctx) {
         try{
             String authToken = ctx.header("Authorization");
-            JoinGameRequest joinRequest = serializer.fromJson(ctx.body(), JoinGameRequest.class);
+            JoinGameRequest joinRequest = SERIALIZER.fromJson(ctx.body(), JoinGameRequest.class);
             JoinGameResult joinResult = service.joinGame(joinRequest, authToken);
-            ctx.result(serializer.toJson(joinResult));
+            ctx.result(SERIALIZER.toJson(joinResult));
         } catch (ServiceException e) {
             serviceExceptionHandler(ctx, e);
         }
@@ -131,7 +128,7 @@ public class Server {
         try {
             String authToken = ctx.header("Authorization");
             DeleteResult deleteResult = service.deleteAll();
-            ctx.result(serializer.toJson(deleteResult));
+            ctx.result(SERIALIZER.toJson(deleteResult));
             ctx.status(200);
         } catch (ServiceException e) {
             serviceExceptionHandler(ctx, e);
@@ -152,22 +149,22 @@ public class Server {
             case BadRequestException ex -> {
                 ctx.contentType("application/json");
                 ctx.status(400);
-                ctx.result(serializer.toJson(Map.of("message", e.getMessage())));
+                ctx.result(SERIALIZER.toJson(Map.of("message", e.getMessage())));
             }
             case UnauthorizedException ex -> {
                 ctx.contentType("application/json");
                 ctx.status(401);
-                ctx.result(serializer.toJson(Map.of("message", e.getMessage())));
+                ctx.result(SERIALIZER.toJson(Map.of("message", e.getMessage())));
             }
             case AlreadyTakenException ex ->  {
                 ctx.contentType("application/json");
                 ctx.status(403);
-                ctx.result(serializer.toJson(Map.of("message", e.getMessage())));
+                ctx.result(SERIALIZER.toJson(Map.of("message", e.getMessage())));
             }
             default -> {
                 ctx.contentType("application/json");
                 ctx.status(500);
-                ctx.result(serializer.toJson(Map.of("message", e.getMessage())));
+                ctx.result(SERIALIZER.toJson(Map.of("message", e.getMessage())));
             }
         }
     }

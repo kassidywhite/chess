@@ -314,16 +314,16 @@ public class PieceMovesCalculator {
     }
 
     public int[] getClosestStraightPiece(String direction) {
-        int[] closest_piece = new int[2];
+        int[] closestPiece = new int[2];
 
         //check down
         if (direction.equals("down")) {
             for (int r = currRow - 1; r >= 1; r--) {
                 ChessPosition testing = new ChessPosition(r, currCol);
                 if (board.getPiece(testing) != null) {
-                    closest_piece[0] = r;
-                    closest_piece[1] = currCol;
-                    return closest_piece;
+                    closestPiece[0] = r;
+                    closestPiece[1] = currCol;
+                    return closestPiece;
                 }
             }
         }
@@ -332,9 +332,9 @@ public class PieceMovesCalculator {
             for (int r = currRow + 1; r <= 8; r++) {
                 ChessPosition testing = new ChessPosition(r, currCol);
                 if (board.getPiece(testing) != null) {
-                    closest_piece[0] = r;
-                    closest_piece[1] = currCol;
-                    return closest_piece;
+                    closestPiece[0] = r;
+                    closestPiece[1] = currCol;
+                    return closestPiece;
                 }
             }
         }
@@ -343,9 +343,9 @@ public class PieceMovesCalculator {
             for (int c = currCol - 1; c >= 1; c--) {
                 ChessPosition testing = new ChessPosition(currRow, c);
                 if (board.getPiece(testing) != null) {
-                    closest_piece[0] = currRow;
-                    closest_piece[1] = c;
-                    return closest_piece;
+                    closestPiece[0] = currRow;
+                    closestPiece[1] = c;
+                    return closestPiece;
                 }
             }
         }
@@ -354,12 +354,12 @@ public class PieceMovesCalculator {
             for (int c = currCol + 1; c <= 8; c++) {
                 ChessPosition testing = new ChessPosition(currRow, c);
                 if (board.getPiece(testing) != null) {
-                    closest_piece[0] = currRow;
-                    closest_piece[1] = c;
-                    return closest_piece;
+                    closestPiece[0] = currRow;
+                    closestPiece[1] = c;
+                    return closestPiece;
                 }
             }
         }
-        return closest_piece;
+        return closestPiece;
     }
 }

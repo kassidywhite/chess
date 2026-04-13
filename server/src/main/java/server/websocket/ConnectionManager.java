@@ -23,20 +23,8 @@ public class ConnectionManager {
         });
     }
 
-    public boolean connectionExists(int gameId) {
-        return connections.get(gameId) != null;
-    }
-
-    public void remove(int gameId){
-        connections.remove(gameId);
-    }
-
     public void removeSession(int gameId, Session session){
         connections.get(gameId).remove(session);
-//        connections.computeIfPresent(gameId, (k, v) -> {
-//            v.remove(session);
-//            return v;
-//        });
     }
 
     // method that sends message to every player in the game

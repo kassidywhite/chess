@@ -14,7 +14,7 @@ import java.util.Objects;
 public class ChessGame {
     TeamColor teamTurn;
     ChessBoard board;
-    ChessBoard boardCopy;
+    public ChessBoard boardCopy;
     public boolean gameOver = false;
 
     public ChessGame() {
@@ -74,20 +74,18 @@ public class ChessGame {
         if(!validMoves.contains(move)){
             throw new InvalidMoveException();
         }
-        if(!isInCheck(teamTurn)){
-            ChessPosition currPos = move.getStartPosition();
-            ChessPosition thisPos = new ChessPosition(move.getEndPosition().getRow(), move.getEndPosition().getColumn());
-            ChessPiece addThis = new ChessPiece(board.getPiece(currPos).getTeamColor(), board.getPiece(currPos).getPieceType());
-            if(move.getPromotionPiece() != null){
-                addThis = new ChessPiece(board.getPiece(currPos).getTeamColor(), move.getPromotionPiece());
-            }
-            board.addPiece(move.getStartPosition(), null);
-            board.addPiece(thisPos, addThis);
 
-            boardCopy = board.clone();
-        } else {
-            throw new InvalidMoveException();
+        ChessPosition currPos = move.getStartPosition();
+        ChessPosition thisPos = new ChessPosition(move.getEndPosition().getRow(), move.getEndPosition().getColumn());
+        ChessPiece addThis = new ChessPiece(board.getPiece(currPos).getTeamColor(), board.getPiece(currPos).getPieceType());
+        if(move.getPromotionPiece() != null){
+            addThis = new ChessPiece(board.getPiece(currPos).getTeamColor(), move.getPromotionPiece());
         }
+        board.addPiece(move.getStartPosition(), null);
+        board.addPiece(thisPos, addThis);
+
+        boardCopy = board.clone();
+
         if(teamTurn == TeamColor.BLACK){
             teamTurn = TeamColor.WHITE;
         } else {
