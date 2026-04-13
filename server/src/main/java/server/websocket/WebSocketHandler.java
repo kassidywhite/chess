@@ -80,7 +80,7 @@ public class WebSocketHandler implements WsConnectHandler, WsMessageHandler, WsC
         }
     }
 
-    private void makeMove(Session session, String username, UserGameCommand command, ChessMove move) throws ServiceException, IOException, InvalidMoveException, DataAccessException {
+    private void makeMove(Session session, String username, UserGameCommand command, ChessMove move) throws IOException, DataAccessException {
         if (!server.confirmAuth(username)) {
             var errorMessage = new ErrorMessage(ServerMessage.ServerMessageType.ERROR, "Didn't register");
             connections.rootMessage(session, errorMessage);
