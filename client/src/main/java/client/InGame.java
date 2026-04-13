@@ -1,9 +1,6 @@
 package client;
 
-import chess.ChessMove;
-import chess.ChessPiece;
-import chess.ChessPosition;
-import chess.PieceMovesCalculator;
+import chess.*;
 import client.websocket.NotificationHandler;
 import client.websocket.WebSocketFacade;
 import model.GameData;
@@ -51,6 +48,12 @@ public class InGame implements NotificationHandler {
                 msg.getGame()
         );
         postHandler.activeGame = newGD;
+        if (postHandler.activeUserColor == null){
+            ChessBoardRender.render(postHandler.activeGame.game().getBoard(), Collections.EMPTY_LIST, "white");
+        } else {
+            ChessBoardRender.render(postHandler.activeGame.game().getBoard(), Collections.EMPTY_LIST, postHandler.activeUserColor);
+        }
+        System.out.println();
     }
 
     public String eval(String input) {
@@ -72,7 +75,9 @@ public class InGame implements NotificationHandler {
     }
 
     public String redraw() {
-        if(postHandler.activeUserColor.equals("black")) {
+        if(postHandler.activeUserColor == null) {
+            ChessBoardRender.render(postHandler.activeGame.game().getBoard(), Collections.EMPTY_LIST, "white");
+        } else if (postHandler.activeUserColor.equals("black")) {
             ChessBoardRender.render(postHandler.activeGame.game().getBoard(), Collections.EMPTY_LIST, "black");
         } else {
             ChessBoardRender.render(postHandler.activeGame.game().getBoard(), Collections.EMPTY_LIST, "white");
@@ -83,6 +88,7 @@ public class InGame implements NotificationHandler {
     public String leave() {
         String token = preHandler.currentUser.authToken();
         GameData activeGame = postHandler.activeGame;
+        postHandler.activeUserColor = null;
         state = State.SIGNEDIN;
         preHandler.state = State.SIGNEDIN;
         postHandler.state = State.SIGNEDIN;
@@ -96,45 +102,50 @@ public class InGame implements NotificationHandler {
 
     public String makeMove(String... params) {
         String token = preHandler.currentUser.authToken();
+        if(postHandler.activeGame.game().gameOver) {
+            return "Game has finished";
+        }
         if(params.length == 2){
-            List<String> splitParams = new ArrayList<>();
-            splitParams.add(String.valueOf(params[0].charAt(0)));
-            splitParams.add(String.valueOf(params[0].charAt(1)));
-            splitParams.add(String.valueOf(params[1].charAt(0)));
-            splitParams.add(String.valueOf(params[1].charAt(1)));
-            int row1 = Integer.parseInt(splitParams.get(1));
-            int row2 = Integer.parseInt(splitParams.get(3));
-            int col1 = findCorrespondingLetter(splitParams.get(0));
-            int col2 = findCorrespondingLetter(splitParams.get(2));
-            if(row1 > 0 && row2 > 0 && row1 < 9 && row2 < 9 && col1 > 0 && col2 > 0 && col1 < 9 && col2 < 9){
-                ChessPosition startPos = new ChessPosition(row1, col1);
-                ChessPosition endPos = new ChessPosition(row2, col2);
-                GameData activeGame = postHandler.activeGame;
+            try {
+                List<String> splitParams = new ArrayList<>();
+                splitParams.add(String.valueOf(params[0].charAt(0)));
+                splitParams.add(String.valueOf(params[0].charAt(1)));
+                splitParams.add(String.valueOf(params[1].charAt(0)));
+                splitParams.add(String.valueOf(params[1].charAt(1)));
+                int row1 = Integer.parseInt(splitParams.get(1));
+                int row2 = Integer.parseInt(splitParams.get(3));
+                int col1 = findCorrespondingLetter(splitParams.get(0));
+                int col2 = findCorrespondingLetter(splitParams.get(2));
+                if(row1 > 0 && row2 > 0 && row1 < 9 && row2 < 9 && col1 > 0 && col2 > 0 && col1 < 9 && col2 < 9){
+                    ChessPosition startPos = new ChessPosition(row1, col1);
+                    ChessPosition endPos = new ChessPosition(row2, col2);
+                    GameData activeGame = postHandler.activeGame;
 
-                // check if it's a promotion piece
-                ChessPiece thisPiece = postHandler.activeGame.game().getBoard().getPiece(startPos);
-                String color = postHandler.activeUserColor;
-                ChessPiece.PieceType promotion = null;
+                    ChessPiece thisPiece = postHandler.activeGame.game().getBoard().getPiece(startPos);
+                    String color = postHandler.activeUserColor;
+                    ChessPiece.PieceType promotion = null;
 
-                if(endPos.getRow() == 8 && color.equals("white") && thisPiece.getPieceType() == ChessPiece.PieceType.PAWN){
-                    while(promotion == null){
-                        promotion = handlePromotion();
+                    if(endPos.getRow() == 8 && color.equals("white") && thisPiece.getPieceType() == ChessPiece.PieceType.PAWN){
+                        while(promotion == null){
+                            promotion = handlePromotion();
+                        }
                     }
-                }
-                if(endPos.getRow() == 1 && color.equals("black") && thisPiece.getPieceType() == ChessPiece.PieceType.PAWN){
-                    while(promotion == null){
-                        promotion = handlePromotion();
+                    if(endPos.getRow() == 1 && color.equals("black") && thisPiece.getPieceType() == ChessPiece.PieceType.PAWN){
+                        while(promotion == null){
+                            promotion = handlePromotion();
+                        }
                     }
+                    ChessMove move = new ChessMove(startPos, endPos, promotion);
+                    try {
+                        ws.makeMove(token, activeGame.gameID(), move);
+                    } catch (Exception e) {
+                        preHandler.clientExceptionHandler(e);
+                    }
+                } else {
+                    return "Please enter a valid start/end position";
                 }
-
-                ChessMove move = new ChessMove(startPos, endPos, promotion);
-                try {
-                    ws.makeMove(token, activeGame.gameID(), move);
-                } catch (Exception e) {
-                    preHandler.clientExceptionHandler(e);
-                }
-            } else {
-                return "Please enter a valid start/end position";
+            } catch (Exception e){
+                    return "Please enter a valid start/end position";
             }
         } else {
             return "Please enter a valid start/end position";
@@ -145,11 +156,12 @@ public class InGame implements NotificationHandler {
     public String resign() {
         String token = preHandler.currentUser.authToken();
         try {
-            ws.resign(token, postHandler.activeGame.gameID());
-            postHandler.activeGame = null;
-            state = State.SIGNEDIN;
-            preHandler.state = State.SIGNEDIN;
-            postHandler.state = State.SIGNEDIN;
+            boolean wantsToLeave = resignHandler();
+            if(wantsToLeave){
+                ws.resign(token, postHandler.activeGame.gameID());
+            } else {
+                return "Ok! Keep playing...";
+            }
         } catch (Exception e) {
             preHandler.clientExceptionHandler(e);
         }
@@ -167,7 +179,12 @@ public class InGame implements NotificationHandler {
                 if(piece != null){
                     Collection<ChessPosition> possibilities = calculatePossibilities(piece, position);
                     possibilities.add(position);
-                    ChessBoardRender.render(postHandler.activeGame.game().getBoard(), possibilities, postHandler.activeUserColor);
+                    if(postHandler.activeUserColor == null){
+                        String color = piece.getTeamColor() == ChessGame.TeamColor.WHITE ? "white" : "black";
+                        ChessBoardRender.render(postHandler.activeGame.game().getBoard(), possibilities, color);
+                    } else {
+                        ChessBoardRender.render(postHandler.activeGame.game().getBoard(), possibilities, postHandler.activeUserColor);
+                    }
                 } else {
                     return "Please enter a valid position";
                 }
@@ -178,6 +195,25 @@ public class InGame implements NotificationHandler {
             return "Please enter a valid position";
         }
         return "";
+    }
+
+    public boolean resignHandler() {
+        System.out.println("Are you sure you want to resign? [y/n]");
+        String line = "";
+        if(preHandler.scanner.hasNext()){
+            line = preHandler.scanner.nextLine();
+        }
+        try {
+            String[] tokens = line.toLowerCase().split(" ");
+            String cmd = (tokens.length > 0) ? tokens[0] : "";
+            if(cmd.equals("y")){
+                return true;
+            } else {
+                return false;
+            }
+        } catch (Exception e) {
+            return false;
+        }
     }
 
     public ChessPiece.PieceType handlePromotion() {
@@ -238,21 +274,7 @@ public class InGame implements NotificationHandler {
     }
 
     public Collection<ChessPosition> calculatePossibilities(ChessPiece piece, ChessPosition position) {
-        PieceMovesCalculator calculator = new PieceMovesCalculator(postHandler.activeGame.game().getBoard(), position);
-        Collection<ChessMove> possibilities;
-        if(piece.getPieceType() == ChessPiece.PieceType.KING){
-            possibilities = calculator.kingMovesCalculator();
-        } else if (piece.getPieceType() == ChessPiece.PieceType.QUEEN){
-            possibilities = calculator.queenMovesCalculator();
-        } else if (piece.getPieceType() == ChessPiece.PieceType.BISHOP){
-            possibilities = calculator.bishopMovesCalculator();
-        } else if (piece.getPieceType() == ChessPiece.PieceType.KNIGHT){
-            possibilities = calculator.knightMovesCalculator();
-        } else if (piece.getPieceType() == ChessPiece.PieceType.ROOK){
-            possibilities = calculator.rookMovesCalculator();
-        } else {
-            possibilities = calculator.pawnMovesCalculator();
-        }
+        Collection<ChessMove> possibilities = postHandler.activeGame.game().validMoves(position);
 
         Collection<ChessPosition> positions = new ArrayList<>();
         for(ChessMove possibility : possibilities){

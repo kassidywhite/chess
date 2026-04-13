@@ -105,7 +105,6 @@ public class Postlogin implements NotificationHandler {
                 JoinGameResult joinGameResult = server.joinGame(request, token);
                 ListGamesResult listGamesResult = server.listGames(token);
                 activeGame = listGamesResult.getGame(Integer.parseInt(params[0]));
-                printChessBoard(params[1].toLowerCase());
                 ws.enterGame(token, Integer.parseInt(params[0]));
                 activeUserColor = params[1].toLowerCase();
                 preHandler.state = INGAME;
@@ -128,27 +127,18 @@ public class Postlogin implements NotificationHandler {
             if (params.length == 1){
                 String token = preHandler.currentUser.authToken();
                 ListGamesResult listGamesResult = server.listGames(token);
-                for (GameData game : listGamesResult.games()) {
-                    if(game.gameID() == Integer.parseInt(params[0])) {
-                        activeGame = listGamesResult.getGame(game.gameID());
-                        printChessBoard("white");
-                        preHandler.state = INGAME;
-                        state = INGAME;
-                        inGameHandler.state = INGAME;
-                        return "";
-                    }
-                }
-                return "Enter valid observe request -> \"observe\" <ID>";
+                activeGame = listGamesResult.getGame(Integer.parseInt(params[0]));
+                ws.enterGame(token, Integer.parseInt(params[0]));
+                preHandler.state = INGAME;
+                state = INGAME;
+                inGameHandler.state = INGAME;
+                return "";
             } else {
                 return "Enter valid observe request -> \"observe\" <ID>";
             }
         } catch (Exception e) {
             return preHandler.clientExceptionHandler(e);
         }
-    }
-
-    public void printChessBoard(String color) {
-        ChessBoardRender.render(activeGame.game().getBoard(), Collections.EMPTY_LIST, color);
     }
 
     public String listGames() throws Exception {
